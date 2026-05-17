@@ -272,8 +272,8 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
   .exp-row{page-break-before:avoid;page-break-inside:avoid}
   .iq-ok,.iq-warn,.iq-bad{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .st-active,.st-leave,.st-terminated{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .tab-content{display:block!important}
-  #tab-payroll,#tab-attendance,#tab-reports,#tab-dashboard{display:none!important}
+  .tab-content{display:none!important}
+  .tab-content.active{display:block!important}
   .print-title{display:block!important;text-align:center;font-size:1.2rem;font-weight:700;padding:10px}
   .grow{page-break-before:always}
   .grow:first-of-type{page-break-before:avoid}
@@ -359,6 +359,155 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
 .add-user-field label{display:block;font-size:.73rem;font-weight:700;color:var(--txt2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
 .add-user-field input,.add-user-field select{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem;font-family:inherit;background:var(--surface);color:var(--txt);direction:rtl;transition:border-color .15s}
 .add-user-field input:focus,.add-user-field select:focus{outline:none;border-color:var(--accent)}
+/* ── REPORT SUB-TABS ── */
+.rep-subtabs{display:flex;gap:4px;margin-bottom:20px;background:var(--surface);border-radius:12px;padding:5px;border:1px solid var(--border)}
+.rep-stab{flex:1;padding:10px 8px;background:transparent;border:none;cursor:pointer;border-radius:9px;font-family:inherit;font-size:.83rem;font-weight:600;color:var(--txt2);transition:all .2s}
+.rep-stab:hover{background:var(--surface2);color:var(--txt)}
+.rep-stab.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3)}
+.rep-subpage{animation:fadeIn .2s ease}
+.rep-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;background:var(--surface);border-radius:12px;border:1px solid var(--border)}
+/* KPI Cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.kpi-card{background:var(--surface);border-radius:14px;padding:18px 14px;border:1px solid var(--border);box-shadow:var(--sh);text-align:center;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0}
+.kpi-blue::before{background:linear-gradient(90deg,#2563eb,#60a5fa)}
+.kpi-green::before{background:linear-gradient(90deg,#16a34a,#4ade80)}
+.kpi-red::before{background:linear-gradient(90deg,#dc2626,#f87171)}
+.kpi-amber::before{background:linear-gradient(90deg,#d97706,#fbbf24)}
+.kpi-purple::before{background:linear-gradient(90deg,#7c3aed,#c084fc)}
+.kpi-ico{font-size:1.6rem;margin-bottom:8px}
+.kpi-val{font-size:1.7rem;font-weight:800;line-height:1;letter-spacing:-.02em}
+.kpi-lbl{font-size:.72rem;color:var(--txt2);margin-top:4px;font-weight:600}
+.kpi-delta{font-size:.72rem;margin-top:5px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-block}
+.kpi-delta.up{background:#dcfce7;color:#16a34a}.kpi-delta.down{background:#fee2e2;color:#dc2626}.kpi-delta.neu{background:var(--surface2);color:var(--txt2)}
+.dark .kpi-delta.up{background:#052e16;color:#4ade80}.dark .kpi-delta.down{background:#450a0a;color:#f87171}
+/* Rep Section */
+.rep-section{background:var(--surface);border-radius:14px;padding:20px;border:1px solid var(--border);box-shadow:var(--sh);margin-bottom:16px}
+.rep-section-title{font-size:.92rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+/* Bar Chart */
+.bar-chart{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:flex;align-items:center;gap:10px;font-size:.82rem}
+.bar-lbl{width:130px;text-align:right;font-weight:600;flex-shrink:0;font-size:.78rem}
+.bar-track{flex:1;background:var(--surface2);border-radius:20px;height:12px;overflow:hidden}
+.bar-fill{height:100%;border-radius:20px;transition:width .5s ease}
+.bar-val{width:50px;font-weight:700;font-size:.78rem;flex-shrink:0}
+/* Rep Table */
+.rep-tbl{width:100%;border-collapse:collapse;font-size:.83rem}
+.rep-tbl thead th{background:var(--surface2);padding:9px 12px;text-align:right;font-weight:700;font-size:.75rem;color:var(--txt2);border-bottom:1px solid var(--border);white-space:nowrap}
+.rep-tbl tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+.rep-tbl tbody tr:hover{background:var(--surface2)}
+.rep-tbl td{padding:9px 12px;vertical-align:middle}
+/* Week bars */
+.week-bars{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+.week-bar-col{text-align:center}
+.week-bar-wrap{height:80px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:6px}
+.week-bar-inner{width:32px;border-radius:6px 6px 0 0;transition:height .4s ease;min-height:4px}
+.week-bar-pct{font-size:.75rem;font-weight:700;margin-bottom:2px}
+.week-bar-lbl{font-size:.72rem;color:var(--txt2)}
+/* Alert chips */
+.chip-ok{background:#dcfce7;color:#166534;padding:3px 10px;border-radius:20px;font-size:.73rem;font-weight:700}
+.chip-warn{background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:.73rem;font-weight:700}
+.chip-bad{background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:20px;font-size:.73rem;font-weight:700}
+.dark .chip-ok{background:#052e16;color:#4ade80}.dark .chip-warn{background:#422006;color:#fde68a}.dark .chip-bad{background:#450a0a;color:#fca5a5}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.rep-subtabs{flex-wrap:wrap}}
+/* ── BELL MENU ── */
+.bell-menu{animation:fadeIn .15s ease}
+/* ── IQ SUMMARY CARDS ── */
+.iq-sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.iq-sum-card{border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;border:1px solid transparent;transition:transform .2s,box-shadow .2s;cursor:default}
+.iq-sum-card:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.iq-sum-card.iq-expired{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+.iq-sum-card.iq-soon{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
+.iq-sum-card.iq-warn90{background:#fefce8;border-color:#fde68a;color:#854d0e}
+.dark .iq-sum-card.iq-expired{background:#450a0a;border-color:#7f1d1d;color:#fca5a5}
+.dark .iq-sum-card.iq-soon{background:#431407;border-color:#9a3412;color:#fdba74}
+.dark .iq-sum-card.iq-warn90{background:#422006;border-color:#854d0e;color:#fde68a}
+.iq-sum-ico{font-size:1.8rem;flex-shrink:0}
+.iq-sum-num{font-size:2rem;font-weight:800;line-height:1}
+.iq-sum-lbl{font-size:.75rem;font-weight:600;margin-top:3px;opacity:.85}
+/* ── IQ TABLE ── */
+.iq-table-wrap{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;box-shadow:var(--sh)}
+.iq-table-head{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.iq-table-head h3{font-size:.9rem;font-weight:700}
+.iq-tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.iq-tbl thead th{background:var(--surface2);padding:9px 12px;text-align:right;font-weight:700;font-size:.75rem;color:var(--txt2);border-bottom:1px solid var(--border);white-space:nowrap}
+.iq-tbl tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+.iq-tbl tbody tr:last-child{border-bottom:none}
+.iq-tbl tbody tr:hover{background:var(--surface2)}
+.iq-tbl td{padding:9px 12px;vertical-align:middle}
+.iq-chip{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;align-items:center;gap:4px}
+.iq-chip.exp{background:#fee2e2;color:#991b1b}
+.iq-chip.s30{background:#ffedd5;color:#9a3412}
+.iq-chip.s90{background:#fef9c3;color:#854d0e}
+.dark .iq-chip.exp{background:#450a0a;color:#fca5a5}
+.dark .iq-chip.s30{background:#431407;color:#fdba74}
+.dark .iq-chip.s90{background:#422006;color:#fde68a}
+/* ── DASHBOARD SECTIONS ── */
+.dash-section{background:var(--surface);border-radius:var(--r);padding:20px;box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:16px}
+.dash-section-title{font-size:.92rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--txt)}
+/* ── GENDER BAR ── */
+.gender-bar-wrap{margin-top:6px}
+.gender-bar-track{background:var(--border);border-radius:20px;height:10px;overflow:hidden;display:flex}
+.gender-bar-male{background:linear-gradient(90deg,#2563eb,#60a5fa);transition:width .6s}
+.gender-bar-female{background:linear-gradient(90deg,#db2777,#f472b6);transition:width .6s}
+.gender-labels{display:flex;justify-content:space-between;font-size:.72rem;margin-top:5px;color:var(--txt2);font-weight:600}
+/* ── SALARY SECTION (admin only) ── */
+.sal-admin-section{background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border-radius:var(--r);padding:20px 24px;color:#fff;margin-bottom:16px;box-shadow:0 4px 20px rgba(37,99,235,.25)}
+.sal-admin-title{font-size:.85rem;opacity:.75;font-weight:600;margin-bottom:4px}
+.sal-admin-num{font-size:2.2rem;font-weight:800;letter-spacing:-.02em}
+.sal-admin-sub{font-size:.78rem;opacity:.65;margin-top:4px}
+/* ── NEW STATS ROW ── */
+.dash-stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:900px){.dash-stats-row{grid-template-columns:repeat(3,1fr)}.iq-sum-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.dash-stats-row{grid-template-columns:repeat(2,1fr)}}
+/* ── STAT CARD NEW ── */
+.stat-card{background:var(--surface);border-radius:14px;padding:18px;box-shadow:var(--sh);border:1px solid var(--border);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.stat-card::after{content:'';position:absolute;top:0;right:0;width:4px;height:100%;border-radius:0 14px 14px 0}
+.stat-card.s-blue::after{background:linear-gradient(180deg,#2563eb,#93c5fd)}
+.stat-card.s-purple::after{background:linear-gradient(180deg,#7c3aed,#c4b5fd)}
+.stat-card.s-amber::after{background:linear-gradient(180deg,#d97706,#fcd34d)}
+.stat-card.s-red::after{background:linear-gradient(180deg,#dc2626,#fca5a5)}
+.stat-card.s-teal::after{background:linear-gradient(180deg,#0891b2,#67e8f9)}
+.stat-ico-new{font-size:1.6rem;margin-bottom:10px}
+.stat-num-new{font-size:1.9rem;font-weight:800;line-height:1;letter-spacing:-.02em}
+.stat-lbl-new{font-size:.76rem;color:var(--txt2);margin-top:4px;font-weight:600}
+.stat-sub-new{font-size:.7rem;color:var(--txt2);margin-top:3px}
+/* ── ATTENDANCE TODAY ── */
+.att-today-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.att-today-card{border-radius:10px;padding:14px;text-align:center;border:1px solid transparent}
+.att-today-card.att-p{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+.att-today-card.att-a{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+.att-today-card.att-l{background:#fffbeb;border-color:#fde68a;color:#854d0e}
+.att-today-card.att-t{background:#f5f3ff;border-color:#ddd6fe;color:#5b21b6}
+.dark .att-today-card.att-p{background:#052e16;border-color:#14532d;color:#86efac}
+.dark .att-today-card.att-a{background:#450a0a;border-color:#7f1d1d;color:#fca5a5}
+.dark .att-today-card.att-l{background:#422006;border-color:#78350f;color:#fde68a}
+.dark .att-today-card.att-t{background:#2e1065;border-color:#4c1d95;color:#c4b5fd}
+.att-today-num{font-size:1.7rem;font-weight:800;line-height:1}
+.att-today-lbl{font-size:.73rem;font-weight:600;margin-top:4px;opacity:.85}
+/* ── MAIN NAV (slide-down) ── */
+#mainNav{display:none;overflow:hidden}
+#mainNav.visible{display:flex;animation:slideDown .3s ease}
+@keyframes slideDown{from{opacity:0;max-height:0;padding:0}to{opacity:1;max-height:60px}}
+/* ── HOME NAV CARDS ── */
+.home-nav-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:20px 0}
+.home-nav-card{background:var(--surface);border-radius:16px;padding:30px 20px;text-align:center;cursor:pointer;border:2px solid var(--border);transition:all .25s;box-shadow:var(--sh)}
+.home-nav-card:hover{transform:translateY(-5px);box-shadow:var(--sh2);border-color:var(--accent)}
+.home-nav-ico{font-size:2.8rem;margin-bottom:12px}
+.home-nav-lbl{font-size:1rem;font-weight:700;color:var(--txt)}
+@media(max-width:600px){.home-nav-grid{grid-template-columns:repeat(2,1fr)}}
+/* ── IQAMA MODAL ── */
+#iqamaModal{display:none;position:fixed;inset:0;z-index:900;align-items:flex-start;justify-content:center;padding:20px}
+#iqamaModal.open{display:flex}
+.iqama-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);z-index:0}
+.iqama-modal-box{position:relative;z-index:1;background:var(--surface);border-radius:18px;box-shadow:0 12px 48px rgba(0,0,0,.3);width:100%;max-width:820px;max-height:90vh;overflow-y:auto;direction:rtl}
+.iqama-modal-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:2;border-radius:18px 18px 0 0}
+.iqama-modal-title{font-size:1.05rem;font-weight:700;color:var(--txt)}
+.iqama-modal-close{background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--txt2);line-height:1;padding:4px 8px;border-radius:8px;transition:background .15s}
+.iqama-modal-close:hover{background:var(--surface2)}
+.iqama-modal-body{padding:20px 24px}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -370,7 +519,7 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
     <div class="logo">🏢</div>
     <h1>نظام إدارة الموظفين <span>v2.0</span></h1>
   </div>
-  <nav class="tabs">
+  <nav class="tabs" id="mainNav">
     <button class="tab-btn active" id="tab-btn-dashboard" onclick="switchTab('dashboard',this)">📊 لوحة التحكم</button>
     <button class="tab-btn" id="tab-btn-employees" onclick="switchTab('employees',this)">👥 الموظفون</button>
     <button class="tab-btn" id="tab-btn-payroll" onclick="switchTab('payroll',this)">💰 الرواتب</button>
@@ -396,6 +545,17 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
         <button class="tools-menu-item" onclick="openAuditLog();closeToolsMenu()">📋 <span id="auditLogBtn">سجل التعديلات</span></button>
       </div>
     </div>
+    <div class="bell-wrap no-print" style="position:relative">
+      <button class="btn btn-ghost" id="bellBtn" onclick="toggleBellMenu()" title="تنبيهات الإقامة" style="font-size:1.1rem;padding:7px 11px">🔔</button>
+      <span class="bell-badge" id="bellBadge" style="display:none;position:absolute;top:-4px;left:-4px;background:#ef4444;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--hdr)"></span>
+      <div class="bell-menu" id="bellMenu" style="display:none;position:absolute;top:calc(100%+8px);left:50%;transform:translateX(-50%);background:var(--surface);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.18);border:1px solid var(--border);min-width:300px;max-width:340px;z-index:600;direction:rtl;overflow:hidden">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:.88rem;color:var(--txt)">🔔 تنبيهات الإقامة</div>
+        <div id="bellMenuItems" style="max-height:280px;overflow-y:auto;padding:8px"></div>
+        <div style="padding:10px 16px;border-top:1px solid var(--border);text-align:center">
+          <button class="btn btn-primary btn-sm" onclick="openIqamaModal()">عرض الكل</button>
+        </div>
+      </div>
+    </div>
     <button class="btn btn-success" onclick="openAdd()" id="btnAdd">+ إضافة موظف</button>
     <button class="btn btn-purple no-print" id="btnUsersMgmt" onclick="openUsersModal()" style="display:none">👥 مستخدمون</button>
     <div class="user-chip no-print" id="userChip"></div>
@@ -403,28 +563,91 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
   </div>
 </header>
 
-<!-- IQAMA ALERT BAR -->
-<div id="iqAlertBar">
-  <span>⚠️</span>
-  <span class="alert-txt" id="iqAlertTxt"></span>
-  <button class="close-alert" onclick="document.getElementById('iqAlertBar').classList.remove('show')" title="إغلاق">✕</button>
+<!-- IQAMA ALERT BAR - hidden, replaced by bell -->
+<div id="iqAlertBar" style="display:none!important"></div>
+
+<!-- IQAMA FULL-SCREEN MODAL -->
+<div id="iqamaModal">
+  <div class="iqama-modal-overlay" onclick="closeIqamaModal()"></div>
+  <div class="iqama-modal-box">
+    <div class="iqama-modal-header">
+      <span class="iqama-modal-title">🚨 تنبيهات الإقامة</span>
+      <button class="iqama-modal-close" onclick="closeIqamaModal()">✕</button>
+    </div>
+    <div class="iqama-modal-body">
+      <div class="iq-sum-grid" id="modalIqSummary"></div>
+      <div class="iq-table-wrap" style="margin-top:16px">
+        <div class="iq-table-head">
+          <h3 id="modalIqTableTitle">قائمة التنبيهات</h3>
+          <button class="btn btn-secondary btn-sm" id="modalIqToggleBtn" onclick="toggleAllIqamaModal()">عرض الكل</button>
+        </div>
+        <table class="iq-tbl"><thead><tr>
+          <th>#</th><th>الاسم</th><th>المشروع</th><th>تاريخ الانتهاء</th><th>الحالة</th>
+        </tr></thead><tbody id="modalIqTableBody"></tbody></table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- TAB: DASHBOARD -->
 <div class="tab-content active" id="tab-dashboard">
 <div class="container">
-  <div class="dash-grid" id="dashCards"></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-    <div>
-      <div class="proj-bar-wrap" id="dashProjBars">
-        <h3>📁 توزيع الموظفين حسب المشروع</h3>
-      </div>
+
+  <!-- ① Stats Row (5 cards) -->
+  <div class="dash-stats-row" id="dashCards"></div>
+
+  <!-- Home Navigation Cards -->
+  <div class="home-nav-grid" id="homeNavGrid">
+    <div class="home-nav-card" onclick="switchTab('employees', document.getElementById('tab-btn-employees'))">
+      <div class="home-nav-ico">👥</div>
+      <div class="home-nav-lbl">الموظفون</div>
     </div>
-    <div class="dash-alerts" id="dashAlerts">
-      <h3>🚨 تنبيهات الإقامة</h3>
+    <div class="home-nav-card" onclick="switchTab('attendance', document.getElementById('tab-btn-attendance'))">
+      <div class="home-nav-ico">📋</div>
+      <div class="home-nav-lbl">الحضور</div>
+    </div>
+    <div class="home-nav-card" onclick="switchTab('payroll', document.getElementById('tab-btn-payroll'))">
+      <div class="home-nav-ico">💰</div>
+      <div class="home-nav-lbl">الرواتب</div>
+    </div>
+    <div class="home-nav-card" onclick="switchTab('reports', document.getElementById('tab-btn-reports'))">
+      <div class="home-nav-ico">📈</div>
+      <div class="home-nav-lbl">التقارير</div>
     </div>
   </div>
-  <div class="att-summary-grid" id="dashAttSum"></div>
+
+  <!-- ② Iqama Alerts Section -->
+  <div id="dashIqSection" class="dash-section" style="margin-bottom:16px;display:none">
+    <div class="dash-section-title">🚨 تنبيهات الإقامة</div>
+    <div class="iq-sum-grid" id="dashIqSummary"></div>
+    <div class="iq-table-wrap">
+      <div class="iq-table-head">
+        <h3 id="dashIqTableTitle">قائمة التنبيهات</h3>
+        <button class="btn btn-secondary btn-sm" id="dashIqToggleBtn" onclick="toggleAllIqama()">عرض الكل</button>
+      </div>
+      <table class="iq-tbl"><thead><tr>
+        <th>#</th><th>الاسم</th><th>المشروع</th><th>تاريخ الانتهاء</th><th>الحالة</th>
+      </tr></thead><tbody id="dashIqTableBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ③ Two-column: Project Distribution + Attendance Today -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <div class="dash-section">
+      <div class="dash-section-title">📁 توزيع الموظفين حسب المشروع</div>
+      <div id="dashProjBars"></div>
+    </div>
+    <div class="dash-section">
+      <div class="dash-section-title">📋 الحضور اليوم</div>
+      <div class="att-today-grid" id="dashAttSum"></div>
+    </div>
+  </div>
+
+  <!-- ④ Salary — admin only -->
+  <div id="dashSalarySection" style="display:none">
+    <div class="sal-admin-section" id="dashSalaryCard"></div>
+  </div>
+
 </div>
 </div>
 
@@ -584,10 +807,62 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
 <!-- TAB: REPORTS -->
 <div class="tab-content" id="tab-reports">
 <div class="container">
-  <div class="stat-grid" id="repStats"></div>
-  <div class="rep-card"><h3 id="repTitlesH3">📊 توزيع المسميات الوظيفية</h3><div id="repTitles"></div></div>
-  <div class="rep-card"><h3 id="repProjH3">📁 تفاصيل المشاريع</h3><div id="repProj"></div></div>
-  <div class="rep-card"><h3 id="repIqH3">⚠️ تنبيهات انتهاء الإقامة (أقل من 90 يوم)</h3><div id="repIqama"></div></div>
+  <!-- Sub-tabs -->
+  <div class="rep-subtabs no-print">
+    <button class="rep-stab active" onclick="switchRepTab('live',this)">📊 لوحة حية</button>
+    <button class="rep-stab" onclick="switchRepTab('weekly',this)">📋 أسبوعي</button>
+    <button class="rep-stab" onclick="switchRepTab('monthly',this)">📅 شهري</button>
+    <button class="rep-stab" onclick="switchRepTab('compare',this)">⚖️ مقارنة</button>
+  </div>
+
+  <!-- LIVE DASHBOARD -->
+  <div id="rep-live" class="rep-subpage">
+    <div id="repLiveContent"></div>
+  </div>
+
+  <!-- WEEKLY REPORT -->
+  <div id="rep-weekly" class="rep-subpage" style="display:none">
+    <div class="rep-toolbar no-print">
+      <label style="font-weight:700">الأسبوع:</label>
+      <input type="week" id="repWeekPick" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface);color:var(--txt);font-size:.87rem"/>
+      <select id="repWeekProj" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface);color:var(--txt);font-size:.87rem">
+        <option value="">كل المشاريع</option>
+      </select>
+      <button class="btn btn-primary" onclick="renderWeeklyReport()">🔄 تحديث</button>
+      <button class="btn btn-info no-print" onclick="window.print()">🖨️ طباعة</button>
+    </div>
+    <div id="repWeeklyContent"></div>
+  </div>
+
+  <!-- MONTHLY REPORT -->
+  <div id="rep-monthly" class="rep-subpage" style="display:none">
+    <div class="rep-toolbar no-print">
+      <label style="font-weight:700">الشهر:</label>
+      <input type="month" id="repMonthPick" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface);color:var(--txt);font-size:.87rem"/>
+      <select id="repMonthProj" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface);color:var(--txt);font-size:.87rem">
+        <option value="">كل المشاريع</option>
+      </select>
+      <button class="btn btn-primary" onclick="renderMonthlyReport()">🔄 تحديث</button>
+      <button class="btn btn-info no-print" onclick="window.print()">🖨️ طباعة</button>
+    </div>
+    <div id="repMonthlyContent"></div>
+  </div>
+
+  <!-- COMPARISON REPORT -->
+  <div id="rep-compare" class="rep-subpage" style="display:none">
+    <div class="rep-toolbar no-print">
+      <label style="font-weight:700">شهر 1:</label>
+      <input type="month" id="repCmp1" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface);color:var(--txt);font-size:.87rem"/>
+      <label style="font-weight:700">شهر 2:</label>
+      <input type="month" id="repCmp2" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface);color:var(--txt);font-size:.87rem"/>
+      <select id="repCmpProj" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface);color:var(--txt);font-size:.87rem">
+        <option value="">كل المشاريع</option>
+      </select>
+      <button class="btn btn-primary" onclick="renderCompareReport()">🔄 مقارنة</button>
+      <button class="btn btn-info no-print" onclick="window.print()">🖨️ طباعة</button>
+    </div>
+    <div id="repCompareContent"></div>
+  </div>
 </div>
 </div>
 
@@ -1263,6 +1538,11 @@ function showApp(){
   applyPermissions();
   initSelects();
   applyLang();
+  // Start on dashboard: hide nav tabs, show home nav grid
+  const nav = document.getElementById('mainNav');
+  if(nav){nav.classList.remove('visible');}
+  const homeGrid = document.getElementById('homeNavGrid');
+  if(homeGrid){homeGrid.style.display='';}
   renderDashboard();
   showIqBanner();
 }
@@ -1301,11 +1581,10 @@ function renderUsersModal(){
       </div>
     </div>
     <div id="nuProjWrap" style="margin-bottom:10px">
-      <div class="add-user-field" style="max-width:200px"><label>${t('lblAssignedProject')}</label>
-        <select id="nuProj">
-          <option value="">${t('allProjects')}</option>
-          ${PROJS.map(p=>`<option value="${p}">${p}</option>`).join('')}
-        </select>
+      <div class="add-user-field"><label>${t('lblAssignedProject')} <span style="font-size:.72rem;color:var(--txt2)">(اختر واحد أو أكثر)</span></label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+          ${PROJS.map(p=>`<label style="display:flex;align-items:center;gap:6px;font-size:.83rem;cursor:pointer;background:var(--surface2);padding:5px 10px;border-radius:8px;border:1px solid var(--border)"><input type="checkbox" class="nuProjCb" value="${p}"> ${p}</label>`).join('')}
+        </div>
       </div>
     </div>
     <div id="nuPermsWrap">
@@ -1320,10 +1599,12 @@ function renderUsersModal(){
     const isMe=currentUser&&currentUser.username===u.username;
     const roleLabel=u.role==='manager'?'🔑 '+t('roleManager'):'👤 '+t('roleSupervisor');
     const permsText=u.role==='manager'?t('allPermsLabel'):(u.permissions||[]).length?getPermsList().filter(p=>(u.permissions||[]).includes(p.key)).map(p=>p.label).join(' | '):t('noPermsLabel');
+    const ap=u.assignedProjects||(u.assignedProject?[u.assignedProject]:[]);
+    const projText=u.role!=='manager'&&ap.length?` | 📁 ${ap.join('، ')}`:'';
     html+=`<div class="user-row">
       <div class="user-row-info">
         <div class="user-row-name">👤 ${u.username}${isMe?' <span style="font-size:.7rem;color:var(--accent)">'+t('lblYou')+'</span>':''}</div>
-        <div class="user-row-role">${roleLabel} — ${permsText}</div>
+        <div class="user-row-role">${roleLabel} — ${permsText}${projText}</div>
       </div>
       ${!isMe?`<button class="btn btn-warn btn-sm" onclick="editUserPerms(${i})">✏️ ${t('btnEdit')}</button>
       <button class="btn btn-danger btn-sm" onclick="deleteUser(${i})">🗑️</button>`:''}</div>`;
@@ -1342,9 +1623,9 @@ function addUserFromForm(){
   const users=loadUsers();
   if(users.find(u=>u.username===username)){errEl.textContent=t('errUserExists');return}
   const perms=role==='manager'?[]:Array.from(document.querySelectorAll('.nuPerm:checked')).map(cb=>cb.value);
-  const assignedProject=role==='manager'?'':(document.getElementById('nuProj')?.value||'');
-  users.push({id:'u'+Date.now(),username,passHash:sHash(pass),role,permissions:perms,assignedProject});
-  logAudit('👤',t('addNewUser').replace('➕ ',''),`${username} (${role==='manager'?t('roleManager'):t('roleSupervisor')}${assignedProject?' — '+assignedProject:''})`);
+  const assignedProjects=role==='manager'?[]:Array.from(document.querySelectorAll('.nuProjCb:checked')).map(cb=>cb.value);
+  users.push({id:'u'+Date.now(),username,passHash:sHash(pass),role,permissions:perms,assignedProjects});
+  logAudit('👤',t('addNewUser').replace('➕ ',''),`${username} (${role==='manager'?t('roleManager'):t('roleSupervisor')}${assignedProjects.length?' — '+assignedProjects.join('، '):''})`);
   saveUsers(users);
   renderUsersModal();
 }
@@ -1366,11 +1647,10 @@ function editUserPerms(i){
     <h3 style="font-size:.97rem;font-weight:700;margin-bottom:16px">${t('editUserTitle')} ${u.username}</h3>
     <div style="margin-bottom:6px;font-size:.78rem;font-weight:700;color:var(--txt2);text-transform:uppercase">${t('lblNewPassword')}</div>
     <input id="editPassFld" type="password" placeholder="${t('lblPassword')}" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.87rem;font-family:inherit;background:var(--surface2);color:var(--txt);margin-bottom:14px;direction:rtl"/>
-    ${u.role!=='manager'?`<div style="margin-bottom:6px;font-size:.78rem;font-weight:700;color:var(--txt2);text-transform:uppercase">${t('lblAssignedProject')}:</div>
-    <select id="editProjFld" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.87rem;font-family:inherit;background:var(--surface2);color:var(--txt);margin-bottom:14px;direction:rtl">
-      <option value="" ${!u.assignedProject?'selected':''}>${t('allProjects')}</option>
-      ${PROJS.map(p=>`<option value="${p}" ${u.assignedProject===p?'selected':''}>${p}</option>`).join('')}
-    </select>`:''}
+    ${u.role!=='manager'?`<div style="margin-bottom:6px;font-size:.78rem;font-weight:700;color:var(--txt2);text-transform:uppercase">${t('lblAssignedProject')} <span style="font-weight:400;opacity:.7">(اختر واحد أو أكثر)</span>:</div>
+    <div id="editProjFld" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+      ${(()=>{const ap=u.assignedProjects||(u.assignedProject?[u.assignedProject]:[]);return PROJS.map(p=>`<label style="display:flex;align-items:center;gap:6px;font-size:.83rem;cursor:pointer;background:var(--surface2);padding:5px 10px;border-radius:8px;border:1px solid var(--border)"><input type="checkbox" class="editProjCb" value="${p}" ${ap.includes(p)?'checked':''}> ${p}</label>`).join('');})()}
+    </div>`:''}
     ${u.role!=='manager'?`<div style="font-size:.78rem;font-weight:700;color:var(--txt2);margin-bottom:10px;text-transform:uppercase">${t('lblPermissions')}</div>
     <div class="perms-grid">${permsHTML(u.permissions||[],'editPerm','')}</div>`:`<p style="color:var(--txt2);font-size:.85rem;margin-bottom:14px">${t('managerAllPerms')}</p>`}
     <div style="display:flex;gap:10px;justify-content:flex-start;margin-top:18px">
@@ -1392,7 +1672,7 @@ function saveUserPerms(i,btn){
   }
   if(u.role!=='manager'){
     u.permissions=Array.from(overlay.querySelectorAll('.editPerm:checked')).map(cb=>cb.value);
-    const pf=overlay.querySelector('#editProjFld');if(pf)u.assignedProject=pf.value;
+    u.assignedProjects=Array.from(overlay.querySelectorAll('.editProjCb:checked')).map(cb=>cb.value);
   }
   saveUsers(users);
   logAudit('✏️','تعديل مستخدم',u.username);
@@ -1415,7 +1695,9 @@ document.addEventListener('click',e=>{if(!e.target.closest('.tools-wrap'))closeT
 // ── PROJECT RESTRICTION ──────────────────────────────────────
 function getMyProject(){
   if(!currentUser||currentUser.role==='manager')return null;
-  return currentUser.assignedProject||null;
+  // support both old (string) and new (array) format
+  const ap=currentUser.assignedProjects||(currentUser.assignedProject?[currentUser.assignedProject]:[]);
+  return ap.length?ap:null;
 }
 
 // ── AUDIT LOG ────────────────────────────────────────────────
@@ -1837,12 +2119,22 @@ function switchTab(name,btn){
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
-  btn.classList.add('active');
-  if(name==='dashboard')renderDashboard();
-  if(name==='employees')render();
-  if(name==='payroll')renderPayroll();
-  if(name==='attendance')renderAtt();
-  if(name==='reports')renderReports();
+  if(btn) btn.classList.add('active');
+  // Show/hide main nav tabs based on current section
+  const nav = document.getElementById('mainNav');
+  const homeGrid = document.getElementById('homeNavGrid');
+  if(name==='dashboard'){
+    if(nav){nav.classList.remove('visible');}
+    if(homeGrid){homeGrid.style.display='';}
+    renderDashboard();
+  } else {
+    if(nav){nav.classList.add('visible');}
+    if(homeGrid){homeGrid.style.display='none';}
+    if(name==='employees')render();
+    if(name==='payroll')renderPayroll();
+    if(name==='attendance')renderAtt();
+    if(name==='reports')renderReports();
+  }
 }
 
 // ── DASHBOARD ────────────────────────────────────────────────
@@ -1855,25 +2147,64 @@ function renderDashboard(){
   const terminated=employees.filter(e=>e.status==='منتهية خدمته').length;
   const totalSal=employees.reduce((s,e)=>s+(e.baseSalary||0),0);
 
-  // Stats cards
+  // ① New Stats Row (5 cards — salary removed from here)
+  const malePct  = total ? Math.round(males/total*100) : 0;
+  const femalePct= total ? Math.round(females/total*100) : 0;
+  const iqCount  = iqamaAlerts().length;
   document.getElementById('dashCards').innerHTML=`
-    <div class="dash-card c-blue"><div class="dash-ico">👥</div>
-      <div><div class="dash-num">${total}</div><div class="dash-lbl">${t('dTotalEmp')}</div><div class="dash-sub">${t('dActive')}${active}</div></div></div>
-    <div class="dash-card c-green"><div class="dash-ico">♂</div>
-      <div><div class="dash-num">${males}</div><div class="dash-lbl">${t('dMales')}</div><div class="dash-sub">${total?Math.round(males/total*100):0}${t('dOfTotal')}</div></div></div>
-    <div class="dash-card c-pink"><div class="dash-ico">♀</div>
-      <div><div class="dash-num">${females}</div><div class="dash-lbl">${t('dFemales')}</div><div class="dash-sub">${total?Math.round(females/total*100):0}${t('dOfTotal')}</div></div></div>
-    <div class="dash-card c-amber"><div class="dash-ico">💰</div>
-      <div><div class="dash-num" style="font-size:1.35rem">${totalSal.toLocaleString()}</div><div class="dash-lbl">${t('dTotalSal')}</div><div class="dash-sub">${t('dSAR')}</div></div></div>
-    <div class="dash-card c-purple"><div class="dash-ico">🟡</div>
-      <div><div class="dash-num">${onLeave}</div><div class="dash-lbl">${t('dOnLeave')}</div></div></div>
-    <div class="dash-card c-cyan"><div class="dash-ico">📋</div>
-      <div><div class="dash-num">${iqamaAlerts().length}</div><div class="dash-lbl">${t('dIqAlerts')}</div><div class="dash-sub">${t('dLess90')}</div></div></div>`;
+    <div class="stat-card s-blue">
+      <div class="stat-ico-new">👥</div>
+      <div class="stat-num-new">${total}</div>
+      <div class="stat-lbl-new">${t('dTotalEmp')}</div>
+      <div class="stat-sub-new">نشط: ${active}</div>
+    </div>
+    <div class="stat-card s-purple">
+      <div class="stat-ico-new">⚧</div>
+      <div style="display:flex;gap:12px;align-items:flex-end">
+        <div><div class="stat-num-new" style="font-size:1.5rem;color:#2563eb">♂${males}</div><div class="stat-sub-new">${malePct}%</div></div>
+        <div><div class="stat-num-new" style="font-size:1.5rem;color:#db2777">♀${females}</div><div class="stat-sub-new">${femalePct}%</div></div>
+      </div>
+      <div class="gender-bar-wrap">
+        <div class="gender-bar-track">
+          <div class="gender-bar-male" style="width:${malePct}%"></div>
+          <div class="gender-bar-female" style="width:${femalePct}%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card s-amber">
+      <div class="stat-ico-new">🌴</div>
+      <div class="stat-num-new">${onLeave}</div>
+      <div class="stat-lbl-new">${t('dOnLeave')}</div>
+    </div>
+    <div class="stat-card s-red">
+      <div class="stat-ico-new">🚫</div>
+      <div class="stat-num-new">${terminated}</div>
+      <div class="stat-lbl-new">منتهية خدمتهم</div>
+    </div>
+    <div class="stat-card s-teal" style="cursor:pointer" onclick="document.getElementById('dashIqSection').scrollIntoView({behavior:'smooth'})">
+      <div class="stat-ico-new">🛂</div>
+      <div class="stat-num-new" style="${iqCount>0?'color:#dc2626':''}">${iqCount}</div>
+      <div class="stat-lbl-new">${t('dIqAlerts')}</div>
+      <div class="stat-sub-new">${t('dLess90')}</div>
+    </div>`;
+
+  // ② Salary section — admin only
+  const salSection = document.getElementById('dashSalarySection');
+  const salCard    = document.getElementById('dashSalaryCard');
+  if(currentUser && currentUser.role==='admin'){
+    salSection.style.display='block';
+    salCard.innerHTML=`
+      <div class="sal-admin-title">💰 إجمالي الرواتب الشهرية</div>
+      <div class="sal-admin-num">${totalSal.toLocaleString()} <span style="font-size:1rem;opacity:.7">ريال</span></div>
+      <div class="sal-admin-sub">موظفون نشطون: ${active} — متوسط: ${active?Math.round(totalSal/active).toLocaleString():0} ريال/موظف</div>`;
+  } else {
+    salSection.style.display='none';
+  }
 
   // Project distribution bars
   const barsEl=document.getElementById('dashProjBars');
   const barColors=['#2563eb','#7c3aed','#0891b2','#d97706'];
-  let barsHtml=`<h3>${t('dProjDist')}</h3>`;
+  let barsHtml=``;
   PROJS.forEach((p,i)=>{
     const c=employees.filter(e=>e.project===p).length;
     const pct=total?Math.round(c/total*100):0;
@@ -1884,26 +2215,61 @@ function renderDashboard(){
   });
   barsEl.innerHTML=barsHtml;
 
-  // Iqama alerts
-  const alerts=iqamaAlerts();
-  const alertsEl=document.getElementById('dashAlerts');
-  let alertsHtml=`<h3>${t('dIqTitle')}</h3>`;
-  if(!alerts.length){
-    alertsHtml+=`<p style="color:var(--txt2);font-size:.86rem;padding:10px 0">${t('dNoAlerts')}</p>`;
-  }else{
-    alerts.slice(0,10).forEach(e=>{
-      const ref=h2g(e.iqamaExpiry)||new Date(e.iqamaExpiry);
-      const days=Math.floor((ref-new Date())/86400000);
-      alertsHtml+=`<div class="alert-item ${days<0?'bad':'warn'}">
-        <span style="font-size:1rem">${days<0?'🔴':'🟡'}</span>
-        <div style="flex:1"><div style="font-weight:700">${e.name}</div>
-          <div style="font-size:.76rem;opacity:.8">${e.project} · ${days<0?t('dExpiredSince')+Math.abs(days)+t('dDay'):days+t('dDaysLeft')}</div></div>
-        <span style="font-size:.76rem;opacity:.75">${e.iqamaExpiry}</span>
-      </div>`;
-    });
-    if(alerts.length>10)alertsHtml+=`<div style="text-align:center;font-size:.8rem;color:var(--txt2);margin-top:8px">${t('dAndMore')}${alerts.length-10}${t('dOthers')}</div>`;
+  // ③ Iqama alerts — 3-level summary + compact table
+  const alerts = iqamaAlerts();
+  const today  = new Date();
+  const getDays = e => {
+    const ref = h2g(e.iqamaExpiry) || new Date(e.iqamaExpiry);
+    return Math.floor((ref - today) / 86400000);
+  };
+  const expired = alerts.filter(e => getDays(e) < 0);
+  const soon30  = alerts.filter(e => { const d=getDays(e); return d>=0 && d<=30; });
+  const soon90  = alerts.filter(e => { const d=getDays(e); return d>30 && d<=90; });
+
+  // Summary cards
+  document.getElementById('dashIqSummary').innerHTML = alerts.length === 0
+    ? `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--txt2);font-size:.88rem">✅ لا توجد إقامات منتهية أو قريبة من الانتهاء</div>`
+    : `
+    <div class="iq-sum-card iq-expired">
+      <div class="iq-sum-ico">🔴</div>
+      <div><div class="iq-sum-num">${expired.length}</div><div class="iq-sum-lbl">إقامات منتهية</div></div>
+    </div>
+    <div class="iq-sum-card iq-soon">
+      <div class="iq-sum-ico">🟠</div>
+      <div><div class="iq-sum-num">${soon30.length}</div><div class="iq-sum-lbl">تنتهي خلال 30 يوم</div></div>
+    </div>
+    <div class="iq-sum-card iq-warn90">
+      <div class="iq-sum-ico">🟡</div>
+      <div><div class="iq-sum-num">${soon90.length}</div><div class="iq-sum-lbl">تنتهي خلال 90 يوم</div></div>
+    </div>`;
+
+  // Table
+  window._allIqAlerts = alerts;
+  window._iqShowAll   = false;
+  renderIqTable(false);
+
+  // Bell menu
+  const badge = document.getElementById('bellBadge');
+  if(alerts.length > 0){
+    badge.textContent = alerts.length > 99 ? '99+' : alerts.length;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
   }
-  alertsEl.innerHTML=alertsHtml;
+  const bellItems = document.getElementById('bellMenuItems');
+  if(!bellItems) return;
+  bellItems.innerHTML = alerts.length === 0
+    ? `<p style="padding:12px;color:var(--txt2);font-size:.84rem;text-align:center">✅ لا توجد تنبيهات</p>`
+    : alerts.slice(0,6).map(e=>{
+        const d = getDays(e);
+        const chip = d<0
+          ? `<span style="color:#dc2626;font-size:.72rem;font-weight:700">منتهية منذ ${Math.abs(d)} يوم</span>`
+          : `<span style="color:#d97706;font-size:.72rem;font-weight:700">تنتهي خلال ${d} يوم</span>`;
+        return `<div style="padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--surface2)">
+          <div style="font-weight:700;font-size:.84rem">${e.name}</div>
+          <div style="display:flex;justify-content:space-between;margin-top:2px">${chip}<span style="font-size:.72rem;color:var(--txt2)">${e.project}</span></div>
+        </div>`;
+      }).join('');
 
   // Today's attendance summary
   const todayKey=new Date().toISOString().split('T')[0];
@@ -1911,10 +2277,10 @@ function renderDashboard(){
   let P=0,A=0,L=0,T=0;
   employees.forEach(e=>{const s=todayAtt[e.id];if(s==='P')P++;else if(s==='A')A++;else if(s==='L')L++;else if(s==='T')T++});
   document.getElementById('dashAttSum').innerHTML=`
-    <div class="att-sum-card"><div class="att-sum-num" style="color:#16a34a">${P}</div><div class="att-sum-lbl">${t('dPresentToday')}</div></div>
-    <div class="att-sum-card"><div class="att-sum-num" style="color:#dc2626">${A}</div><div class="att-sum-lbl">${t('dAbsentLbl')}</div></div>
-    <div class="att-sum-card"><div class="att-sum-num" style="color:#d97706">${L}</div><div class="att-sum-lbl">${t('dLeaveLbl')}</div></div>
-    <div class="att-sum-card"><div class="att-sum-num" style="color:#7c3aed">${T}</div><div class="att-sum-lbl">${t('dLateLbl')}</div></div>`;
+    <div class="att-today-card att-p"><div class="att-today-num">${P}</div><div class="att-today-lbl">✅ ${t('dPresentToday')}</div></div>
+    <div class="att-today-card att-a"><div class="att-today-num">${A}</div><div class="att-today-lbl">❌ ${t('dAbsentLbl')}</div></div>
+    <div class="att-today-card att-l"><div class="att-today-num">${L}</div><div class="att-today-lbl">🌴 ${t('dLeaveLbl')}</div></div>
+    <div class="att-today-card att-t"><div class="att-today-num">${T}</div><div class="att-today-lbl">⏰ ${t('dLateLbl')}</div></div>`;
 }
 
 // Helper — employees with iqama expiring in < 90 days
@@ -1989,7 +2355,7 @@ function getFiltered(){
   const now    =new Date();
   const myProj=getMyProject();
   let list=employees.filter(e=>{
-    if(myProj&&e.project!==myProj)return false;
+    if(myProj&&!myProj.includes(e.project))return false;
     if(proj   &&e.project!==proj)return false;
     if(shift  &&(e.shift||'-')!==shift)return false;
     if(gender &&e.gender!==gender)return false;
@@ -2161,8 +2527,9 @@ function openAdd(){
   document.getElementById('fPhoto').value='';
   document.getElementById('modalBg').classList.add('open');
   const sw=document.getElementById('fSalWrap'),otw=document.getElementById('fOTWrap');
-  if(sw)sw.style.display=can('payroll')?'':'none';
-  if(otw)otw.style.display=can('payroll')?'':'none';
+  const _isMgr=currentUser&&currentUser.role==='manager';
+  if(sw)sw.style.display=_isMgr?'':'none';
+  if(otw)otw.style.display=_isMgr?'':'none';
   setTimeout(()=>document.getElementById('fName').focus(),50);
 }
 
@@ -2191,8 +2558,9 @@ function openEdit(idx){
   document.getElementById('fPhoto').value='';
   document.getElementById('modalBg').classList.add('open');
   const sw=document.getElementById('fSalWrap'),otw=document.getElementById('fOTWrap');
-  if(sw)sw.style.display=can('payroll')?'':'none';
-  if(otw)otw.style.display=can('payroll')?'':'none';
+  const _isMgr=currentUser&&currentUser.role==='manager';
+  if(sw)sw.style.display=_isMgr?'':'none';
+  if(otw)otw.style.display=_isMgr?'':'none';
 }
 
 function closeModal(){document.getElementById('modalBg').classList.remove('open')}
@@ -2324,15 +2692,22 @@ function getAttCount(month, empId){
 }
 
 function renderPayroll(){
+  const isMgr=currentUser&&currentUser.role==='manager';
   const month=document.getElementById('payMonth').value;
   const proj=document.getElementById('payProj').value;
   document.getElementById('payTitle').textContent=t('payTitle')+' — '+(month||t('paySelectMonth'));
   const myProj=getMyProject();
-  const list=employees.filter(e=>{if(myProj&&e.project!==myProj)return false;return!proj||e.project===proj});
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj});
   const data=month?(payroll[month]||{}):{};
   const tbody=document.getElementById('payBody');
   tbody.innerHTML='';
   let grand=0,totalAbsDeduct=0,totalOT=0,totalBonus=0;
+
+  // ── إخفاء/إظهار أعمدة الراتب حسب الصلاحية ──
+  const salCols=['pth-sal','pth-deduct','pth-hr','pth-ott','pth-bonus','pth-extra','pth-net'];
+  salCols.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=isMgr?'':'none';});
+  const payslipCol=document.querySelector('#payThead th.no-print');if(payslipCol)payslipCol.style.display=isMgr?'':'none';
+  document.getElementById('payGrand').style.display=isMgr?'':'none';
 
   list.forEach((e,i)=>{
     const d=data[e.id]||{};
@@ -2340,7 +2715,6 @@ function renderPayroll(){
     const hourlyRate=e.baseSalary?+(e.baseSalary/30/8).toFixed(2):0;
     const att=month?getAttCount(month,e.id):{P:0,A:0,L:0,T:0};
     const absDeduct=+(att.A*dailyRate).toFixed(2);
-    // auto deduction = absence deduction; manual extra deductions separate
     const extraDeduct=d.extraDeductions||0;
     const bonus=d.bonus||0;
     const otHours=d.overtimeHours||0;
@@ -2352,45 +2726,53 @@ function renderPayroll(){
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td style="color:var(--txt2);font-size:.76rem">${i+1}</td>
-      <td class="no-print">${month?`<button class="btn btn-info btn-sm" onclick="showPayslip('${e.id}','${month}')" title="بطاقة الراتب">🧾</button>`:''}</td>
+      ${isMgr?`<td class="no-print">${month?`<button class="btn btn-info btn-sm" onclick="showPayslip('${e.id}','${month}')" title="بطاقة الراتب">🧾</button>`:''}</td>`:''}
       <td><strong>${e.name}</strong></td>
       <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
-      <td style="font-weight:700">${(e.baseSalary||0).toLocaleString()}</td>
+      ${isMgr?`<td style="font-weight:700">${(e.baseSalary||0).toLocaleString()}</td>`:''}
       <td style="color:#16a34a;font-weight:600;text-align:center">${att.P+att.T}</td>
       <td style="color:#dc2626;font-weight:600;text-align:center">${att.A}</td>
       <td style="color:#d97706;font-weight:600;text-align:center">${att.L}</td>
-      <td style="color:#dc2626;font-weight:600" id="abd-${e.id}">${absDeduct?absDeduct.toLocaleString():'—'}</td>
+      ${isMgr?`<td style="color:#dc2626;font-weight:600" id="abd-${e.id}">${absDeduct?absDeduct.toLocaleString():'—'}</td>`:''}
       <td><input class="pay-input" type="number" min="0" step=".5" value="${otHours||''}" placeholder="0"
           oninput="onPay('${month}','${e.id}','overtimeHours',this.value)"/></td>
+      ${isMgr?`
       <td style="color:var(--txt2);font-size:.8rem">${hourlyRate}</td>
       <td style="color:#16a34a;font-weight:600" id="ot-${e.id}">${otTotal?otTotal.toLocaleString():'—'}</td>
       <td><input class="pay-input" type="number" min="0" value="${bonus||''}" placeholder="0"
           oninput="onPay('${month}','${e.id}','bonus',this.value)"/></td>
       <td><input class="pay-input" type="number" min="0" value="${extraDeduct||''}" placeholder="0"
           oninput="onPay('${month}','${e.id}','extraDeductions',this.value)"/></td>
-      <td id="tot-${e.id}" style="font-weight:800;color:${net<0?'#dc2626':'#16a34a'};font-size:.9rem">${net.toLocaleString()}</td>
+      <td id="tot-${e.id}" style="font-weight:800;color:${net<0?'#dc2626':'#16a34a'};font-size:.9rem">${net.toLocaleString()}</td>`:''}
       <td><input class="pay-input" type="text" style="width:85px" value="${d.notes||''}" placeholder="..."
           oninput="onPay('${month}','${e.id}','notes',this.value)"/></td>`;
     tbody.appendChild(tr);
   });
 
   const tr=document.createElement('tr');tr.className='total-row';
-  tr.innerHTML=`
-    <td colspan="3" style="text-align:right;font-weight:700">${t('payTotalLabel')}</td>
-    <td style="font-weight:700">${list.reduce((s,e)=>s+(e.baseSalary||0),0).toLocaleString()}</td>
-    <td colspan="3"></td>
-    <td style="color:#dc2626;font-weight:700">${totalAbsDeduct.toLocaleString()}</td>
-    <td colspan="2"></td>
-    <td style="color:#16a34a;font-weight:700">${totalOT.toLocaleString()}</td>
-    <td style="color:#2563eb;font-weight:700">${totalBonus.toLocaleString()}</td>
-    <td></td>
-    <td style="color:#16a34a;font-size:.97rem;font-weight:800" id="grandCell">${grand.toLocaleString()} ${t('sar')}</td>
-    <td></td>`;
+  if(isMgr){
+    tr.innerHTML=`
+      <td colspan="3" style="text-align:right;font-weight:700">${t('payTotalLabel')}</td>
+      <td style="font-weight:700">${list.reduce((s,e)=>s+(e.baseSalary||0),0).toLocaleString()}</td>
+      <td colspan="3"></td>
+      <td style="color:#dc2626;font-weight:700">${totalAbsDeduct.toLocaleString()}</td>
+      <td colspan="2"></td>
+      <td style="color:#16a34a;font-weight:700">${totalOT.toLocaleString()}</td>
+      <td style="color:#2563eb;font-weight:700">${totalBonus.toLocaleString()}</td>
+      <td></td>
+      <td style="color:#16a34a;font-size:.97rem;font-weight:800" id="grandCell">${grand.toLocaleString()} ${t('sar')}</td>
+      <td></td>`;
+  } else {
+    tr.innerHTML=`
+      <td colspan="2" style="text-align:right;font-weight:700">${t('payTotalLabel')}</td>
+      <td colspan="3"></td>
+      <td><strong>${list.length} موظف</strong></td>`;
+  }
   tbody.appendChild(tr);
-  document.getElementById('payGrand').textContent=t('payGrandLabel')+grand.toLocaleString()+' '+t('sar');
+  if(isMgr)document.getElementById('payGrand').textContent=t('payGrandLabel')+grand.toLocaleString()+' '+t('sar');
 
-  // ملخص بطاقات
-  if(month){
+  // ملخص بطاقات — للمدير فقط
+  if(month && isMgr){
     document.getElementById('payMonthlySummary').style.display='block';
     document.getElementById('paySummaryCards').innerHTML=`
       <div class="dash-card c-blue"><div class="dash-ico">👥</div>
@@ -2403,6 +2785,8 @@ function renderPayroll(){
         <div><div class="dash-num" style="font-size:1.2rem">${totalOT.toLocaleString()}</div><div class="dash-lbl">${t('paySumOT')}</div></div></div>
       <div class="dash-card c-purple"><div class="dash-ico">💸</div>
         <div><div class="dash-num" style="font-size:1.2rem">${grand.toLocaleString()}</div><div class="dash-lbl">${t('paySumNet')}</div></div></div>`;
+  } else {
+    document.getElementById('payMonthlySummary').style.display='none';
   }
 }
 
@@ -2509,7 +2893,7 @@ function renderAtt(){
   const proj=document.getElementById('attProj').value;
   document.getElementById('attTitle').textContent=t('attTitle')+' — '+(date||t('attSelectDate'));
   const myProj=getMyProject();
-  const list=employees.filter(e=>{if(myProj&&e.project!==myProj)return false;return!proj||e.project===proj});
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj});
   const day=date?(attendance[date]||{}):{};
   const tbody=document.getElementById('attBody');tbody.innerHTML='';
   let P=0,A=0,L=0,T=0;
@@ -2547,7 +2931,7 @@ function markAllP(){
   const proj=document.getElementById('attProj').value;
   if(!attendance[date])attendance[date]={};
   const myProj=getMyProject();
-  employees.filter(e=>{if(myProj&&e.project!==myProj)return false;return!proj||e.project===proj}).forEach(e=>attendance[date][e.id]='P');
+  employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj}).forEach(e=>attendance[date][e.id]='P');
   saveAtt();renderAtt();
 }
 
@@ -2556,7 +2940,7 @@ function renderAttSum(){
   const proj=document.getElementById('attSumProj').value;
   if(!month)return;
   const myProj=getMyProject();
-  const list=employees.filter(e=>{if(myProj&&e.project!==myProj)return false;return!proj||e.project===proj});
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj});
   const tbody=document.getElementById('attSumBody');tbody.innerHTML='';
   const days=Object.keys(attendance).filter(d=>d.startsWith(month));
   list.forEach((e,i)=>{
@@ -2592,62 +2976,425 @@ function exportAttCSV(){
 }
 
 // ── REPORTS ──────────────────────────────────────────────────
+// ── REPORTS HELPERS ───────────────────────────────────────────
+function getWeekStr(date){
+  const d=new Date(date);d.setHours(0,0,0,0);
+  d.setDate(d.getDate()+4-(d.getDay()||7));
+  const y=new Date(d.getFullYear(),0,1);
+  const w=Math.ceil(((d-y)/86400000+1)/7);
+  return`${d.getFullYear()}-W${String(w).padStart(2,'0')}`;
+}
+function getWeekDates(ws){
+  const[yr,wk]=ws.split('-W');
+  const jan4=new Date(+yr,0,4);
+  const mon=new Date(jan4);
+  mon.setDate(jan4.getDate()-(jan4.getDay()||7)+1+7*(+wk-1));
+  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return d.toISOString().split('T')[0];});
+}
+function getMonthDates(ms){
+  const[yr,mo]=ms.split('-').map(Number);
+  const days=new Date(yr,mo,0).getDate();
+  return Array.from({length:days},(_,i)=>`${ms}-${String(i+1).padStart(2,'0')}`);
+}
+function prevMonthStr(ms){
+  const[yr,mo]=ms.split('-').map(Number);
+  const d=new Date(yr,mo-2,1);
+  return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function getAttSummary(dates,empId){
+  let P=0,A=0,L=0,T=0;
+  dates.forEach(d=>{const s=(attendance[d]||{})[empId];if(s==='P')P++;else if(s==='A')A++;else if(s==='L')L++;else if(s==='T')T++;});
+  return{P,A,L,T};
+}
+function pct(a,b){return b?Math.round(a/b*100):0;}
+function attChip(p){
+  if(p>=90)return`<span class="chip-ok">${p}%</span>`;
+  if(p>=70)return`<span class="chip-warn">${p}%</span>`;
+  return`<span class="chip-bad">${p}%</span>`;
+}
+
+// ── SUB-TAB SWITCHER ──────────────────────────────────────────
+function switchRepTab(id,btn){
+  ['live','weekly','monthly','compare'].forEach(x=>{
+    const el=document.getElementById('rep-'+x);if(el)el.style.display=x===id?'':'none';
+  });
+  document.querySelectorAll('.rep-stab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  if(id==='live')renderLiveDashboard();
+}
+
+// ── MAIN ENTRY (called by switchTab) ─────────────────────────
 function renderReports(){
-  const total=employees.length;
-  document.getElementById('repStats').innerHTML=`
-    <div class="stat-card"><div class="stat-ico" style="background:#dbeafe">👥</div>
-      <div><div class="stat-num">${total}</div><div class="stat-lbl">${t('repTotalEmp')}</div></div></div>
-    ${PROJS.map((p,i)=>{
-      const bg=['#dbeafe','#ede9fe','#cffafe','#fef3c7'][i];
-      const ic=['🏥','🏢','🏛','⛵'][i];
-      return`<div class="stat-card"><div class="stat-ico" style="background:${bg}">${ic}</div>
-        <div><div class="stat-num">${employees.filter(e=>e.project===p).length}</div><div class="stat-lbl">${p}</div></div></div>`;
-    }).join('')}`;
+  // init project dropdowns for reports
+  const myProj=getMyProject();
+  const opts='<option value="">كل المشاريع</option>'+PROJS.map(p=>`<option value="${p}">${p}</option>`).join('');
+  ['repWeekProj','repMonthProj','repCmpProj'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    if(myProj){
+      if(myProj.length===1){el.innerHTML=`<option value="${myProj[0]}">${myProj[0]}</option>`;el.disabled=true;}
+      else{el.innerHTML='<option value="">كل المشاريع</option>'+myProj.map(p=>`<option value="${p}">${p}</option>`).join('');el.disabled=false;}
+    }else{el.innerHTML=opts;el.disabled=false;}
+  });
+  // default picker values
+  const todayStr=new Date().toISOString().split('T')[0];
+  const thisMonth=todayStr.substr(0,7);
+  const wp=document.getElementById('repWeekPick');if(wp&&!wp.value)wp.value=getWeekStr(new Date());
+  const mp=document.getElementById('repMonthPick');if(mp&&!mp.value)mp.value=thisMonth;
+  const c1=document.getElementById('repCmp1');if(c1&&!c1.value)c1.value=prevMonthStr(thisMonth);
+  const c2=document.getElementById('repCmp2');if(c2&&!c2.value)c2.value=thisMonth;
+  // show live tab first
+  switchRepTab('live',document.querySelector('.rep-stab'));
+}
 
-  // titles
-  const tc={};employees.forEach(e=>{tc[e.title||'—']=(tc[e.title||'—']||0)+1});
-  document.getElementById('repTitles').innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:10px">
-    ${Object.entries(tc).sort((a,b)=>b[1]-a[1]).map(([t,c])=>`
-      <div style="background:var(--surface2);border-radius:8px;padding:9px 14px;display:flex;align-items:center;gap:9px">
-        <span style="font-weight:700;font-size:1.15rem">${c}</span>
-        <span style="color:var(--txt2);font-size:.83rem">${t}</span>
-      </div>`).join('')}
-  </div>`;
+// ── LIVE DASHBOARD ────────────────────────────────────────────
+function renderLiveDashboard(){
+  const myProj=getMyProject();
+  const list=employees.filter(e=>!myProj||myProj.includes(e.project));
+  const total=list.length;
+  const todayStr=new Date().toISOString().split('T')[0];
+  const thisMonth=todayStr.substr(0,7);
+  const isMgr=currentUser&&currentUser.role==='manager';
 
-  // project breakdown
-  document.getElementById('repProj').innerHTML=PROJS.map((p,pi)=>{
-    const list=employees.filter(e=>e.project===p);
-    if(!list.length)return'';
-    const sc={};list.forEach(e=>{const s=SL[e.shift||'-']||'-';sc[s]=(sc[s]||0)+1});
-    return`<div style="margin-bottom:14px">
-      <div style="font-weight:700;font-size:.93rem;margin-bottom:7px">
-        <span class="badge ${BC[pi]}">${p}</span>
-        <span style="margin-right:8px">${list.length} ${t('repEmpWord')}</span>
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:7px">
-        ${Object.entries(sc).map(([s,c])=>`<span style="background:var(--surface2);border-radius:6px;padding:3px 11px;font-size:.81rem"><strong>${c}</strong> — ${s}</span>`).join('')}
-      </div>
+  // today
+  const todayAtt=attendance[todayStr]||{};
+  let tP=0,tA=0,tL=0,tT=0;
+  list.forEach(e=>{const s=todayAtt[e.id];if(s==='P')tP++;else if(s==='A')tA++;else if(s==='L')tL++;else if(s==='T')tT++;});
+  const tMarked=tP+tA+tL+tT;
+
+  // this week
+  const wDates=getWeekDates(getWeekStr(new Date())).filter(d=>d<=todayStr);
+  let wP=0,wA=0,wL=0,wT=0;
+  list.forEach(e=>{const s=getAttSummary(wDates,e.id);wP+=s.P;wA+=s.A;wL+=s.L;wT+=s.T;});
+
+  // this month
+  const mDates=getMonthDates(thisMonth);
+  const recDates=mDates.filter(d=>d<=todayStr);
+  let mP=0,mA=0,mL=0,mT=0,mOT=0;
+  const mPay=payroll[thisMonth]||{};
+  list.forEach(e=>{const s=getAttSummary(mDates,e.id);mP+=s.P;mA+=s.A;mL+=s.L;mT+=s.T;mOT+=mPay[e.id]?.overtimeHours||0;});
+
+  // project bars (monthly)
+  const projBreak=PROJS.map((proj,pi)=>{
+    const pList=list.filter(e=>e.project===proj);if(!pList.length)return'';
+    let pp=0,pt=0;
+    pList.forEach(e=>{const s=getAttSummary(recDates,e.id);pp+=s.P;pt+=s.T;});
+    const pp2=pct(pp+pt,pList.length*(recDates.length||1));
+    const colors=['#3b82f6','#8b5cf6','#06b6d4','#f59e0b'];
+    return`<div class="bar-row">
+      <span class="bar-lbl"><span class="badge ${BC[pi]}">${proj}</span></span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pp2}%;background:${colors[pi]||'#3b82f6'}"></div></div>
+      <span class="bar-val">${pp2}%</span>
+      <span style="color:var(--txt2);font-size:.78rem">${pList.length} موظف</span>
     </div>`;
   }).join('');
 
-  // iqama alerts
-  const alerts=iqamaAlerts();
-  document.getElementById('repIqama').innerHTML=alerts.length
-    ?`<table style="width:100%;border-collapse:collapse;font-size:.86rem">
-        <tr style="border-bottom:2px solid var(--border)">
-          <th style="padding:7px;text-align:right">${t('repName')}</th>
-          <th style="padding:7px;text-align:right">${t('repProject')}</th>
-          <th style="padding:7px;text-align:right">${t('repIqNum')}</th>
-          <th style="padding:7px;text-align:right">${t('repIqExpiry')}</th>
-        </tr>
-        ${alerts.map(e=>`<tr style="border-bottom:1px solid var(--border)">
-          <td style="padding:7px;font-weight:600">${e.name}</td>
-          <td style="padding:7px">${e.project}</td>
-          <td style="padding:7px">${e.iqamaNum||'—'}</td>
-          <td style="padding:7px">${iqBadge(e.iqamaExpiry)}</td>
-        </tr>`).join('')}
-      </table>`
-    :`<p style="color:var(--txt2);font-size:.88rem">${t('repNoIq')}</p>`;
+  const iqCount=iqamaAlerts().length;
+  const notMarked=list.filter(e=>!todayAtt[e.id]);
+
+  document.getElementById('repLiveContent').innerHTML=`
+    <div class="rep-section">
+      <div class="rep-section-title">📍 اليوم — ${todayStr}</div>
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${tP}</div><div class="kpi-lbl">حضور</div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${tA}</div><div class="kpi-lbl">غياب</div></div>
+        <div class="kpi-card kpi-amber"><div class="kpi-ico">🌙</div><div class="kpi-val" style="color:#d97706">${tL}</div><div class="kpi-lbl">إجازة</div></div>
+        <div class="kpi-card kpi-purple"><div class="kpi-ico">⏱️</div><div class="kpi-val" style="color:#7c3aed">${tT}</div><div class="kpi-lbl">تأخير</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📊</div><div class="kpi-val">${tMarked?pct(tP+tT,tMarked):0}%</div><div class="kpi-lbl">نسبة الحضور اليوم</div></div>
+      </div>
+    </div>
+
+    <div class="rep-section">
+      <div class="rep-section-title">📆 هذا الأسبوع (${wDates.length} أيام مسجّلة)</div>
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${wP}</div><div class="kpi-lbl">أيام حضور</div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${wA}</div><div class="kpi-lbl">أيام غياب</div></div>
+        <div class="kpi-card kpi-amber"><div class="kpi-ico">🌙</div><div class="kpi-val" style="color:#d97706">${wL}</div><div class="kpi-lbl">أيام إجازة</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${wDates.length&&total?pct(wP+wT,total*wDates.length):0}%</div><div class="kpi-lbl">معدل الحضور</div></div>
+      </div>
+    </div>
+
+    <div class="rep-section">
+      <div class="rep-section-title">📅 هذا الشهر — ${thisMonth} (${recDates.length} يوم مسجّل)</div>
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">👥</div><div class="kpi-val">${total}</div><div class="kpi-lbl">إجمالي الموظفين</div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${mP}</div><div class="kpi-lbl">إجمالي حضور</div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${mA}</div><div class="kpi-lbl">إجمالي غياب</div></div>
+        <div class="kpi-card kpi-purple"><div class="kpi-ico">⏱️</div><div class="kpi-val" style="color:#7c3aed">${mOT}</div><div class="kpi-lbl">ساعات أوفر</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${pct(mP+mT,total*(recDates.length||1))}%</div><div class="kpi-lbl">معدل الحضور</div></div>
+        ${iqCount?`<div class="kpi-card kpi-amber"><div class="kpi-ico">🔔</div><div class="kpi-val" style="color:#d97706">${iqCount}</div><div class="kpi-lbl">تنبيهات إقامة</div></div>`:''}
+      </div>
+    </div>
+
+    <div class="rep-section">
+      <div class="rep-section-title">🏗 معدل الحضور بالمشروع (هذا الشهر)</div>
+      <div class="bar-chart">${projBreak||'<p style="color:var(--txt2)">لا توجد بيانات</p>'}</div>
+    </div>
+
+    ${isMgr&&notMarked.length?`<div class="rep-section">
+      <div class="rep-section-title">⚠️ لم يُسجَّل حضورهم اليوم (${notMarked.length})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${notMarked.map(e=>`<span style="background:var(--surface2);padding:5px 12px;border-radius:20px;font-size:.84rem">${e.name}</span>`).join('')}
+      </div>
+    </div>`:''}
+  `;
+}
+
+// ── WEEKLY REPORT ─────────────────────────────────────────────
+function renderWeeklyReport(){
+  const weekStr=document.getElementById('repWeekPick').value;
+  const proj=document.getElementById('repWeekProj').value;
+  if(!weekStr){alert('اختر الأسبوع أولاً');return;}
+  const myProj=getMyProject();
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
+  const wDates=getWeekDates(weekStr);
+  const dayNames=['الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت','الأحد'];
+  const monthStr=wDates[0].substr(0,7);
+  const mPay=payroll[monthStr]||{};
+  const todayStr=new Date().toISOString().split('T')[0];
+  const workDays=wDates.filter(d=>d<=todayStr).length;
+
+  // totals
+  let totP=0,totA=0,totL=0,totT=0;
+  list.forEach(e=>{const s=getAttSummary(wDates,e.id);totP+=s.P;totA+=s.A;totL+=s.L;totT+=s.T;});
+
+  // project summary
+  const projRows=PROJS.map((p,pi)=>{
+    const pList=list.filter(e=>e.project===p);if(!pList.length)return'';
+    let pp=0,pa=0,pl=0,pt=0;
+    pList.forEach(e=>{const s=getAttSummary(wDates,e.id);pp+=s.P;pa+=s.A;pl+=s.L;pt+=s.T;});
+    const pp2=workDays?pct(pp+pt,pList.length*workDays):0;
+    return`<tr>
+      <td><span class="badge ${BC[pi]}">${p}</span></td>
+      <td style="text-align:center">${pList.length}</td>
+      <td style="text-align:center;color:#16a34a">${pp}</td>
+      <td style="text-align:center;color:#dc2626">${pa}</td>
+      <td style="text-align:center;color:#d97706">${pl}</td>
+      <td style="text-align:center">${attChip(pp2)}</td>
+    </tr>`;
+  }).join('');
+
+  // employee detail rows
+  const empRows=list.map((e,i)=>{
+    const s=getAttSummary(wDates,e.id);
+    const pp2=workDays?pct(s.P+s.T,workDays):0;
+    const pi=PROJS.indexOf(e.project);
+    const cells=wDates.map(d=>{
+      const st=(attendance[d]||{})[e.id]||'';
+      const bg=st==='P'?'#dcfce7':st==='A'?'#fee2e2':st==='L'?'#fef9c3':st==='T'?'#ede9fe':'';
+      const lbl=st==='P'?'✓':st==='A'?'✗':st==='L'?'إج':st==='T'?'⏱':'—';
+      return`<td style="text-align:center;background:${bg};border-radius:4px;font-size:.82rem;padding:4px 2px">${lbl}</td>`;
+    }).join('');
+    return`<tr>
+      <td>${i+1}</td><td style="font-weight:600">${e.name}</td>
+      <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
+      ${cells}
+      <td style="text-align:center;font-weight:700;color:#16a34a">${s.P}</td>
+      <td style="text-align:center;color:#dc2626">${s.A}</td>
+      <td style="text-align:center;color:#d97706">${s.L}</td>
+      <td style="text-align:center">${attChip(pp2)}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('repWeeklyContent').innerHTML=`
+    <div class="rep-section">
+      <div class="rep-section-title">📋 التقرير الأسبوعي — ${weekStr}</div>
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">👥</div><div class="kpi-val">${list.length}</div><div class="kpi-lbl">عدد الموظفين</div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${totP}</div><div class="kpi-lbl">أيام حضور</div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${totA}</div><div class="kpi-lbl">أيام غياب</div></div>
+        <div class="kpi-card kpi-amber"><div class="kpi-ico">🌙</div><div class="kpi-val" style="color:#d97706">${totL}</div><div class="kpi-lbl">أيام إجازة</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${workDays&&list.length?pct(totP+totT,list.length*workDays):0}%</div><div class="kpi-lbl">معدل الحضور</div></div>
+      </div>
+    </div>
+    <div class="rep-section">
+      <div class="rep-section-title">🏗 ملخص المشاريع</div>
+      <table class="rep-tbl"><thead><tr><th>المشروع</th><th>موظفين</th><th>حضور</th><th>غياب</th><th>إجازة</th><th>معدل</th></tr></thead>
+      <tbody>${projRows||'<tr><td colspan="6" style="text-align:center;color:var(--txt2)">لا توجد بيانات</td></tr>'}</tbody></table>
+    </div>
+    <div class="rep-section">
+      <div class="rep-section-title">👤 تفصيل الموظفين يوماً بيوم</div>
+      <div style="overflow-x:auto">
+        <table class="rep-tbl">
+          <thead><tr><th>#</th><th>الاسم</th><th>المشروع</th>
+            ${dayNames.map((d,i)=>`<th style="font-size:.72rem;min-width:38px">${d}<br><span style="color:var(--txt2);font-size:.68rem">${wDates[i].substr(5)}</span></th>`).join('')}
+            <th>✓</th><th>✗</th><th>إج</th><th>%</th></tr></thead>
+          <tbody>${empRows||'<tr><td colspan="12" style="text-align:center;color:var(--txt2)">لا توجد بيانات</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ── MONTHLY REPORT ────────────────────────────────────────────
+function renderMonthlyReport(){
+  const monthStr=document.getElementById('repMonthPick').value;
+  const proj=document.getElementById('repMonthProj').value;
+  if(!monthStr){alert('اختر الشهر أولاً');return;}
+  const myProj=getMyProject();
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
+  const mDates=getMonthDates(monthStr);
+  const mPay=payroll[monthStr]||{};
+  const isMgr=currentUser&&currentUser.role==='manager';
+  const todayStr=new Date().toISOString().split('T')[0];
+  const recDates=mDates.filter(d=>d<=todayStr);
+
+  let totP=0,totA=0,totL=0,totT=0,totOT=0;
+  list.forEach(e=>{const s=getAttSummary(mDates,e.id);totP+=s.P;totA+=s.A;totL+=s.L;totT+=s.T;totOT+=mPay[e.id]?.overtimeHours||0;});
+  const possibleDays=list.length*(recDates.length||1);
+  const attPct=pct(totP+totT,possibleDays);
+
+  const projRows=PROJS.map((p,pi)=>{
+    const pList=list.filter(e=>e.project===p);if(!pList.length)return'';
+    let pp=0,pa=0,pl=0,pt=0,pot=0;
+    pList.forEach(e=>{const s=getAttSummary(mDates,e.id);pp+=s.P;pa+=s.A;pl+=s.L;pt+=s.T;pot+=mPay[e.id]?.overtimeHours||0;});
+    const pp2=pct(pp+pt,pList.length*(recDates.length||1));
+    return`<tr>
+      <td><span class="badge ${BC[pi]}">${p}</span></td>
+      <td style="text-align:center">${pList.length}</td>
+      <td style="text-align:center;color:#16a34a;font-weight:600">${pp}</td>
+      <td style="text-align:center;color:#dc2626">${pa}</td>
+      <td style="text-align:center;color:#d97706">${pl}</td>
+      <td style="text-align:center;color:#7c3aed">${pot}</td>
+      <td style="text-align:center">${attChip(pp2)}</td>
+    </tr>`;
+  }).join('');
+
+  const salHdr=isMgr?'<th>الراتب</th><th>خصم غياب</th><th>أوفر ﷼</th><th>الصافي</th>':'';
+  const empRows=list.map((e,i)=>{
+    const s=getAttSummary(mDates,e.id);
+    const pay=mPay[e.id]||{};
+    const dr=e.baseSalary?+(e.baseSalary/30).toFixed(2):0;
+    const hr=e.baseSalary?+(e.baseSalary/30/8).toFixed(2):0;
+    const absD=+(s.A*dr).toFixed(2);
+    const otAmt=+((pay.overtimeHours||0)*hr).toFixed(2);
+    const net=(e.baseSalary||0)-absD+otAmt+(pay.bonus||0)-(pay.extraDeductions||0);
+    const pp2=recDates.length?pct(s.P+s.T,recDates.length):0;
+    const pi=PROJS.indexOf(e.project);
+    const salCells=isMgr?`<td style="text-align:center">${(e.baseSalary||0).toLocaleString()}</td>
+      <td style="text-align:center;color:#dc2626">${absD.toLocaleString()}</td>
+      <td style="text-align:center;color:#16a34a">${otAmt.toLocaleString()}</td>
+      <td style="text-align:center;font-weight:700">${Math.round(net).toLocaleString()}</td>`:'';
+    return`<tr>
+      <td>${i+1}</td><td style="font-weight:600">${e.name}</td>
+      <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
+      <td style="text-align:center;color:#16a34a">${s.P}</td>
+      <td style="text-align:center;color:#dc2626">${s.A}</td>
+      <td style="text-align:center;color:#d97706">${s.L}</td>
+      <td style="text-align:center;color:#7c3aed">${pay.overtimeHours||0}</td>
+      <td style="text-align:center">${attChip(pp2)}</td>
+      ${salCells}
+    </tr>`;
+  }).join('');
+
+  document.getElementById('repMonthlyContent').innerHTML=`
+    <div class="rep-section">
+      <div class="rep-section-title">📅 التقرير الشهري — ${monthStr}</div>
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">👥</div><div class="kpi-val">${list.length}</div><div class="kpi-lbl">الموظفين</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📋</div><div class="kpi-val">${recDates.length}</div><div class="kpi-lbl">أيام مسجّلة</div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${totP}</div><div class="kpi-lbl">إجمالي حضور</div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${totA}</div><div class="kpi-lbl">إجمالي غياب</div></div>
+        <div class="kpi-card kpi-purple"><div class="kpi-ico">⏱️</div><div class="kpi-val" style="color:#7c3aed">${totOT}</div><div class="kpi-lbl">ساعات أوفر</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${attPct}%</div><div class="kpi-lbl">معدل الحضور</div></div>
+      </div>
+    </div>
+    <div class="rep-section">
+      <div class="rep-section-title">🏗 ملخص المشاريع</div>
+      <table class="rep-tbl"><thead><tr><th>المشروع</th><th>موظفين</th><th>حضور</th><th>غياب</th><th>إجازة</th><th>أوفر ساعة</th><th>معدل</th></tr></thead>
+      <tbody>${projRows||'<tr><td colspan="7" style="text-align:center;color:var(--txt2)">لا توجد بيانات</td></tr>'}</tbody></table>
+    </div>
+    <div class="rep-section">
+      <div class="rep-section-title">👤 تفصيل الموظفين</div>
+      <div style="overflow-x:auto">
+        <table class="rep-tbl">
+          <thead><tr><th>#</th><th>الاسم</th><th>المشروع</th><th>حضور</th><th>غياب</th><th>إجازة</th><th>أوفر ساعة</th><th>%</th>${salHdr}</tr></thead>
+          <tbody>${empRows||'<tr><td colspan="8" style="text-align:center;color:var(--txt2)">لا توجد بيانات</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ── COMPARE REPORT ────────────────────────────────────────────
+function renderCompareReport(){
+  const m1=document.getElementById('repCmp1').value;
+  const m2=document.getElementById('repCmp2').value;
+  const proj=document.getElementById('repCmpProj').value;
+  if(!m1||!m2){alert('اختر شهرين للمقارنة');return;}
+  const myProj=getMyProject();
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
+  const isMgr=currentUser&&currentUser.role==='manager';
+
+  function monthStats(ms){
+    const d=getMonthDates(ms);const pay=payroll[ms]||{};
+    let P=0,A=0,L=0,T=0,OT=0,net=0;
+    list.forEach(e=>{
+      const s=getAttSummary(d,e.id);P+=s.P;A+=s.A;L+=s.L;T+=s.T;OT+=pay[e.id]?.overtimeHours||0;
+      if(isMgr){const p=pay[e.id]||{};const dr=e.baseSalary?e.baseSalary/30:0;const hr=e.baseSalary?e.baseSalary/30/8:0;
+        net+=(e.baseSalary||0)-(s.A*dr)+((p.overtimeHours||0)*hr)+(p.bonus||0)-(p.extraDeductions||0);}
+    });
+    return{P,A,L,T,OT,net:Math.round(net)};
+  }
+
+  const s1=monthStats(m1),s2=monthStats(m2);
+
+  function dlt(v2,v1,inv=false){
+    const d=v2-v1;if(!d)return'<span style="color:var(--txt2)">—</span>';
+    const good=inv?d<0:d>0;
+    return`<span style="color:${good?'#16a34a':'#dc2626'};font-weight:700">${d>0?'+':''}${d}</span>`;
+  }
+  function pdlt(v2,v1){
+    if(!v1)return'<span style="color:var(--txt2)">—</span>';
+    const d=Math.round((v2-v1)/v1*100);
+    return`<span style="color:${d>=0?'#16a34a':'#dc2626'};font-weight:700">${d>0?'+':''}${d}%</span>`;
+  }
+
+  // per-employee rows
+  const empRows=list.map((e,i)=>{
+    const d1=getMonthDates(m1),d2=getMonthDates(m2);
+    const a1=getAttSummary(d1,e.id),a2=getAttSummary(d2,e.id);
+    const ot1=(payroll[m1]||{})[e.id]?.overtimeHours||0;
+    const ot2=(payroll[m2]||{})[e.id]?.overtimeHours||0;
+    const pi=PROJS.indexOf(e.project);
+    return`<tr>
+      <td>${i+1}</td><td style="font-weight:600">${e.name}</td>
+      <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
+      <td style="text-align:center">${a1.P}→${a2.P} ${dlt(a2.P,a1.P)}</td>
+      <td style="text-align:center">${a1.A}→${a2.A} ${dlt(a2.A,a1.A,true)}</td>
+      <td style="text-align:center">${ot1}→${ot2} ${dlt(ot2,ot1)}</td>
+    </tr>`;
+  }).join('');
+
+  const salRow=isMgr?`<tr style="font-weight:700;border-top:2px solid var(--border)">
+    <td>💰 صافي الرواتب (﷼)</td>
+    <td style="text-align:center">${s1.net.toLocaleString()}</td>
+    <td style="text-align:center">${s2.net.toLocaleString()}</td>
+    <td style="text-align:center">${dlt(s2.net,s1.net)}</td>
+    <td style="text-align:center">${pdlt(s2.net,s1.net)}</td>
+  </tr>`:'';
+
+  document.getElementById('repCompareContent').innerHTML=`
+    <div class="rep-section">
+      <div class="rep-section-title">⚖️ مقارنة: ${m1} مقابل ${m2}</div>
+      <table class="rep-tbl">
+        <thead><tr><th>المؤشر</th><th>${m1}</th><th>${m2}</th><th>التغيير</th><th>النسبة</th></tr></thead>
+        <tbody>
+          <tr><td>👥 عدد الموظفين</td><td style="text-align:center">${list.length}</td><td style="text-align:center">${list.length}</td><td>—</td><td>—</td></tr>
+          <tr><td>✅ إجمالي الحضور</td><td style="text-align:center">${s1.P}</td><td style="text-align:center">${s2.P}</td><td style="text-align:center">${dlt(s2.P,s1.P)}</td><td style="text-align:center">${pdlt(s2.P,s1.P)}</td></tr>
+          <tr><td>❌ إجمالي الغياب</td><td style="text-align:center">${s1.A}</td><td style="text-align:center">${s2.A}</td><td style="text-align:center">${dlt(s2.A,s1.A,true)}</td><td style="text-align:center">${pdlt(s2.A,s1.A)}</td></tr>
+          <tr><td>🌙 الإجازات</td><td style="text-align:center">${s1.L}</td><td style="text-align:center">${s2.L}</td><td style="text-align:center">${dlt(s2.L,s1.L,true)}</td><td style="text-align:center">${pdlt(s2.L,s1.L)}</td></tr>
+          <tr><td>⏱️ ساعات أوفر تايم</td><td style="text-align:center">${s1.OT}</td><td style="text-align:center">${s2.OT}</td><td style="text-align:center">${dlt(s2.OT,s1.OT)}</td><td style="text-align:center">${pdlt(s2.OT,s1.OT)}</td></tr>
+          ${salRow}
+        </tbody>
+      </table>
+    </div>
+    <div class="rep-section">
+      <div class="rep-section-title">👤 مقارنة الموظفين تفصيلياً</div>
+      <div style="overflow-x:auto">
+        <table class="rep-tbl">
+          <thead><tr><th>#</th><th>الاسم</th><th>المشروع</th><th>حضور (${m1}→${m2})</th><th>غياب (${m1}→${m2})</th><th>أوفر (${m1}→${m2})</th></tr></thead>
+          <tbody>${empRows||'<tr><td colspan="6" style="text-align:center;color:var(--txt2)">لا توجد بيانات</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>`;
 }
 
 // ── EXPORT CSV ───────────────────────────────────────────────
@@ -2667,13 +3414,18 @@ function dlCSV(rows,name){
 function initSelects(){
   const saved={};['fltProj','payProj','attProj','attSumProj'].forEach(id=>{const el=document.getElementById(id);if(el)saved[id]=el.value});
   const opts=`<option value="">${t('allProjects')}</option>`+PROJS.map(p=>`<option value="${p}">${p}</option>`).join('');
-  const myProj=getMyProject();
+  const myProj=getMyProject(); // array or null
   ['fltProj','payProj','attProj','attSumProj'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
     if(myProj){
-      // supervisor: show only their project, locked
-      el.innerHTML=`<option value="${myProj}">${myProj}</option>`;
-      el.value=myProj;el.disabled=true;
+      // supervisor: show only their assigned projects
+      if(myProj.length===1){
+        el.innerHTML=`<option value="${myProj[0]}">${myProj[0]}</option>`;
+        el.value=myProj[0];el.disabled=true;
+      }else{
+        el.innerHTML=`<option value="">${t('allProjects')}</option>`+myProj.map(p=>`<option value="${p}">${p}</option>`).join('');
+        el.value='';el.disabled=false;
+      }
     }else{
       el.innerHTML=opts;el.value=saved[id]||'';el.disabled=false;
     }
@@ -2708,6 +3460,138 @@ function showIqBanner(){
   if(expiring)msg+=(msg?t('bannerAnd'):'')+`${expiring} ${t('bannerExpiring')}`;
   document.getElementById('iqAlertTxt').textContent=msg+t('bannerSuffix');
   bar.classList.add('show');
+}
+
+// ── Iqama table toggle ──
+function renderIqTable(showAll){
+  const alerts = window._allIqAlerts || [];
+  const today  = new Date();
+  const getDays = e => {
+    const ref = (typeof h2g==='function'?h2g(e.iqamaExpiry):null) || new Date(e.iqamaExpiry);
+    return Math.floor((ref - today) / 86400000);
+  };
+  const list = showAll ? alerts : alerts.slice(0,5);
+  const tbody = document.getElementById('dashIqTableBody');
+  if(!tbody) return;
+  if(!alerts.length){
+    tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--txt2)">✅ لا توجد تنبيهات</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map((e,i)=>{
+    const d = getDays(e);
+    let chip, chipClass;
+    if(d < 0){ chip=`منتهية منذ ${Math.abs(d)} يوم`; chipClass='exp'; }
+    else if(d<=30){ chip=`تنتهي خلال ${d} يوم`; chipClass='s30'; }
+    else { chip=`تنتهي خلال ${d} يوم`; chipClass='s90'; }
+    return `<tr>
+      <td style="color:var(--txt2)">${i+1}</td>
+      <td style="font-weight:700">${e.name}</td>
+      <td><span class="sbadge">${e.project}</span></td>
+      <td style="font-size:.78rem;color:var(--txt2)">${e.iqamaExpiry||'—'}</td>
+      <td><span class="iq-chip ${chipClass}">${d<0?'🔴':d<=30?'🟠':'🟡'} ${chip}</span></td>
+    </tr>`;
+  }).join('');
+  const btn = document.getElementById('dashIqToggleBtn');
+  const title = document.getElementById('dashIqTableTitle');
+  if(btn){ btn.textContent = showAll ? 'عرض أقل' : `عرض الكل (${alerts.length})`; }
+  if(title){ title.textContent = `قائمة التنبيهات${showAll?'':' — أحدث 5'}`; }
+}
+function toggleAllIqama(){
+  window._iqShowAll = !window._iqShowAll;
+  renderIqTable(window._iqShowAll);
+}
+function toggleBellMenu(){
+  openIqamaModal();
+}
+function closeBellMenu(){
+  closeIqamaModal();
+}
+// ESC key closes the iqama modal
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') closeIqamaModal();
+});
+
+// ── IQAMA FULL-SCREEN MODAL ──────────────────────────────────
+function openIqamaModal(){
+  const modal = document.getElementById('iqamaModal');
+  if(!modal) return;
+  renderIqamaModal();
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeIqamaModal(){
+  const modal = document.getElementById('iqamaModal');
+  if(modal) modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function renderIqamaModal(){
+  const alerts = window._allIqAlerts || [];
+  const today = new Date();
+  const getDays = e => {
+    const ref = (typeof h2g==='function'?h2g(e.iqamaExpiry):null) || new Date(e.iqamaExpiry);
+    return Math.floor((ref - today) / 86400000);
+  };
+  const expired = alerts.filter(e => getDays(e) < 0);
+  const soon30  = alerts.filter(e => { const d=getDays(e); return d>=0 && d<=30; });
+  const soon90  = alerts.filter(e => { const d=getDays(e); return d>30 && d<=90; });
+  // Summary cards
+  const sumEl = document.getElementById('modalIqSummary');
+  if(sumEl){
+    sumEl.innerHTML = alerts.length === 0
+      ? `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--txt2);font-size:.88rem">✅ لا توجد إقامات منتهية أو قريبة من الانتهاء</div>`
+      : `<div class="iq-sum-card iq-expired">
+          <div class="iq-sum-ico">🔴</div>
+          <div><div class="iq-sum-num">${expired.length}</div><div class="iq-sum-lbl">إقامات منتهية</div></div>
+        </div>
+        <div class="iq-sum-card iq-soon30">
+          <div class="iq-sum-ico">🟠</div>
+          <div><div class="iq-sum-num">${soon30.length}</div><div class="iq-sum-lbl">تنتهي خلال 30 يوم</div></div>
+        </div>
+        <div class="iq-sum-card iq-soon90">
+          <div class="iq-sum-ico">🟡</div>
+          <div><div class="iq-sum-num">${soon90.length}</div><div class="iq-sum-lbl">تنتهي خلال 90 يوم</div></div>
+        </div>`;
+  }
+  // Table
+  window._iqModalShowAll = window._iqModalShowAll || false;
+  renderIqamaModalTable(window._iqModalShowAll);
+}
+function renderIqamaModalTable(showAll){
+  const alerts = window._allIqAlerts || [];
+  const today = new Date();
+  const getDays = e => {
+    const ref = (typeof h2g==='function'?h2g(e.iqamaExpiry):null) || new Date(e.iqamaExpiry);
+    return Math.floor((ref - today) / 86400000);
+  };
+  const list = showAll ? alerts : alerts.slice(0,5);
+  const tbody = document.getElementById('modalIqTableBody');
+  if(!tbody) return;
+  if(!alerts.length){
+    tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--txt2)">✅ لا توجد تنبيهات</td></tr>`;
+  } else {
+    tbody.innerHTML = list.map((e,i)=>{
+      const d = getDays(e);
+      let chip, chipClass;
+      if(d < 0){ chip=`منتهية منذ ${Math.abs(d)} يوم`; chipClass='exp'; }
+      else if(d<=30){ chip=`تنتهي خلال ${d} يوم`; chipClass='s30'; }
+      else { chip=`تنتهي خلال ${d} يوم`; chipClass='s90'; }
+      return `<tr>
+        <td style="color:var(--txt2)">${i+1}</td>
+        <td style="font-weight:700">${e.name}</td>
+        <td><span class="sbadge">${e.project}</span></td>
+        <td style="font-size:.78rem;color:var(--txt2)">${e.iqamaExpiry||'—'}</td>
+        <td><span class="iq-chip ${chipClass}">${d<0?'🔴':d<=30?'🟠':'🟡'} ${chip}</span></td>
+      </tr>`;
+    }).join('');
+  }
+  const btn = document.getElementById('modalIqToggleBtn');
+  const title = document.getElementById('modalIqTableTitle');
+  if(btn){ btn.textContent = showAll ? 'عرض أقل' : `عرض الكل (${alerts.length})`; }
+  if(title){ title.textContent = `قائمة التنبيهات${showAll?'':' — أحدث 5'}`; }
+}
+function toggleAllIqamaModal(){
+  window._iqModalShowAll = !window._iqModalShowAll;
+  renderIqamaModalTable(window._iqModalShowAll);
 }
 
 // ── BOOT ─────────────────────────────────────────────────────

@@ -4,6 +4,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>نظام إدارة الموظفين</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f0f4f8;--surface:#fff;--surface2:#f8fafc;--hdr:#0f2444;
@@ -21,7 +24,7 @@
   --grad:linear-gradient(135deg,#060d1a 0%,#0f1f38 60%,#1e3a8a 100%);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--txt);direction:rtl;transition:background .25s,color .25s;min-height:100vh}
+body{font-family:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--txt);direction:rtl;transition:background .25s,color .25s;min-height:100vh;font-feature-settings:'kern' 1,'liga' 1}
 /* ── HEADER ── */
 header{background:var(--grad);color:#fff;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;min-height:60px;box-shadow:0 4px 20px rgba(0,0,0,.25);position:sticky;top:0;z-index:100}
 .hdr-brand{display:flex;align-items:center;gap:10px}
@@ -319,12 +322,16 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
 .proj-lock-banner.show{display:flex}
 .print-title{display:none}
 /* ── LOGIN SCREEN ── */
-#loginOverlay{position:fixed;inset:0;background:var(--grad);z-index:9999;display:flex;align-items:center;justify-content:center;direction:rtl}
+#loginOverlay{position:fixed;inset:0;background:var(--grad);z-index:9999;display:flex;align-items:center;justify-content:center;direction:rtl;overflow:hidden}
+#loginOverlay::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(37,99,235,.25),transparent 70%);top:-200px;right:-200px;border-radius:50%;animation:floatBg 12s ease-in-out infinite}
+#loginOverlay::after{content:'';position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(124,58,237,.2),transparent 70%);bottom:-150px;left:-150px;border-radius:50%;animation:floatBg 14s ease-in-out infinite reverse}
+@keyframes floatBg{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-20px) scale(1.05)}}
 #loginOverlay.hidden{display:none}
-.login-card{background:var(--surface);border-radius:18px;padding:40px 36px;width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.4);text-align:center}
-.login-logo{font-size:3rem;margin-bottom:8px}
-.login-title{font-size:1.3rem;font-weight:800;color:var(--txt);margin-bottom:4px}
-.login-sub{font-size:.82rem;color:var(--txt2);margin-bottom:28px}
+.login-card{background:var(--surface);border-radius:22px;padding:44px 38px;width:400px;max-width:90vw;box-shadow:0 25px 70px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.05);text-align:center;position:relative;z-index:1;backdrop-filter:blur(10px)}
+.login-logo{font-size:3.2rem;margin-bottom:10px;display:inline-block;animation:logoBounce 2.5s ease-in-out infinite;filter:drop-shadow(0 4px 12px rgba(37,99,235,.3))}
+@keyframes logoBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.login-title{font-size:1.45rem;font-weight:800;color:var(--txt);margin-bottom:6px;letter-spacing:-.02em}
+.login-sub{font-size:.85rem;color:var(--txt2);margin-bottom:32px}
 .login-field{text-align:right;margin-bottom:16px}
 .login-field label{display:block;font-size:.77rem;font-weight:700;color:var(--txt2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
 .login-field input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.93rem;font-family:inherit;background:var(--surface2);color:var(--txt);direction:rtl;transition:border-color .15s}
@@ -461,42 +468,61 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
 .dash-stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
 @media(max-width:900px){.dash-stats-row{grid-template-columns:repeat(3,1fr)}.iq-sum-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.dash-stats-row{grid-template-columns:repeat(2,1fr)}}
-/* ── STAT CARD NEW ── */
-.stat-card{background:var(--surface);border-radius:14px;padding:18px;box-shadow:var(--sh);border:1px solid var(--border);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
-.stat-card:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
-.stat-card::after{content:'';position:absolute;top:0;right:0;width:4px;height:100%;border-radius:0 14px 14px 0}
-.stat-card.s-blue::after{background:linear-gradient(180deg,#2563eb,#93c5fd)}
-.stat-card.s-purple::after{background:linear-gradient(180deg,#7c3aed,#c4b5fd)}
-.stat-card.s-amber::after{background:linear-gradient(180deg,#d97706,#fcd34d)}
-.stat-card.s-red::after{background:linear-gradient(180deg,#dc2626,#fca5a5)}
-.stat-card.s-teal::after{background:linear-gradient(180deg,#0891b2,#67e8f9)}
-.stat-ico-new{font-size:1.6rem;margin-bottom:10px}
-.stat-num-new{font-size:1.9rem;font-weight:800;line-height:1;letter-spacing:-.02em}
-.stat-lbl-new{font-size:.76rem;color:var(--txt2);margin-top:4px;font-weight:600}
-.stat-sub-new{font-size:.7rem;color:var(--txt2);margin-top:3px}
+/* ── STAT CARD NEW (PRO) ── */
+.stat-card{background:var(--surface);border-radius:16px;padding:20px 18px;box-shadow:var(--sh);border:1px solid var(--border);transition:transform .25s cubic-bezier(.4,0,.2,1),box-shadow .25s,border-color .25s;position:relative;overflow:hidden;cursor:default}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--sh2);border-color:transparent}
+.stat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 0%,transparent 60%,rgba(255,255,255,.03) 100%);pointer-events:none}
+.stat-card::after{content:'';position:absolute;top:0;right:0;width:4px;height:100%;border-radius:0 16px 16px 0;transition:width .25s}
+.stat-card:hover::after{width:6px}
+.stat-card.s-blue::after{background:linear-gradient(180deg,#2563eb,#60a5fa)}
+.stat-card.s-purple::after{background:linear-gradient(180deg,#7c3aed,#a78bfa)}
+.stat-card.s-amber::after{background:linear-gradient(180deg,#d97706,#fbbf24)}
+.stat-card.s-red::after{background:linear-gradient(180deg,#dc2626,#f87171)}
+.stat-card.s-teal::after{background:linear-gradient(180deg,#0891b2,#22d3ee)}
+.stat-card.s-green::after{background:linear-gradient(180deg,#16a34a,#4ade80)}
+/* ico bg circle */
+.stat-ico-new{font-size:1.4rem;margin-bottom:12px;width:42px;height:42px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;background:var(--surface2);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.stat-card.s-blue .stat-ico-new{background:linear-gradient(135deg,rgba(37,99,235,.15),rgba(96,165,250,.08))}
+.stat-card.s-purple .stat-ico-new{background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(167,139,250,.08))}
+.stat-card.s-amber .stat-ico-new{background:linear-gradient(135deg,rgba(217,119,6,.15),rgba(251,191,36,.08))}
+.stat-card.s-red .stat-ico-new{background:linear-gradient(135deg,rgba(220,38,38,.15),rgba(248,113,113,.08))}
+.stat-card.s-teal .stat-ico-new{background:linear-gradient(135deg,rgba(8,145,178,.15),rgba(34,211,238,.08))}
+.stat-num-new{font-size:2rem;font-weight:800;line-height:1;letter-spacing:-.03em;font-feature-settings:'tnum' 1}
+.stat-lbl-new{font-size:.78rem;color:var(--txt2);margin-top:6px;font-weight:600;letter-spacing:.01em}
+.stat-sub-new{font-size:.7rem;color:var(--txt2);margin-top:4px;display:inline-flex;align-items:center;gap:5px}
+.stat-sub-new.trend-up{color:#16a34a}
+.stat-sub-new.trend-down{color:#dc2626}
+/* progress bar inside stat card */
+.stat-progress{margin-top:10px;height:5px;background:var(--surface2);border-radius:20px;overflow:hidden}
+.stat-progress-fill{height:100%;border-radius:20px;transition:width .8s cubic-bezier(.4,0,.2,1)}
 /* ── ATTENDANCE TODAY ── */
 .att-today-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.att-today-card{border-radius:10px;padding:14px;text-align:center;border:1px solid transparent}
-.att-today-card.att-p{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
-.att-today-card.att-a{background:#fef2f2;border-color:#fecaca;color:#991b1b}
-.att-today-card.att-l{background:#fffbeb;border-color:#fde68a;color:#854d0e}
-.att-today-card.att-t{background:#f5f3ff;border-color:#ddd6fe;color:#5b21b6}
-.dark .att-today-card.att-p{background:#052e16;border-color:#14532d;color:#86efac}
-.dark .att-today-card.att-a{background:#450a0a;border-color:#7f1d1d;color:#fca5a5}
-.dark .att-today-card.att-l{background:#422006;border-color:#78350f;color:#fde68a}
-.dark .att-today-card.att-t{background:#2e1065;border-color:#4c1d95;color:#c4b5fd}
-.att-today-num{font-size:1.7rem;font-weight:800;line-height:1}
-.att-today-lbl{font-size:.73rem;font-weight:600;margin-top:4px;opacity:.85}
+.att-today-card{border-radius:12px;padding:18px 12px;text-align:center;border:1px solid transparent;position:relative;overflow:hidden;transition:transform .2s}
+.att-today-card:hover{transform:translateY(-2px)}
+.att-today-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:currentColor;opacity:.5}
+.att-today-card.att-p{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#bbf7d0;color:#166534}
+.att-today-card.att-a{background:linear-gradient(135deg,#fef2f2,#fee2e2);border-color:#fecaca;color:#991b1b}
+.att-today-card.att-l{background:linear-gradient(135deg,#fffbeb,#fef3c7);border-color:#fde68a;color:#854d0e}
+.att-today-card.att-t{background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-color:#ddd6fe;color:#5b21b6}
+.dark .att-today-card.att-p{background:linear-gradient(135deg,#052e16,#064e3b);border-color:#14532d;color:#86efac}
+.dark .att-today-card.att-a{background:linear-gradient(135deg,#450a0a,#7f1d1d);border-color:#7f1d1d;color:#fca5a5}
+.dark .att-today-card.att-l{background:linear-gradient(135deg,#422006,#78350f);border-color:#78350f;color:#fde68a}
+.dark .att-today-card.att-t{background:linear-gradient(135deg,#2e1065,#4c1d95);border-color:#4c1d95;color:#c4b5fd}
+.att-today-num{font-size:2rem;font-weight:800;line-height:1;letter-spacing:-.02em;font-feature-settings:'tnum' 1}
+.att-today-lbl{font-size:.78rem;font-weight:700;margin-top:6px;opacity:.85}
 /* ── MAIN NAV (slide-down) ── */
 #mainNav{display:none;overflow:hidden}
 #mainNav.visible{display:flex;animation:slideDown .3s ease}
 @keyframes slideDown{from{opacity:0;max-height:0;padding:0}to{opacity:1;max-height:60px}}
-/* ── HOME NAV CARDS ── */
+/* ── HOME NAV CARDS (PRO) ── */
 .home-nav-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:20px 0}
-.home-nav-card{background:var(--surface);border-radius:16px;padding:30px 20px;text-align:center;cursor:pointer;border:2px solid var(--border);transition:all .25s;box-shadow:var(--sh)}
-.home-nav-card:hover{transform:translateY(-5px);box-shadow:var(--sh2);border-color:var(--accent)}
-.home-nav-ico{font-size:2.8rem;margin-bottom:12px}
-.home-nav-lbl{font-size:1rem;font-weight:700;color:var(--txt)}
+.home-nav-card{background:var(--surface);border-radius:18px;padding:32px 20px;text-align:center;cursor:pointer;border:1px solid var(--border);transition:all .3s cubic-bezier(.4,0,.2,1);box-shadow:var(--sh);position:relative;overflow:hidden}
+.home-nav-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 50%,rgba(37,99,235,.06) 100%);opacity:0;transition:opacity .3s}
+.home-nav-card:hover{transform:translateY(-6px);box-shadow:0 12px 32px rgba(37,99,235,.18);border-color:var(--accent)}
+.home-nav-card:hover::before{opacity:1}
+.home-nav-card:hover .home-nav-ico{transform:scale(1.1)}
+.home-nav-ico{font-size:2.6rem;margin-bottom:14px;display:inline-block;transition:transform .3s cubic-bezier(.4,0,.2,1);filter:drop-shadow(0 2px 8px rgba(37,99,235,.15))}
+.home-nav-lbl{font-size:1.05rem;font-weight:700;color:var(--txt);letter-spacing:-.01em}
 @media(max-width:600px){.home-nav-grid{grid-template-columns:repeat(2,1fr)}}
 /* ── IQAMA MODAL ── */
 #iqamaModal{display:none;position:fixed;inset:0;z-index:900;align-items:flex-start;justify-content:center;padding:20px}
@@ -2172,18 +2198,22 @@ function renderDashboard(){
   const malePct  = total ? Math.round(males/total*100) : 0;
   const femalePct= total ? Math.round(females/total*100) : 0;
   const iqCount  = iqamaAlerts().length;
+  const activePct=total?Math.round(active/total*100):0;
+  const onLeavePct=total?Math.round(onLeave/total*100):0;
+  const termPct=total?Math.round(terminated/total*100):0;
   document.getElementById('dashCards').innerHTML=`
     <div class="stat-card s-blue">
       <div class="stat-ico-new">👥</div>
       <div class="stat-num-new">${total}</div>
       <div class="stat-lbl-new">${t('dTotalEmp')}</div>
-      <div class="stat-sub-new">نشط: ${active}</div>
+      <div class="stat-sub-new trend-up">▲ ${active} نشط</div>
+      <div class="stat-progress"><div class="stat-progress-fill" style="width:${activePct}%;background:linear-gradient(90deg,#2563eb,#60a5fa)"></div></div>
     </div>
     <div class="stat-card s-purple">
       <div class="stat-ico-new">⚧</div>
-      <div style="display:flex;gap:12px;align-items:flex-end">
-        <div><div class="stat-num-new" style="font-size:1.5rem;color:#2563eb">♂${males}</div><div class="stat-sub-new">${malePct}%</div></div>
-        <div><div class="stat-num-new" style="font-size:1.5rem;color:#db2777">♀${females}</div><div class="stat-sub-new">${femalePct}%</div></div>
+      <div style="display:flex;gap:14px;align-items:flex-end">
+        <div><div class="stat-num-new" style="font-size:1.6rem;color:#2563eb">♂${males}</div><div class="stat-sub-new" style="color:#2563eb;font-weight:700">${malePct}%</div></div>
+        <div><div class="stat-num-new" style="font-size:1.6rem;color:#db2777">♀${females}</div><div class="stat-sub-new" style="color:#db2777;font-weight:700">${femalePct}%</div></div>
       </div>
       <div class="gender-bar-wrap">
         <div class="gender-bar-track">
@@ -2196,17 +2226,21 @@ function renderDashboard(){
       <div class="stat-ico-new">🌴</div>
       <div class="stat-num-new">${onLeave}</div>
       <div class="stat-lbl-new">${t('dOnLeave')}</div>
+      <div class="stat-sub-new">${onLeavePct}% من الإجمالي</div>
+      <div class="stat-progress"><div class="stat-progress-fill" style="width:${onLeavePct}%;background:linear-gradient(90deg,#d97706,#fbbf24)"></div></div>
     </div>
     <div class="stat-card s-red">
       <div class="stat-ico-new">🚫</div>
       <div class="stat-num-new">${terminated}</div>
       <div class="stat-lbl-new">منتهية خدمتهم</div>
+      <div class="stat-sub-new">${termPct}% من الإجمالي</div>
+      <div class="stat-progress"><div class="stat-progress-fill" style="width:${termPct}%;background:linear-gradient(90deg,#dc2626,#f87171)"></div></div>
     </div>
     <div class="stat-card s-teal" style="cursor:pointer" onclick="document.getElementById('dashIqSection').scrollIntoView({behavior:'smooth'})">
       <div class="stat-ico-new">🛂</div>
       <div class="stat-num-new" style="${iqCount>0?'color:#dc2626':''}">${iqCount}</div>
       <div class="stat-lbl-new">${t('dIqAlerts')}</div>
-      <div class="stat-sub-new">${t('dLess90')}</div>
+      <div class="stat-sub-new ${iqCount>0?'trend-down':''}">${iqCount>0?'⚠️ تحتاج متابعة':'✓ كل شيء جيد'}</div>
     </div>`;
 
   // ② Salary section — admin only

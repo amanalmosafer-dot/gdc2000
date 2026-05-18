@@ -2535,21 +2535,20 @@ function mkRow(e,n,pi){
     <div class="exp-item"><span class="exp-lbl">${t('expSal')}</span><span class="exp-val" style="font-weight:700;color:var(--ok)">${sal}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expOT')}</span><span class="exp-val">${e.overtimeRate?e.overtimeRate+' '+t('sarH'):'—'}</span></div>
   </div>
-  ${(e.medExamDate||e.vaccMMR||e.vaccInfluenza||e.vaccHepB1||e.vaccHepB2||e.vaccHepB3)?`
   <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:10px">
     <div style="font-size:.75rem;font-weight:700;color:var(--txt2);margin-bottom:8px;padding:0 14px">🏥 الفحص الطبي والتطعيمات</div>
     <div class="exp-inner" style="padding-top:0">
-      ${e.medExamDate?`<div class="exp-item"><span class="exp-lbl">📋 الفحص الطبي</span><span class="exp-val">${e.medExamDate}</span></div>`:''}
-      ${e.medExamExpiry?`<div class="exp-item"><span class="exp-lbl">⏳ انتهاء الفحص</span><span class="exp-val">${medBadge(e.medExamExpiry)}</span></div>`:''}
-      ${e.vaccMMR?`<div class="exp-item"><span class="exp-lbl">💉 MMR</span><span class="exp-val"><span class="chip-ok">✓ ${e.vaccMMR}</span></span></div>`:''}
-      ${e.vaccInfluenza?`<div class="exp-item"><span class="exp-lbl">💉 Influenza</span><span class="exp-val"><span class="chip-ok">✓ ${e.vaccInfluenza}</span></span></div>`:''}
+      <div class="exp-item"><span class="exp-lbl">📋 الفحص الطبي</span><span class="exp-val">${e.medExamDate||'<span style="color:var(--txt2)">—</span>'}</span></div>
+      <div class="exp-item"><span class="exp-lbl">⏳ انتهاء الفحص</span><span class="exp-val">${e.medExamExpiry?medBadge(e.medExamExpiry):'<span style="color:var(--txt2)">—</span>'}</span></div>
+      <div class="exp-item"><span class="exp-lbl">💉 MMR</span><span class="exp-val">${e.vaccMMR?`<span class="chip-ok">✓ ${e.vaccMMR}</span>`:'<span class="chip-bad">✗ لم يُطعَّم</span>'}</span></div>
+      <div class="exp-item"><span class="exp-lbl">💉 Influenza</span><span class="exp-val">${e.vaccInfluenza?`<span class="chip-ok">✓ ${e.vaccInfluenza}</span>`:'<span class="chip-bad">✗ لم يُطعَّم</span>'}</span></div>
       <div class="exp-item full"><span class="exp-lbl">💉 Hep B</span><span class="exp-val" style="display:flex;gap:10px">
         <span class="${e.vaccHepB1?'chip-ok':'chip-bad'}">${e.vaccHepB1?'✓':'✗'} الأولى</span>
         <span class="${e.vaccHepB2?'chip-ok':'chip-bad'}">${e.vaccHepB2?'✓':'✗'} الثانية</span>
         <span class="${e.vaccHepB3?'chip-ok':'chip-bad'}">${e.vaccHepB3?'✓':'✗'} الثالثة</span>
       </span></div>
     </div>
-  </div>`:''}
+  </div>
   </td>`;
 
   const frag=document.createDocumentFragment();

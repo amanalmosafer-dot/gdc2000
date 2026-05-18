@@ -957,6 +957,27 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
 
       <hr class="drawer-sep"/>
 
+      <!-- الفحص الطبي والتطعيمات -->
+      <div class="field full" style="grid-column:1/-1">
+        <label style="font-weight:700;font-size:.84rem;color:var(--txt2);margin-bottom:10px;display:block">🏥 الفحص الطبي والتطعيمات</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div class="field" style="margin:0"><label style="font-size:.78rem">تاريخ الفحص الطبي</label><input id="fMedDate" type="date"/></div>
+          <div class="field" style="margin:0"><label style="font-size:.78rem">انتهاء الفحص الطبي</label><input id="fMedExpiry" type="date"/></div>
+          <div class="field" style="margin:0"><label style="font-size:.78rem">💉 MMR — تاريخ التطعيم</label><input id="fVaccMMR" type="date"/></div>
+          <div class="field" style="margin:0"><label style="font-size:.78rem">💉 Influenza — تاريخ التطعيم</label><input id="fVaccFlu" type="date"/></div>
+        </div>
+        <div style="padding:12px 14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
+          <div style="font-weight:700;font-size:.82rem;margin-bottom:9px;color:var(--txt)">💉 Hep B — الجرعات</div>
+          <div style="display:flex;gap:22px;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:7px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="fHepB1" style="width:16px;height:16px;accent-color:var(--accent)"> الجرعة الأولى</label>
+            <label style="display:flex;align-items:center;gap:7px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="fHepB2" style="width:16px;height:16px;accent-color:var(--accent)"> الجرعة الثانية</label>
+            <label style="display:flex;align-items:center;gap:7px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="fHepB3" style="width:16px;height:16px;accent-color:var(--accent)"> الجرعة الثالثة</label>
+          </div>
+        </div>
+      </div>
+
+      <hr class="drawer-sep"/>
+
       <!-- مشروع وشفت وفرع -->
       <div class="field full"><label id="dLblProject">المشروع</label><select id="fProj"></select></div>
       <div class="field"><label id="dLblShift">الشفت</label>
@@ -2250,26 +2271,37 @@ function renderDashboard(){
 
   // Bell menu
   const badge = document.getElementById('bellBadge');
-  if(alerts.length > 0){
-    badge.textContent = alerts.length > 99 ? '99+' : alerts.length;
-    badge.style.display = 'flex';
-  } else {
-    badge.style.display = 'none';
+  const medAlerts=medicalAlerts();
+  const totalAlerts=alerts.length+medAlerts.length;
+  if(badge){
+    badge.textContent=totalAlerts>99?'99+':totalAlerts;
+    badge.style.display=totalAlerts>0?'flex':'none';
   }
   const bellItems = document.getElementById('bellMenuItems');
   if(!bellItems) return;
-  bellItems.innerHTML = alerts.length === 0
-    ? `<p style="padding:12px;color:var(--txt2);font-size:.84rem;text-align:center">✅ لا توجد تنبيهات</p>`
-    : alerts.slice(0,6).map(e=>{
-        const d = getDays(e);
-        const chip = d<0
-          ? `<span style="color:#dc2626;font-size:.72rem;font-weight:700">منتهية منذ ${Math.abs(d)} يوم</span>`
-          : `<span style="color:#d97706;font-size:.72rem;font-weight:700">تنتهي خلال ${d} يوم</span>`;
-        return `<div style="padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--surface2)">
-          <div style="font-weight:700;font-size:.84rem">${e.name}</div>
-          <div style="display:flex;justify-content:space-between;margin-top:2px">${chip}<span style="font-size:.72rem;color:var(--txt2)">${e.project}</span></div>
-        </div>`;
-      }).join('');
+  const iqRows=alerts.slice(0,4).map(e=>{
+    const d=getDays(e);
+    const chip=d<0?`<span style="color:#dc2626;font-size:.72rem;font-weight:700">إقامة منتهية منذ ${Math.abs(d)} يوم</span>`
+               :`<span style="color:#d97706;font-size:.72rem;font-weight:700">إقامة تنتهي خلال ${d} يوم</span>`;
+    return`<div style="padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--surface2)">
+      <div style="font-weight:700;font-size:.84rem">${e.name}</div>
+      <div style="display:flex;justify-content:space-between;margin-top:2px">${chip}<span style="font-size:.72rem;color:var(--txt2)">${e.project}</span></div>
+    </div>`;
+  }).join('');
+  const medRows=medAlerts.slice(0,4).map(e=>{
+    const ref=new Date(e.medExamExpiry);
+    const d=Math.floor((ref-new Date())/86400000);
+    const chip=d<0?`<span style="color:#dc2626;font-size:.72rem;font-weight:700">فحص طبي منتهي منذ ${Math.abs(d)} يوم</span>`
+               :`<span style="color:#d97706;font-size:.72rem;font-weight:700">فحص طبي ينتهي خلال ${d} يوم</span>`;
+    return`<div style="padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--surface2)">
+      <div style="font-weight:700;font-size:.84rem">${e.name}</div>
+      <div style="display:flex;justify-content:space-between;margin-top:2px">${chip}<span style="font-size:.72rem;color:var(--txt2)">${e.project}</span></div>
+    </div>`;
+  }).join('');
+  bellItems.innerHTML=totalAlerts===0
+    ?`<p style="padding:12px;color:var(--txt2);font-size:.84rem;text-align:center">✅ لا توجد تنبيهات</p>`
+    :(alerts.length?`<div style="padding:6px 10px 3px;font-size:.74rem;font-weight:700;color:var(--txt2)">🪪 تنبيهات الإقامة</div>${iqRows}`:'')
+    +(medAlerts.length?`<div style="padding:6px 10px 3px;font-size:.74rem;font-weight:700;color:var(--txt2)">🏥 تنبيهات الفحص الطبي</div>${medRows}`:'');
 
   // Today's attendance summary
   const todayKey=new Date().toISOString().split('T')[0];
@@ -2393,6 +2425,27 @@ function iqBadge(exp){
   return`<span class="iq-ok">${exp}</span>`;
 }
 
+function medBadge(exp){
+  if(!exp)return'<span style="color:var(--txt2)">—</span>';
+  const ref=new Date(exp);
+  if(isNaN(ref))return`<span style="color:var(--txt2)">${exp}</span>`;
+  const days=Math.floor((ref-new Date())/86400000);
+  if(days<0)return`<span class="iq-bad">منتهي (${exp})</span>`;
+  if(days<30)return`<span class="iq-bad">${exp} (${days} يوم)</span>`;
+  if(days<90)return`<span class="iq-warn">${exp} (${days} يوم)</span>`;
+  return`<span class="iq-ok">${exp}</span>`;
+}
+
+function medicalAlerts(){
+  const today=new Date();
+  return employees.filter(e=>{
+    if(!e.medExamExpiry)return false;
+    const ref=new Date(e.medExamExpiry);
+    const days=Math.floor((ref-today)/86400000);
+    return days<90;
+  }).sort((a,b)=>new Date(a.medExamExpiry)-new Date(b.medExamExpiry));
+}
+
 // ── RENDER EMPLOYEES ─────────────────────────────────────────
 function render(){
   const proj=document.getElementById('fltProj').value;
@@ -2481,7 +2534,23 @@ function mkRow(e,n,pi){
     <div class="exp-item"><span class="exp-lbl">${t('expStart')}</span><span class="exp-val">${e.startDate||'—'}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expSal')}</span><span class="exp-val" style="font-weight:700;color:var(--ok)">${sal}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expOT')}</span><span class="exp-val">${e.overtimeRate?e.overtimeRate+' '+t('sarH'):'—'}</span></div>
-  </div></td>`;
+  </div>
+  ${(e.medExamDate||e.vaccMMR||e.vaccInfluenza||e.vaccHepB1||e.vaccHepB2||e.vaccHepB3)?`
+  <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:10px">
+    <div style="font-size:.75rem;font-weight:700;color:var(--txt2);margin-bottom:8px;padding:0 14px">🏥 الفحص الطبي والتطعيمات</div>
+    <div class="exp-inner" style="padding-top:0">
+      ${e.medExamDate?`<div class="exp-item"><span class="exp-lbl">📋 الفحص الطبي</span><span class="exp-val">${e.medExamDate}</span></div>`:''}
+      ${e.medExamExpiry?`<div class="exp-item"><span class="exp-lbl">⏳ انتهاء الفحص</span><span class="exp-val">${medBadge(e.medExamExpiry)}</span></div>`:''}
+      ${e.vaccMMR?`<div class="exp-item"><span class="exp-lbl">💉 MMR</span><span class="exp-val"><span class="chip-ok">✓ ${e.vaccMMR}</span></span></div>`:''}
+      ${e.vaccInfluenza?`<div class="exp-item"><span class="exp-lbl">💉 Influenza</span><span class="exp-val"><span class="chip-ok">✓ ${e.vaccInfluenza}</span></span></div>`:''}
+      <div class="exp-item full"><span class="exp-lbl">💉 Hep B</span><span class="exp-val" style="display:flex;gap:10px">
+        <span class="${e.vaccHepB1?'chip-ok':'chip-bad'}">${e.vaccHepB1?'✓':'✗'} الأولى</span>
+        <span class="${e.vaccHepB2?'chip-ok':'chip-bad'}">${e.vaccHepB2?'✓':'✗'} الثانية</span>
+        <span class="${e.vaccHepB3?'chip-ok':'chip-bad'}">${e.vaccHepB3?'✓':'✗'} الثالثة</span>
+      </span></div>
+    </div>
+  </div>`:''}
+  </td>`;
 
   const frag=document.createDocumentFragment();
   frag.appendChild(tr);frag.appendChild(exp);
@@ -2518,8 +2587,9 @@ function openAdd(){
   document.getElementById('fTitle').value='Cleaner';
   document.getElementById('fGender').value='';
   document.getElementById('fSponsor').value='';
-  ['fIqExp','fStart'].forEach(id=>document.getElementById(id).value='');
+  ['fIqExp','fStart','fMedDate','fMedExpiry','fVaccMMR','fVaccFlu'].forEach(id=>document.getElementById(id).value='');
   ['fSal','fOT'].forEach(id=>document.getElementById(id).value='');
+  ['fHepB1','fHepB2','fHepB3'].forEach(id=>document.getElementById(id).checked=false);
   document.getElementById('fShift').value='-';
   document.getElementById('fStatus').value='نشط';
   document.getElementById('fProj').value=PROJS[0];
@@ -2556,6 +2626,13 @@ function openEdit(idx){
   photoData=e.photo||'';
   document.getElementById('photoPrev').innerHTML=e.photo?`<img src="${e.photo}"/>`:'👤';
   document.getElementById('fPhoto').value='';
+  document.getElementById('fMedDate').value=e.medExamDate||'';
+  document.getElementById('fMedExpiry').value=e.medExamExpiry||'';
+  document.getElementById('fVaccMMR').value=e.vaccMMR||'';
+  document.getElementById('fVaccFlu').value=e.vaccInfluenza||'';
+  document.getElementById('fHepB1').checked=!!(e.vaccHepB1);
+  document.getElementById('fHepB2').checked=!!(e.vaccHepB2);
+  document.getElementById('fHepB3').checked=!!(e.vaccHepB3);
   document.getElementById('modalBg').classList.add('open');
   const sw=document.getElementById('fSalWrap'),otw=document.getElementById('fOTWrap');
   const _isMgr=currentUser&&currentUser.role==='manager';
@@ -2595,6 +2672,13 @@ function saveEmp(){
     branch:document.getElementById('fBranch').value.trim(),
     project:document.getElementById('fProj').value,
     photo:photoData,
+    medExamDate:document.getElementById('fMedDate').value,
+    medExamExpiry:document.getElementById('fMedExpiry').value,
+    vaccMMR:document.getElementById('fVaccMMR').value,
+    vaccInfluenza:document.getElementById('fVaccFlu').value,
+    vaccHepB1:document.getElementById('fHepB1').checked,
+    vaccHepB2:document.getElementById('fHepB2').checked,
+    vaccHepB3:document.getElementById('fHepB3').checked,
   };
   const isEdit=editIdx>=0;
   if(isEdit)employees[editIdx]=emp;else employees.push(emp);

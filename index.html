@@ -3564,19 +3564,9 @@ document.getElementById('attSumMonth').value=thisMonth;
 
 // ── IQAMA ALERT BANNER ───────────────────────────────────────
 function showIqBanner(){
-  const alerts=iqamaAlerts();
-  const bar=document.getElementById('iqAlertBar');
-  if(!alerts.length){bar.classList.remove('show');return}
-  const expired=alerts.filter(e=>{
-    const ref=h2g(e.iqamaExpiry)||new Date(e.iqamaExpiry);
-    return Math.floor((ref-new Date())/86400000)<0;
-  });
-  const expiring=alerts.length-expired.length;
-  let msg='';
-  if(expired.length)msg+=`${expired.length} ${t('bannerExpired')}`;
-  if(expiring)msg+=(msg?t('bannerAnd'):'')+`${expiring} ${t('bannerExpiring')}`;
-  document.getElementById('iqAlertTxt').textContent=msg+t('bannerSuffix');
-  bar.classList.add('show');
+  // البانر العلوي تم استبداله بنظام الجرس + التنبيهات في الداشبورد
+  // هذه الدالة لا تفعل شيء — الإبقاء عليها لتجنب أخطاء استدعاء قديمة
+  return;
 }
 
 // ── Iqama table toggle ──

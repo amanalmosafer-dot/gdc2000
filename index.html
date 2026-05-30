@@ -537,6 +537,7 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -1511,11 +1512,7 @@ function loadUsers(){return cachedUsers;}
 function saveUsers(u){cachedUsers=u;localStorage.setItem('sysUsers',JSON.stringify(u));if(typeof db!=='undefined'&&fbReady){const o={};u.forEach(x=>{o[x.id]=x;});db.ref('users').set(o);}}
 
 function ensureAdmin(){
-  let users=loadUsers();
-  if(!users.find(u=>u.role==='manager')){
-    users.push({id:'admin',username:'admin',passHash:sHash('admin123'),role:'manager',permissions:[]});
-    saveUsers(users);
-  }
+  // الحسابات تُدار الآن عبر Firebase Authentication — لا إنشاء حساب محلي
 }
 
 let currentUser=null;
@@ -1533,15 +1530,31 @@ function doLogin(){
   const errEl=document.getElementById('loginErr');
   errEl.classList.remove('show');
   if(!uname||!pass){errEl.textContent=t('errLoginRequired');errEl.classList.add('show');return}
-  const users=loadUsers();
-  const user=users.find(u=>u.username===uname&&u.passHash===sHash(pass));
-  if(!user){errEl.textContent=t('errLoginWrong');errEl.classList.add('show');return}
-  currentUser=user;
-  sessionStorage.setItem('authUser',JSON.stringify(user));
-  showApp();
+  const btn=document.querySelector('.login-btn');
+  if(btn){btn.disabled=true;if(!btn.dataset.txt)btn.dataset.txt=btn.textContent;btn.textContent='⏳ ...';}
+  auth.signInWithEmailAndPassword(uname2email(uname),pass)
+    .then(cred=>{
+      const u=cred.user;
+      return db.ref('users/'+u.uid).once('value').then(snap=>{
+        let meta=snap.val();
+        if(!meta)meta=(cachedUsers||[]).find(x=>x.username===uname)||{username:uname,role:'supervisor',permissions:[],assignedProjects:[]};
+        currentUser={id:u.uid,uid:u.uid,username:meta.username||uname,role:meta.role||'supervisor',permissions:meta.permissions||[],assignedProjects:meta.assignedProjects||(meta.assignedProject?[meta.assignedProject]:[])};
+        sessionStorage.setItem('authUser',JSON.stringify(currentUser));
+        showApp();
+      });
+    })
+    .catch(err=>{
+      let m=t('errLoginWrong');
+      if(err.code==='auth/operation-not-allowed')m='⚠️ لم يُفعَّل نظام الدخول في Firebase بعد';
+      else if(err.code==='auth/network-request-failed')m='⚠️ لا يوجد اتصال بالإنترنت';
+      else if(err.code==='auth/too-many-requests')m='⚠️ محاولات كثيرة، انتظر قليلاً';
+      errEl.textContent=m;errEl.classList.add('show');
+    })
+    .finally(()=>{if(btn){btn.disabled=false;btn.textContent=btn.dataset.txt||'🔒 دخول';}});
 }
 
 function doLogout(){
+  auth.signOut().catch(()=>{});
   currentUser=null;
   sessionStorage.removeItem('authUser');
   document.getElementById('loginOverlay').classList.remove('hidden');
@@ -1595,7 +1608,14 @@ function showApp(){
 }
 
 function initAuth(){
-  ensureAdmin();
+  // الجلسة تنتهي بإغلاق التبويب (أكثر أماناً)
+  auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(()=>{});
+  // عند تأكيد المصادقة: فعّل مزامنة البيانات. وإن لم يوجد مستخدم، أعِد لشاشة الدخول
+  auth.onAuthStateChanged(u=>{
+    if(u){fbReady=true;attachDataListeners();}
+    else if(currentUser){currentUser=null;sessionStorage.removeItem('authUser');
+      document.getElementById('loginOverlay').classList.remove('hidden');}
+  });
   if(currentUser){showApp();}
   else{document.getElementById('loginOverlay').classList.remove('hidden');}
 }
@@ -1666,15 +1686,33 @@ function addUserFromForm(){
   const errEl=document.getElementById('addUserErr');
   errEl.textContent='';
   if(!username){errEl.textContent=t('errUserRequired');return}
-  if(!pass||pass.length<4){errEl.textContent=t('errPassMin4');return}
+  if(!pass||pass.length<6){errEl.textContent='كلمة المرور 6 أحرف على الأقل';return}
   const users=loadUsers();
   if(users.find(u=>u.username===username)){errEl.textContent=t('errUserExists');return}
   const perms=role==='manager'?[]:Array.from(document.querySelectorAll('.nuPerm:checked')).map(cb=>cb.value);
   const assignedProjects=role==='manager'?[]:Array.from(document.querySelectorAll('.nuProjCb:checked')).map(cb=>cb.value);
-  users.push({id:'u'+Date.now(),username,passHash:sHash(pass),role,permissions:perms,assignedProjects});
-  logAudit('👤',t('addNewUser').replace('➕ ',''),`${username} (${role==='manager'?t('roleManager'):t('roleSupervisor')}${assignedProjects.length?' — '+assignedProjects.join('، '):''})`);
-  saveUsers(users);
-  renderUsersModal();
+  errEl.style.color='var(--txt2)';errEl.textContent='⏳ جاري إنشاء الحساب...';
+  // إنشاء حساب Firebase Auth عبر نسخة ثانوية حتى لا يخرج المدير من حسابه
+  const secApp=firebase.apps.find(a=>a.name==='sec')||firebase.initializeApp(firebaseConfig,'sec');
+  secApp.auth().createUserWithEmailAndPassword(uname2email(username),pass)
+    .then(cred=>{
+      const newUid=cred.user.uid;
+      const rec={id:newUid,uid:newUid,username,role,permissions:perms,assignedProjects};
+      const all=loadUsers().filter(x=>x.username!==username);all.push(rec);
+      return db.ref('users/'+newUid).set(rec).then(()=>{cachedUsers=all;localStorage.setItem('sysUsers',JSON.stringify(all));return secApp.auth().signOut();});
+    })
+    .then(()=>{
+      logAudit('👤',t('addNewUser').replace('➕ ',''),`${username} (${role==='manager'?t('roleManager'):t('roleSupervisor')}${assignedProjects.length?' — '+assignedProjects.join('، '):''})`);
+      errEl.style.color='#16a34a';errEl.textContent='✅ تم إنشاء الحساب';
+      renderUsersModal();
+    })
+    .catch(err=>{
+      let m='خطأ: '+(err.code||err.message);
+      if(err.code==='auth/email-already-in-use')m=t('errUserExists');
+      else if(err.code==='auth/operation-not-allowed')m='⚠️ فعّل Email/Password في Firebase أولاً';
+      else if(err.code==='auth/weak-password')m='⚠️ كلمة المرور ضعيفة';
+      errEl.style.color='#dc2626';errEl.textContent=m;
+    });
 }
 
 function deleteUser(i){
@@ -1692,8 +1730,7 @@ function editUserPerms(i){
   div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);direction:rtl';
   div.innerHTML=`<div style="background:var(--surface);border-radius:16px;padding:24px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto">
     <h3 style="font-size:.97rem;font-weight:700;margin-bottom:16px">${t('editUserTitle')} ${u.username}</h3>
-    <div style="margin-bottom:6px;font-size:.78rem;font-weight:700;color:var(--txt2);text-transform:uppercase">${t('lblNewPassword')}</div>
-    <input id="editPassFld" type="password" placeholder="${t('lblPassword')}" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.87rem;font-family:inherit;background:var(--surface2);color:var(--txt);margin-bottom:14px;direction:rtl"/>
+    <div style="margin-bottom:14px;padding:9px 12px;background:var(--surface2);border-radius:8px;font-size:.78rem;color:var(--txt2);line-height:1.6">🔑 كلمة المرور تُدار عبر Firebase. لتغييرها احذف الحساب وأعد إنشاءه بكلمة جديدة.</div>
     ${u.role!=='manager'?`<div style="margin-bottom:6px;font-size:.78rem;font-weight:700;color:var(--txt2);text-transform:uppercase">${t('lblAssignedProject')} <span style="font-weight:400;opacity:.7">(اختر واحد أو أكثر)</span>:</div>
     <div id="editProjFld" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
       ${(()=>{const ap=u.assignedProjects||(u.assignedProject?[u.assignedProject]:[]);return PROJS.map(p=>`<label style="display:flex;align-items:center;gap:6px;font-size:.83rem;cursor:pointer;background:var(--surface2);padding:5px 10px;border-radius:8px;border:1px solid var(--border)"><input type="checkbox" class="editProjCb" value="${p}" ${ap.includes(p)?'checked':''}> ${p}</label>`).join('');})()}
@@ -1712,11 +1749,6 @@ function saveUserPerms(i,btn){
   const users=loadUsers();
   const u=users[i];
   const overlay=btn.closest('div[style*="fixed"]');
-  const newPass=overlay.querySelector('#editPassFld');
-  if(newPass&&newPass.value.trim()){
-    if(newPass.value.trim().length<4){alert(t('errPassMin4Long'));return}
-    u.passHash=sHash(newPass.value.trim());
-  }
   if(u.role!=='manager'){
     u.permissions=Array.from(overlay.querySelectorAll('.editPerm:checked')).map(cb=>cb.value);
     u.assignedProjects=Array.from(overlay.querySelectorAll('.editProjCb:checked')).map(cb=>cb.value);
@@ -2026,7 +2058,10 @@ const INIT=[
 const firebaseConfig={apiKey:"AIzaSyAiimyuiSybHFxv1XMojBVUWIm5EIHNfFQ",authDomain:"employees-system-53d4d.firebaseapp.com",databaseURL:"https://employees-system-53d4d-default-rtdb.firebaseio.com",projectId:"employees-system-53d4d",storageBucket:"employees-system-53d4d.firebasestorage.app",messagingSenderId:"298494081168",appId:"1:298494081168:web:87aa81e980f87330e54015"};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
+const auth=firebase.auth();
 var fbReady=false;
+// المستخدم يكتب اسمه فقط، ونحوّله داخلياً لبريد ثابت
+function uname2email(u){return u.includes('@')?u:u.toLowerCase()+'@gdc2000.local';}
 
 // ── LOAD DATA ────────────────────────────────────────────────
 let employees = JSON.parse(localStorage.getItem('employees')||'null');
@@ -2127,36 +2162,29 @@ function renderActive(){
   else if(id==='attendance')renderAtt();
   else if(id==='reports')renderReports();
 }
-db.ref('employees').on('value',snap=>{
-  const v=snap.val();
-  if(v){employees=Object.values(v);localStorage.setItem('employees',JSON.stringify(employees));}
-  renderActive();
-});
-db.ref('attendance').on('value',snap=>{
-  attendance=snap.val()||{};localStorage.setItem('attendance',JSON.stringify(attendance));
-  renderActive();
-});
-db.ref('payroll').on('value',snap=>{
-  payroll=snap.val()||{};localStorage.setItem('payroll',JSON.stringify(payroll));
-  renderActive();
-});
-db.ref('users').on('value',snap=>{
-  const v=snap.val();
-  if(v){cachedUsers=Object.values(v);localStorage.setItem('sysUsers',JSON.stringify(cachedUsers));}
-});
-// First-run: upload existing local data to Firebase if Firebase is empty, then unlock writes
-db.ref('employees').once('value',snap=>{
-  if(!snap.val()&&employees.length){
-    const eo={};employees.forEach(e=>{eo[e.id]=e;});db.ref('employees').set(eo);
-    if(Object.keys(attendance).length)db.ref('attendance').set(attendance);
-    if(Object.keys(payroll).length)db.ref('payroll').set(payroll);
-    const lu=JSON.parse(localStorage.getItem('sysUsers')||'[]');
-    if(lu.length){const uo={};lu.forEach(x=>{uo[x.id]=x;});db.ref('users').set(uo);}
-    const al=JSON.parse(localStorage.getItem('auditLog')||'[]');
-    if(al.length){const ao={};al.forEach((l,i)=>{ao['l'+i]=l;});db.ref('auditLog').set(ao);}
-  }
-  fbReady=true;
-});
+// مزامنة البيانات تُربط فقط بعد تسجيل الدخول (القاعدة مقفلة على المصادقين)
+let _listenersOn=false;
+function attachDataListeners(){
+  if(_listenersOn)return;_listenersOn=true;fbReady=true;
+  const onErr=e=>console.warn('sync:',e&&e.code);
+  db.ref('employees').on('value',snap=>{
+    const v=snap.val();
+    if(v){employees=Object.values(v);localStorage.setItem('employees',JSON.stringify(employees));}
+    renderActive();
+  },onErr);
+  db.ref('attendance').on('value',snap=>{
+    attendance=snap.val()||{};localStorage.setItem('attendance',JSON.stringify(attendance));
+    renderActive();
+  },onErr);
+  db.ref('payroll').on('value',snap=>{
+    payroll=snap.val()||{};localStorage.setItem('payroll',JSON.stringify(payroll));
+    renderActive();
+  },onErr);
+  db.ref('users').on('value',snap=>{
+    const v=snap.val();
+    if(v){cachedUsers=Object.values(v);localStorage.setItem('sysUsers',JSON.stringify(cachedUsers));}
+  },onErr);
+}
 
 // ── STATE ────────────────────────────────────────────────────
 let sortCol=null,sortDir=1,editIdx=-1,photoData='';

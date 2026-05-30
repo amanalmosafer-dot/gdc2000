@@ -1,0 +1,27 @@
+{
+  "rules": {
+    "users": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'manager'",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'manager'",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid"
+      }
+    },
+    "employees": {
+      ".read": "auth != null && root.child('users').child(auth.uid).exists()",
+      ".write": "auth != null && root.child('users').child(auth.uid).exists()"
+    },
+    "attendance": {
+      ".read": "auth != null && root.child('users').child(auth.uid).exists()",
+      ".write": "auth != null && root.child('users').child(auth.uid).exists()"
+    },
+    "payroll": {
+      ".read": "auth != null && root.child('users').child(auth.uid).exists()",
+      ".write": "auth != null && root.child('users').child(auth.uid).exists()"
+    },
+    "auditLog": {
+      ".read": "auth != null && root.child('users').child(auth.uid).exists()",
+      ".write": "auth != null && root.child('users').child(auth.uid).exists()"
+    }
+  }
+}

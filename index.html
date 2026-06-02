@@ -28,7 +28,8 @@ body{font-family:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;background:var(--b
 /* ── HEADER ── */
 header{background:var(--grad);color:#fff;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;min-height:60px;box-shadow:0 4px 20px rgba(0,0,0,.25);position:sticky;top:0;z-index:100}
 .hdr-brand{display:flex;align-items:center;gap:10px}
-.hdr-brand .logo{width:34px;height:34px;background:rgba(255,255,255,.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;backdrop-filter:blur(4px)}
+.hdr-brand .logo{height:34px;display:flex;align-items:center;justify-content:center}
+.hdr-brand .logo svg{height:30px;width:auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))}
 header h1{font-size:1.05rem;font-weight:700;letter-spacing:.01em}
 header h1 span{opacity:.6;font-weight:400;font-size:.8rem;margin-right:6px}
 /* ── TABS ── */
@@ -328,7 +329,8 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
 @keyframes floatBg{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-20px) scale(1.05)}}
 #loginOverlay.hidden{display:none}
 .login-card{background:var(--surface);border-radius:22px;padding:44px 38px;width:400px;max-width:90vw;box-shadow:0 25px 70px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.05);text-align:center;position:relative;z-index:1;backdrop-filter:blur(10px)}
-.login-logo{font-size:3.2rem;margin-bottom:10px;display:inline-block;animation:logoBounce 2.5s ease-in-out infinite;filter:drop-shadow(0 4px 12px rgba(37,99,235,.3))}
+.login-logo{margin-bottom:12px;display:inline-block;animation:logoBounce 2.5s ease-in-out infinite;filter:drop-shadow(0 6px 14px rgba(141,130,83,.35))}
+.login-logo svg{width:100px;height:auto;display:block;margin:0 auto}
 @keyframes logoBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 .login-title{font-size:1.45rem;font-weight:800;color:var(--txt);margin-bottom:6px;letter-spacing:-.02em}
 .login-sub{font-size:.85rem;color:var(--txt2);margin-bottom:32px}
@@ -545,8 +547,8 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
 
 <header>
   <div class="hdr-brand">
-    <div class="logo">🏢</div>
-    <h1>نظام إدارة الموظفين <span>v2.0</span></h1>
+    <div class="logo"><svg viewBox="0 0 130 80" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d4c585"/><stop offset="1" stop-color="#a8985c"/></linearGradient></defs><path d="M8 30 C 40 8, 80 8, 122 26 C 90 22, 55 26, 30 40 C 22 37, 14 34, 8 30 Z" fill="url(#gh)"/><path d="M8 46 C 42 26, 82 26, 122 44 C 90 40, 55 44, 30 56 C 22 53, 14 50, 8 46 Z" fill="url(#gh)" opacity=".82"/><path d="M14 62 C 46 46, 84 46, 120 62 C 92 59, 58 62, 36 70 C 28 68, 20 65, 14 62 Z" fill="url(#gh)" opacity=".64"/></svg></div>
+    <h1>الإنماء الذهبية <span>نظام إدارة الموظفين</span></h1>
   </div>
   <nav class="tabs" id="mainNav">
     <button class="tab-btn active" id="tab-btn-dashboard" onclick="switchTab('dashboard',this)">📊 لوحة التحكم</button>
@@ -1059,7 +1061,9 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
 <!-- LOGIN OVERLAY -->
 <div id="loginOverlay">
   <div class="login-card">
-    <div class="login-logo">🏢</div>
+    <div class="login-logo"><svg viewBox="0 0 130 80" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a89a63"/><stop offset="1" stop-color="#7d7448"/></linearGradient></defs><path d="M8 30 C 40 8, 80 8, 122 26 C 90 22, 55 26, 30 40 C 22 37, 14 34, 8 30 Z" fill="url(#gl)"/><path d="M8 46 C 42 26, 82 26, 122 44 C 90 40, 55 44, 30 56 C 22 53, 14 50, 8 46 Z" fill="url(#gl)" opacity=".82"/><path d="M14 62 C 46 46, 84 46, 120 62 C 92 59, 58 62, 36 70 C 28 68, 20 65, 14 62 Z" fill="url(#gl)" opacity=".64"/></svg></div>
+    <div style="color:#9a8e57;font-weight:800;font-size:1.1rem;margin-bottom:2px">شركة الإنماء الذهبية</div>
+    <div style="color:#9a8e57;font-weight:500;font-size:.72rem;letter-spacing:.05em;opacity:.9;margin-bottom:20px">للمقاولات العامة · GOLDEN DEVELOPMENT</div>
     <div class="login-title" id="loginTitleEl">نظام إدارة الموظفين</div>
     <div class="login-sub" id="loginSubEl">سجّل دخولك للمتابعة</div>
     <div class="login-err" id="loginErr"></div>

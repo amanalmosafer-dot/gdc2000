@@ -3457,7 +3457,9 @@ function renderPayroll(){
     grand+=net;totalAbsDeduct+=absDeduct;totalOT+=otTotal;totalBonus+=bonus;
 
     const pi=PROJS.indexOf(e.project);
-    const covBadge=covOT?`<span style="font-size:.65rem;color:#0891b2;display:block" title="تلقائي من التغطية المؤقتة">🔄 +${covOT}h تغطية</span>`:'';
+    // عرض إجمالي الساعات في الخانة (يدوي + تغطية تلقائية)
+    const otTitle=covOT?`تلقائي من التغطية: ${covOT} ساعة + يدوي: ${manualOT} ساعة`:'';
+    const otBg=covOT?'background:linear-gradient(135deg,#cffafe,#e0f2fe);border-color:#0891b2;font-weight:700':'';
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td style="color:var(--txt2);font-size:.76rem">${i+1}</td>
@@ -3469,8 +3471,8 @@ function renderPayroll(){
       <td style="color:#dc2626;font-weight:600;text-align:center">${att.A}</td>
       <td style="color:#d97706;font-weight:600;text-align:center">${att.L}</td>
       ${isMgr?`<td style="color:#dc2626;font-weight:600" id="abd-${e.id}">${absDeduct?absDeduct.toLocaleString():'—'}</td>`:''}
-      <td><input class="pay-input" type="number" min="0" step=".5" value="${manualOT||''}" placeholder="0"
-          oninput="onPay('${month}','${e.id}','overtimeHours',this.value)"/>${covBadge}</td>
+      <td><input class="pay-input" type="number" min="0" step=".5" value="${otHours||''}" placeholder="0" data-cov="${covOT}" title="${otTitle}" style="${otBg}"
+          oninput="onPay('${month}','${e.id}','overtimeHours',Math.max(0,(parseFloat(this.value)||0)-${covOT}))"/></td>
       ${isMgr?`
       <td style="color:var(--txt2);font-size:.8rem">${hourlyRate}</td>
       <td style="color:#16a34a;font-weight:600" id="ot-${e.id}">${otTotal?otTotal.toLocaleString():'—'}</td>

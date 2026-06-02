@@ -536,6 +536,25 @@ body.printing-att>*:not(#dailyAttPrint){display:none!important}
 .dark .att-today-card.att-t{background:linear-gradient(135deg,#2e1065,#4c1d95);border-color:#4c1d95;color:#c4b5fd}
 .att-today-num{font-size:2rem;font-weight:800;line-height:1;letter-spacing:-.02em;font-feature-settings:'tnum' 1}
 .att-today-lbl{font-size:.78rem;font-weight:700;margin-top:6px;opacity:.85}
+/* ── TOAST NOTIFICATIONS ── */
+#toastWrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;width:max-content;max-width:92vw}
+.toast{pointer-events:auto;display:flex;align-items:center;gap:11px;background:var(--surface);color:var(--txt);border:1px solid var(--border);border-radius:12px;padding:13px 18px;box-shadow:0 8px 30px rgba(0,0,0,.22);font-size:.9rem;font-weight:600;min-width:240px;max-width:90vw;animation:toastIn .3s cubic-bezier(.2,.8,.2,1);border-right:4px solid var(--accent)}
+.toast.out{animation:toastOut .3s ease forwards}
+.toast .t-ico{font-size:1.2rem;flex-shrink:0}
+.toast.ok{border-right-color:#16a34a}.toast.err{border-right-color:#dc2626}.toast.info{border-right-color:#2563eb}.toast.warn{border-right-color:#d97706}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toastOut{to{opacity:0;transform:translateY(20px) scale(.96)}}
+/* ── EVALUATION ── */
+.ev-crit{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.ev-crit-lbl{font-weight:700;font-size:.88rem}
+.ev-crit-lbl small{display:block;font-weight:400;font-size:.72rem;color:var(--txt2);margin-top:2px}
+.ev-stars{display:flex;gap:4px;direction:ltr}
+.ev-star{font-size:1.5rem;cursor:pointer;color:var(--border);transition:transform .1s,color .1s;line-height:1;user-select:none}
+.ev-star:hover{transform:scale(1.15)}
+.ev-star.on{color:#f59e0b}
+.ev-score-badge{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:.9rem;padding:4px 12px;border-radius:20px}
+.ev-r-ex{background:#dcfce7;color:#15803d}.ev-r-vg{background:#dbeafe;color:#1d4ed8}.ev-r-g{background:#fef9c3;color:#a16207}.ev-r-n{background:#fee2e2;color:#b91c1c}.ev-r-none{background:var(--surface2);color:var(--txt2)}
+.dark .ev-r-ex{background:#052e16;color:#86efac}.dark .ev-r-vg{background:#0c2d6b;color:#93c5fd}.dark .ev-r-g{background:#422006;color:#fde68a}.dark .ev-r-n{background:#450a0a;color:#fca5a5}
 /* ── MAIN NAV (slide-down) ── */
 #mainNav{display:none;overflow:hidden}
 #mainNav.visible{display:flex;animation:slideDown .3s ease}
@@ -580,6 +599,7 @@ body.printing-att>*:not(#dailyAttPrint){display:none!important}
     <button class="tab-btn" id="tab-btn-payroll" onclick="switchTab('payroll',this)">💰 الرواتب</button>
     <button class="tab-btn" id="tab-btn-attendance" onclick="switchTab('attendance',this)">📋 الحضور</button>
     <button class="tab-btn" id="tab-btn-reports" onclick="switchTab('reports',this)">📈 التقارير</button>
+    <button class="tab-btn" id="tab-btn-evaluation" onclick="switchTab('evaluation',this)">⭐ التقييم</button>
   </nav>
   <div class="hdr-actions">
     <div class="tools-wrap no-print">
@@ -668,6 +688,10 @@ body.printing-att>*:not(#dailyAttPrint){display:none!important}
     <div class="home-nav-card" onclick="switchTab('reports', document.getElementById('tab-btn-reports'))">
       <div class="home-nav-ico">📈</div>
       <div class="home-nav-lbl">التقارير</div>
+    </div>
+    <div class="home-nav-card" onclick="switchTab('evaluation', document.getElementById('tab-btn-evaluation'))">
+      <div class="home-nav-ico">⭐</div>
+      <div class="home-nav-lbl">التقييم</div>
     </div>
   </div>
 
@@ -922,11 +946,38 @@ body.printing-att>*:not(#dailyAttPrint){display:none!important}
 </div>
 </div>
 
+<!-- TAB: EVALUATION -->
+<div class="tab-content" id="tab-evaluation">
+<div class="container">
+  <div class="toolbar">
+    <label>الشهر:</label>
+    <input type="month" id="evalMonth" onchange="renderEvaluations()"/>
+    <select id="evalProj" onchange="renderEvaluations()"><option value="">كل المشاريع</option></select>
+    <div class="spacer"></div>
+    <div id="evalSum" style="font-size:.83rem;color:var(--txt2)"></div>
+  </div>
+  <div class="tbl-wrap">
+    <div class="tbl-hdr"><h2 id="evalTitle">تقييم الموظفين</h2></div>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr>
+        <th>#</th><th>الاسم</th><th>المشروع</th><th>النتيجة</th><th>التقدير</th><th>آخر تقييم</th><th style="text-align:left">إجراء</th>
+      </tr></thead>
+      <tbody id="evalBody"></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+</div>
+
 <!-- EMPLOYEE PRINT CARD -->
 <div id="empPrintCard"></div>
 
 <!-- DAILY ATTENDANCE PRINT SHEET -->
 <div id="dailyAttPrint"></div>
+
+<!-- TOAST NOTIFICATIONS -->
+<div id="toastWrap"></div>
 
 <!-- DRAWER -->
 <div class="modal-bg" id="modalBg">
@@ -1128,7 +1179,7 @@ const T={
     // header
     sysTitle:'نظام إدارة الموظفين',
     tabDash:'📊 لوحة التحكم',tabEmp:'👥 الموظفون',tabPay:'💰 الرواتب',
-    tabAtt:'📋 الحضور',tabRep:'📈 التقارير',
+    tabAtt:'📋 الحضور',tabRep:'📈 التقارير',tabEval:'⭐ التقييم',
     btnBackup:'💾 نسخ',btnRestore:'📥 استعادة',
     btnDark:'🌙 داكن',btnLight:'☀️ فاتح',btnExcel:'⬇️ Excel',
     btnPrint:'🖨️ طباعة',btnAdd:'+ إضافة موظف',btnLang:'🌐 EN',
@@ -1220,7 +1271,7 @@ const T={
     permDashboard:'📊 لوحة التحكم',permEmpView:'👁️ رؤية الموظفين',
     permEmpEdit:'✏️ تعديل الموظفين',permEmpAdd:'➕ إضافة موظف',
     permEmpDel:'🗑️ حذف موظف',permAttendance:'📋 الحضور والغياب',
-    permReports:'📈 التقارير',permPayroll:'💰 الرواتب',permBackup:'💾 نسخ/استعادة',
+    permReports:'📈 التقارير',permEvaluation:'⭐ التقييم',permPayroll:'💰 الرواتب',permBackup:'💾 نسخ/استعادة',
     // errors & confirms
     errLoginRequired:'يرجى إدخال اسم المستخدم وكلمة المرور',
     errLoginWrong:'اسم المستخدم أو كلمة المرور غير صحيحة',
@@ -1263,7 +1314,7 @@ const T={
   en:{
     sysTitle:'Employee Management System',
     tabDash:'📊 Dashboard',tabEmp:'👥 Employees',tabPay:'💰 Payroll',
-    tabAtt:'📋 Attendance',tabRep:'📈 Reports',
+    tabAtt:'📋 Attendance',tabRep:'📈 Reports',tabEval:'⭐ Evaluation',
     btnBackup:'💾 Backup',btnRestore:'📥 Restore',
     btnDark:'🌙 Dark',btnLight:'☀️ Light',btnExcel:'⬇️ Excel',
     btnPrint:'🖨️ Print',btnAdd:'+ Add Employee',btnLang:'🌐 عربي',
@@ -1347,7 +1398,7 @@ const T={
     permDashboard:'📊 Dashboard',permEmpView:'👁️ View Employees',
     permEmpEdit:'✏️ Edit Employees',permEmpAdd:'➕ Add Employee',
     permEmpDel:'🗑️ Delete Employee',permAttendance:'📋 Attendance',
-    permReports:'📈 Reports',permPayroll:'💰 Payroll',permBackup:'💾 Backup/Restore',
+    permReports:'📈 Reports',permEvaluation:'⭐ Evaluation',permPayroll:'💰 Payroll',permBackup:'💾 Backup/Restore',
     // errors & confirms
     errLoginRequired:'Please enter username and password',
     errLoginWrong:'Incorrect username or password',
@@ -1403,6 +1454,7 @@ function applyLang(){
   setText('tab-btn-payroll',t('tabPay'));
   setText('tab-btn-attendance',t('tabAtt'));
   setText('tab-btn-reports',t('tabRep'));
+  setText('tab-btn-evaluation',t('tabEval'));
   setText('langBtn',t('btnLang'));
   setText('btnBackupTxt',t('btnBackup'));
   setText('btnRestoreTxt',t('btnRestore'));
@@ -1532,6 +1584,7 @@ const PERMS_KEYS=[
   {key:'employees_delete', tkey:'permEmpDel'},
   {key:'attendance',       tkey:'permAttendance'},
   {key:'reports',          tkey:'permReports'},
+  {key:'evaluation',       tkey:'permEvaluation'},
   {key:'payroll',          tkey:'permPayroll'},
   {key:'backup',           tkey:'permBackup'},
 ];
@@ -1613,6 +1666,7 @@ function applyPermissions(){
   can('payroll')?show('tab-btn-payroll'):hide('tab-btn-payroll');
   can('attendance')?show('tab-btn-attendance'):hide('tab-btn-attendance');
   can('reports')?show('tab-btn-reports'):hide('tab-btn-reports');
+  can('evaluation')?show('tab-btn-evaluation'):hide('tab-btn-evaluation');
   // header buttons
   can('employees_add')?show('btnAdd'):hide('btnAdd');
   const backupEl=document.getElementById('btnBackup');if(backupEl)backupEl.style.display=can('backup')?'':'none';
@@ -2125,6 +2179,20 @@ var fbReady=false;
 // المستخدم يكتب اسمه فقط، ونحوّله داخلياً لبريد ثابت
 function uname2email(u){return u.includes('@')?u:u.toLowerCase()+'@gdc2000.local';}
 
+// ── إشعارات أنيقة (Toast) ────────────────────────────────────
+function toast(msg,type){
+  type=type||'info';
+  const icons={ok:'✅',err:'❌',info:'ℹ️',warn:'⚠️'};
+  const wrap=document.getElementById('toastWrap');
+  if(!wrap){alert(msg);return;}
+  const el=document.createElement('div');
+  el.className='toast '+type;
+  el.innerHTML=`<span class="t-ico">${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  wrap.appendChild(el);
+  const dur=type==='err'?4500:2800;
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),300);},dur);
+}
+
 // ── وضع التطوير المحلي ────────────────────────────────────────
 // يُفعّل تلقائياً عند فتح الملف محلياً (file://) مع وجود بيانات تجريبية.
 // في هذا الوضع: لا اتصال بالقاعدة الحية إطلاقاً — كل شيء محلي وآمن.
@@ -2221,10 +2289,12 @@ saveEmps();
 
 let attendance=JSON.parse(localStorage.getItem('attendance')||'{}');
 let payroll=JSON.parse(localStorage.getItem('payroll')||'{}');
+let evaluations=JSON.parse(localStorage.getItem('evaluations')||'{}');
 
 function saveEmps(){localStorage.setItem('employees',JSON.stringify(employees));if(fbReady){const o={};employees.forEach(e=>{o[e.id]=e;});db.ref('employees').set(o);}}
 function saveAtt(){localStorage.setItem('attendance',JSON.stringify(attendance));if(fbReady)db.ref('attendance').set(attendance);}
 function savePay(){localStorage.setItem('payroll',JSON.stringify(payroll));if(fbReady)db.ref('payroll').set(payroll);}
+function saveEval(){localStorage.setItem('evaluations',JSON.stringify(evaluations));if(fbReady)db.ref('evaluations').set(evaluations);}
 
 // ── FIREBASE REAL-TIME SYNC ───────────────────────────────────
 function renderActive(){
@@ -2237,6 +2307,7 @@ function renderActive(){
   else if(id==='payroll')renderPayroll();
   else if(id==='attendance')renderAtt();
   else if(id==='reports')renderReports();
+  else if(id==='evaluation')renderEvaluations();
 }
 // مزامنة البيانات تُربط فقط بعد تسجيل الدخول (القاعدة مقفلة على المصادقين)
 let _listenersOn=false;
@@ -2254,6 +2325,10 @@ function attachDataListeners(){
   },onErr);
   db.ref('payroll').on('value',snap=>{
     payroll=snap.val()||{};localStorage.setItem('payroll',JSON.stringify(payroll));
+    renderActive();
+  },onErr);
+  db.ref('evaluations').on('value',snap=>{
+    evaluations=snap.val()||{};localStorage.setItem('evaluations',JSON.stringify(evaluations));
     renderActive();
   },onErr);
   db.ref('users').on('value',snap=>{
@@ -2285,6 +2360,7 @@ function switchTab(name,btn){
     if(name==='payroll')renderPayroll();
     if(name==='attendance')renderAtt();
     if(name==='reports')renderReports();
+    if(name==='evaluation')renderEvaluations();
   }
 }
 
@@ -2485,9 +2561,9 @@ function restoreData(inp){
       if(data.employees){employees=data.employees;saveEmps()}
       if(data.attendance){attendance=data.attendance;saveAtt()}
       if(data.payroll){payroll=data.payroll;savePay()}
-      alert(t('msgRestoreOk'));
+      toast(t('msgRestoreOk'),'ok');
       render();renderDashboard();
-    }catch(e){alert(t('errRestoreFile'))}
+    }catch(e){toast(t('errRestoreFile'),'err')}
   };
   r.readAsText(f);
   inp.value='';
@@ -2788,7 +2864,7 @@ function prevPhoto(inp){
 
 function saveEmp(){
   const name=document.getElementById('fName').value.trim();
-  if(!name){alert(t('errEmpNameRequired'));return}
+  if(!name){toast(t('errEmpNameRequired'),'err');return}
   const emp={
     id:editIdx>=0?employees[editIdx].id:uid(),
     empNum:document.getElementById('fEmpNum').value.trim(),
@@ -2903,7 +2979,7 @@ function printEmp(idx){
 
 function printDailyAtt(){
   const date=document.getElementById('attDate').value;
-  if(!date){alert(t('errSelectDate'));return}
+  if(!date){toast(t('errSelectDate'),'err');return}
   const proj=document.getElementById('attProj').value;
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
@@ -2956,6 +3032,115 @@ function printDailyAtt(){
   document.body.classList.add('printing-att');
   window.print();
   document.body.classList.remove('printing-att');
+}
+
+// ── EVALUATION SYSTEM ─────────────────────────────────────────
+const EVAL_CRIT=[
+  {k:'quality',     label:'جودة العمل',          w:25, desc:'إتقان العمل وخلوّه من الأخطاء'},
+  {k:'productivity',label:'الإنتاجية والسرعة',    w:20, desc:'إنجاز المطلوب في الوقت المحدد'},
+  {k:'compliance',  label:'الالتزام بالتعليمات',  w:15, desc:'اتّباع توجيهات المشرف'},
+  {k:'teamwork',    label:'التعاون مع الفريق',     w:15, desc:'العلاقة مع الزملاء والتعاون'},
+  {k:'safety',      label:'السلامة المهنية',       w:10, desc:'الالتزام بإجراءات السلامة'},
+];
+function computeEvalScore(rec,month,empId){
+  let manual=0;
+  EVAL_CRIT.forEach(c=>{manual+=((rec[c.k]||0)/5)*c.w;});
+  const att=getAttCount(month,empId);
+  const denom=att.P+att.A+att.T;
+  const attP=denom?((att.P+att.T)/denom):1;
+  return {total:Math.round(manual+attP*15), attPct:Math.round(attP*100)};
+}
+function evalRating(tot){
+  if(tot>=90)return{label:'ممتاز',cls:'ev-r-ex',stars:'⭐⭐⭐⭐⭐'};
+  if(tot>=75)return{label:'جيد جداً',cls:'ev-r-vg',stars:'⭐⭐⭐⭐'};
+  if(tot>=60)return{label:'جيد',cls:'ev-r-g',stars:'⭐⭐⭐'};
+  return{label:'يحتاج متابعة',cls:'ev-r-n',stars:'⚠️'};
+}
+function renderEvaluations(){
+  const monthEl=document.getElementById('evalMonth');
+  if(monthEl&&!monthEl.value)monthEl.value=new Date().toISOString().substr(0,7);
+  const month=monthEl?monthEl.value:'';
+  const proj=document.getElementById('evalProj').value;
+  const myProj=getMyProject();
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
+  const monthData=evaluations[month]||{};
+  const tbody=document.getElementById('evalBody');tbody.innerHTML='';
+  const canEval=can('evaluation');
+  let done=0;
+  list.forEach((e,i)=>{
+    const rec=monthData[e.id];
+    const pi=PROJS.indexOf(e.project);
+    let scoreCell='<span class="ev-score-badge ev-r-none">—</span>';
+    let ratingCell='<span style="color:var(--txt2)">غير مقيّم</span>';
+    let lastCell='—';
+    if(rec){done++;
+      const sc=computeEvalScore(rec,month,e.id);const r=evalRating(sc.total);
+      scoreCell=`<span class="ev-score-badge ${r.cls}">${sc.total}<small style="font-weight:600">/100</small></span>`;
+      ratingCell=`<span style="font-weight:700">${r.stars} ${r.label}</span>`;
+      lastCell=rec.at?new Date(rec.at).toLocaleDateString('ar-SA-u-nu-latn'):'—';
+    }
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:var(--txt2)">${i+1}</td><td><strong>${e.name}</strong></td>
+      <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
+      <td>${scoreCell}</td><td>${ratingCell}</td><td style="color:var(--txt2);font-size:.82rem">${lastCell}</td>
+      <td style="text-align:left">${canEval?`<button class="btn btn-primary btn-sm" onclick="openEvalModal('${e.id}')">${rec?'✏️ تعديل':'⭐ تقييم'}</button>`:'—'}</td>`;
+    tbody.appendChild(tr);
+  });
+  const sumEl=document.getElementById('evalSum');if(sumEl)sumEl.textContent=`${done} مقيّم من ${list.length}`;
+  const ttl=document.getElementById('evalTitle');if(ttl)ttl.textContent='تقييم الموظفين — '+(month||'');
+}
+function openEvalModal(empId){
+  if(!can('evaluation')){toast('لا تملك صلاحية التقييم','err');return;}
+  const month=document.getElementById('evalMonth').value;
+  if(!month){toast('اختر الشهر أولاً','warn');return;}
+  const e=employees.find(x=>x.id===empId);if(!e)return;
+  const rec=(evaluations[month]||{})[empId]||{};
+  window._evalTmp={quality:rec.quality||0,productivity:rec.productivity||0,compliance:rec.compliance||0,teamwork:rec.teamwork||0,safety:rec.safety||0};
+  const att=getAttCount(month,empId);const denom=att.P+att.A+att.T;const attP=denom?Math.round((att.P+att.T)/denom*100):100;
+  const critHtml=EVAL_CRIT.map(c=>`
+    <div class="ev-crit">
+      <div class="ev-crit-lbl">${c.label}<small>${c.desc} · الوزن ${c.w}%</small></div>
+      <div class="ev-stars" data-crit="${c.k}">
+        ${[1,2,3,4,5].map(n=>`<span class="ev-star${n<=window._evalTmp[c.k]?' on':''}" onclick="setEvalStar('${c.k}',${n})">★</span>`).join('')}
+      </div>
+    </div>`).join('');
+  const div=document.createElement('div');
+  div.id='evalOverlay';
+  div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);direction:rtl;padding:16px';
+  div.innerHTML=`<div style="background:var(--surface);border-radius:16px;padding:24px;width:560px;max-width:96vw;max-height:92vh;overflow-y:auto">
+    <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:4px">⭐ تقييم: ${e.name}</h3>
+    <div style="color:var(--txt2);font-size:.83rem;margin-bottom:16px">${e.project} · ${month}</div>
+    ${critHtml}
+    <div class="ev-crit" style="border-bottom:none">
+      <div class="ev-crit-lbl">المواظبة <small>تلقائي من سجل الحضور · الوزن 15%</small></div>
+      <div style="font-weight:800;font-size:1.1rem;color:${attP>=90?'#16a34a':attP>=70?'#d97706':'#dc2626'}">${attP}%</div>
+    </div>
+    <label style="display:block;font-size:.8rem;font-weight:700;color:var(--txt2);margin:14px 0 6px">ملاحظات (اختياري)</label>
+    <textarea id="evalNotes" rows="3" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface2);color:var(--txt);direction:rtl;resize:vertical;box-sizing:border-box">${rec.notes||''}</textarea>
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button class="btn btn-secondary" onclick="document.getElementById('evalOverlay').remove()">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveEvalForm('${empId}')">💾 حفظ التقييم</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+}
+function setEvalStar(crit,val){
+  window._evalTmp[crit]=val;
+  const wrap=document.querySelector('#evalOverlay .ev-stars[data-crit="'+crit+'"]');
+  if(wrap)[...wrap.children].forEach((s,i)=>s.classList.toggle('on',i<val));
+}
+function saveEvalForm(empId){
+  const month=document.getElementById('evalMonth').value;
+  const tmp=window._evalTmp||{};
+  const missing=EVAL_CRIT.filter(c=>!tmp[c.k]);
+  if(missing.length){toast('قيّم كل المعايير أولاً ('+missing.length+' ناقص)','warn');return;}
+  if(!evaluations[month])evaluations[month]={};
+  evaluations[month][empId]={quality:tmp.quality,productivity:tmp.productivity,compliance:tmp.compliance,teamwork:tmp.teamwork,safety:tmp.safety,notes:(document.getElementById('evalNotes').value||'').trim(),by:currentUser?currentUser.username:'',at:Date.now()};
+  saveEval();
+  if(typeof logAudit==='function')logAudit('⭐','تقييم موظف',((employees.find(e=>e.id===empId)||{}).name||'')+' — '+month);
+  const ov=document.getElementById('evalOverlay');if(ov)ov.remove();
+  toast('تم حفظ التقييم بنجاح','ok');
+  renderEvaluations();
 }
 
 // ── PAYROLL ──────────────────────────────────────────────────
@@ -3107,9 +3292,9 @@ function onPay(month,empId,field,val){
 // ── احسب الرواتب من الحضور تلقائياً ─────────────────────────
 function calcPayrollFromAtt(){
   const month=document.getElementById('payMonth').value;
-  if(!month){alert(t('errSelectMonth'));return}
+  if(!month){toast(t('errSelectMonth'),'err');return}
   const days=Object.keys(attendance).filter(d=>d.startsWith(month));
-  if(!days.length){alert(t('errNoAttRecord'));return}
+  if(!days.length){toast(t('errNoAttRecord'),'err');return}
   const proj=document.getElementById('payProj').value;
   const list=employees.filter(e=>!proj||e.project===proj);
   if(!payroll[month])payroll[month]={};
@@ -3134,9 +3319,9 @@ function calcPayrollFromAtt(){
     return att.A>0?`• ${e.name}: ${att.A} يوم غياب`:'';
   }).filter(Boolean);
   if(summary.length){
-    alert(t('msgPayrollCalcDone')+`\n\n📋 ${summary.slice(0,10).join('\n')}${summary.length>10?`\n...${t('dAndMore')}${summary.length-10}`:''}`);
+    toast(t('msgPayrollCalcDone')+` — ${summary.length} موظف لديهم غياب`,'ok');
   }else{
-    alert(t('msgNoAbsences'));
+    toast(t('msgNoAbsences'),'ok');
   }
 }
 
@@ -3195,7 +3380,7 @@ function renderAtt(){
 }
 
 function setAtt(date,empId,status,btn){
-  if(!date){alert(t('errSelectDate'));return}
+  if(!date){toast(t('errSelectDate'),'err');return}
   if(!attendance[date])attendance[date]={};
   const prev=attendance[date][empId];
   if(prev===status){delete attendance[date][empId]}
@@ -3205,7 +3390,7 @@ function setAtt(date,empId,status,btn){
 
 function markAllP(){
   const date=document.getElementById('attDate').value;
-  if(!date){alert(t('errSelectDate'));return}
+  if(!date){toast(t('errSelectDate'),'err');return}
   const proj=document.getElementById('attProj').value;
   if(!attendance[date])attendance[date]={};
   const myProj=getMyProject();
@@ -3421,7 +3606,7 @@ function renderLiveDashboard(){
 function renderWeeklyReport(){
   const weekStr=document.getElementById('repWeekPick').value;
   const proj=document.getElementById('repWeekProj').value;
-  if(!weekStr){alert('اختر الأسبوع أولاً');return;}
+  if(!weekStr){toast('اختر الأسبوع أولاً','warn');return;}
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
   const wDates=getWeekDates(weekStr);
@@ -3506,7 +3691,7 @@ function renderWeeklyReport(){
 function renderMonthlyReport(){
   const monthStr=document.getElementById('repMonthPick').value;
   const proj=document.getElementById('repMonthProj').value;
-  if(!monthStr){alert('اختر الشهر أولاً');return;}
+  if(!monthStr){toast('اختر الشهر أولاً','warn');return;}
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
   const mDates=getMonthDates(monthStr);
@@ -3596,7 +3781,7 @@ function renderCompareReport(){
   const m1=document.getElementById('repCmp1').value;
   const m2=document.getElementById('repCmp2').value;
   const proj=document.getElementById('repCmpProj').value;
-  if(!m1||!m2){alert('اختر شهرين للمقارنة');return;}
+  if(!m1||!m2){toast('اختر شهرين للمقارنة','warn');return;}
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
   const isMgr=currentUser&&currentUser.role==='manager';
@@ -3690,10 +3875,10 @@ function dlCSV(rows,name){
 
 // ── INIT ─────────────────────────────────────────────────────
 function initSelects(){
-  const saved={};['fltProj','payProj','attProj','attSumProj'].forEach(id=>{const el=document.getElementById(id);if(el)saved[id]=el.value});
+  const saved={};['fltProj','payProj','attProj','attSumProj','evalProj'].forEach(id=>{const el=document.getElementById(id);if(el)saved[id]=el.value});
   const opts=`<option value="">${t('allProjects')}</option>`+PROJS.map(p=>`<option value="${p}">${p}</option>`).join('');
   const myProj=getMyProject(); // array or null
-  ['fltProj','payProj','attProj','attSumProj'].forEach(id=>{
+  ['fltProj','payProj','attProj','attSumProj','evalProj'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
     if(myProj){
       // supervisor: show only their assigned projects
@@ -3722,6 +3907,7 @@ const thisMonth=today.substr(0,7);
 document.getElementById('attDate').value=today;
 document.getElementById('payMonth').value=thisMonth;
 document.getElementById('attSumMonth').value=thisMonth;
+{const em=document.getElementById('evalMonth');if(em)em.value=thisMonth;}
 
 // ── IQAMA ALERT BANNER ───────────────────────────────────────
 function showIqBanner(){

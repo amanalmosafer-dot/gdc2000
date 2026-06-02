@@ -233,7 +233,7 @@ td{padding:9px 12px;vertical-align:middle}
   .hdr-brand h1 span{display:none}
 }
 /* ── PRINT CARD (single employee) ── */
-#empPrintCard,#dailyAttPrint,#evalPrint,#empAttPrint{display:none}
+#empPrintCard,#dailyAttPrint,#evalPrint,#empAttPrint,#otReportPrint{display:none}
 .da-card{max-width:820px;margin:0 auto;background:#fff;font-family:'Tajawal','Segoe UI',Arial,sans-serif;direction:rtl;color:#0f172a}
 .da-hdr{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:3px solid #8d8253;padding-bottom:14px;margin-bottom:16px}
 .da-hdr img{height:42px;width:auto}
@@ -295,30 +295,36 @@ td{padding:9px 12px;vertical-align:middle}
   body.printing-ematt #empAttPrint *{display:revert!important}
   body.printing-ematt{background:#fff!important;margin:0!important;padding:0!important}
 
+  /* ══ طباعة تقرير الأوفر تايم ══ */
+  body.printing-ot *{display:none!important}
+  body.printing-ot #otReportPrint,
+  body.printing-ot #otReportPrint *{display:revert!important}
+  body.printing-ot{background:#fff!important;margin:0!important;padding:0!important}
+
   /* ══ الطباعة العادية (قائمة الموظفين، التقارير...) ══ */
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ematt) header,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ematt) #iqAlertBar,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .tabs,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .toolbar,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .proj-grid,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .hdr-actions,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .actions,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .no-print,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #toastWrap,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #devBanner,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #loginOverlay,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #modalBg,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #dailyAttPrint,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #evalPrint,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #empPrintCard{display:none!important}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt){background:#fff;color:#000}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .tab-content{display:none!important}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .tab-content.active{display:block!important}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .container{max-width:100%;margin:0;padding:0}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .tbl-wrap{box-shadow:none;border-radius:0;border:none}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) table{font-size:.79rem}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) thead th{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .print-title{display:block!important;text-align:center;font-size:1.2rem;font-weight:700;padding:10px}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-ematt) header,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-ematt) #iqAlertBar,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .tabs,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .toolbar,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .proj-grid,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .hdr-actions,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .actions,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .no-print,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #toastWrap,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #devBanner,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #loginOverlay,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #modalBg,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #dailyAttPrint,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #evalPrint,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #empPrintCard{display:none!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot){background:#fff;color:#000}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .tab-content{display:none!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .tab-content.active{display:block!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .container{max-width:100%;margin:0;padding:0}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .tbl-wrap{box-shadow:none;border-radius:0;border:none}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) table{font-size:.79rem}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) thead th{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .print-title{display:block!important;text-align:center;font-size:1.2rem;font-weight:700;padding:10px}
   .badge,.sbadge,.bbadge,.iq-ok,.iq-warn,.iq-bad{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .da-P,.da-A,.da-L,.da-T,.da-O{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .da-hdr{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -820,6 +826,7 @@ td{padding:9px 12px;vertical-align:middle}
     <button class="btn btn-success" onclick="savePayroll()">💾 حفظ</button>
     <button class="btn btn-info no-print" onclick="exportPayCSV()">⬇️ Excel</button>
     <button class="btn btn-info no-print" onclick="window.print()">🖨️ طباعة</button>
+    <button class="btn no-print" style="background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff" onclick="printOvertimeReport()">⏱️ تقرير الأوفر تايم</button>
   </div>
   <!-- ملخص الشهر -->
   <div id="payMonthlySummary" style="display:none;margin-bottom:14px">
@@ -1002,6 +1009,9 @@ td{padding:9px 12px;vertical-align:middle}
 
 <!-- EMPLOYEE MONTHLY ATTENDANCE PRINT -->
 <div id="empAttPrint"></div>
+
+<!-- OVERTIME REPORT PRINT -->
+<div id="otReportPrint"></div>
 
 <!-- TOAST NOTIFICATIONS -->
 <div id="toastWrap"></div>
@@ -2357,6 +2367,20 @@ function getCoverageOT(empId,month){
   });
   return hours;
 }
+// تفاصيل أيام الأوفر تايم: [{date, dayName, shift, status, hours}]
+function getCoverageOTDetails(empId,month){
+  const monthDays=getMonthDates(month);
+  const DNAMES=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const out=[];
+  monthDays.forEach(d=>{
+    const cov=getActiveCoverage(empId,d);
+    if(!cov)return;
+    const st=(attendance[d]||{})[empId]||'';
+    if(st!=='P'&&st!=='T')return;
+    out.push({date:d,dayName:DNAMES[new Date(d).getDay()],shift:SL[cov.coverShift]||cov.coverShift,status:st==='P'?'حاضر':'متأخر',hours:8});
+  });
+  return out;
+}
 
 // ── FIREBASE REAL-TIME SYNC ───────────────────────────────────
 function renderActive(){
@@ -3175,6 +3199,103 @@ function printEmpMonthlyAtt(empId){
   document.body.classList.add('printing-ematt');
   window.print();
   document.body.classList.remove('printing-ematt');
+}
+
+// تقرير الأوفر تايم الشامل — موظفين ↔ أيام ↔ شفت
+function printOvertimeReport(){
+  const month=document.getElementById('payMonth').value;
+  if(!month){toast('اختر الشهر أولاً','warn');return;}
+  const proj=document.getElementById('payProj').value;
+  const myProj=getMyProject();
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
+
+  // اجمع كل موظف عنده أوفر
+  const data=[];
+  let grandHours=0,grandAmount=0;
+  list.forEach(e=>{
+    const details=getCoverageOTDetails(e.id,month);
+    if(!details.length)return;
+    const hourlyRate=e.baseSalary?+(e.baseSalary/30/8).toFixed(2):0;
+    const totalHours=details.reduce((s,d)=>s+d.hours,0);
+    const totalAmount=+(totalHours*hourlyRate).toFixed(2);
+    grandHours+=totalHours;grandAmount+=totalAmount;
+    data.push({emp:e,details,totalHours,hourlyRate,totalAmount});
+  });
+
+  if(!data.length){toast('لا يوجد أوفر تايم في هذا الشهر','info');return;}
+
+  const isMgr=currentUser&&currentUser.role==='manager';
+  // بناء صفوف الجدول
+  const rows=data.map((rec,idx)=>{
+    const pi=PROJS.indexOf(rec.emp.project);
+    const projBadge=pi>=0?`<span class="badge ${BC[pi]||''}" style="-webkit-print-color-adjust:exact;print-color-adjust:exact">${rec.emp.project}</span>`:rec.emp.project;
+    // تفاصيل الأيام (مدمجة في خلية واحدة)
+    const dayCells=rec.details.map(d=>
+      `<div style="padding:3px 6px;border-bottom:1px dashed #e2e8f0;font-size:.72rem;display:flex;justify-content:space-between;gap:8px">
+        <span style="font-weight:700">${d.date.substr(8)}/${d.date.substr(5,2)}</span>
+        <span style="color:#64748b">${d.dayName}</span>
+        <span style="color:#0891b2;font-weight:600">${d.shift}</span>
+        <span style="color:#15803d;font-weight:700">${d.hours}h</span>
+      </div>`).join('');
+    return `<tr>
+      <td style="text-align:center;font-weight:600">${idx+1}</td>
+      <td style="font-weight:700;font-size:.85rem">${rec.emp.name}<br><span style="font-size:.7rem;color:#64748b">${rec.emp.empNum||'—'}</span></td>
+      <td style="text-align:center">${projBadge}</td>
+      <td style="text-align:center;color:#64748b;font-size:.75rem">${SL[rec.emp.shift||'-']||'—'}</td>
+      <td style="padding:0">${dayCells}</td>
+      <td style="text-align:center;font-weight:800;color:#0891b2;font-size:1.1rem">${rec.totalHours}<br><span style="font-size:.65rem;color:#64748b;font-weight:600">ساعة</span></td>
+      ${isMgr?`<td style="text-align:center;color:#64748b;font-size:.78rem">${rec.hourlyRate}</td>
+      <td style="text-align:center;font-weight:800;color:#15803d">${rec.totalAmount.toLocaleString()}</td>`:''}
+    </tr>`;
+  }).join('');
+
+  document.getElementById('otReportPrint').innerHTML=`
+    <div class="da-card" style="max-width:760px;font-size:.85rem">
+      <div class="da-hdr">
+        <img src="logo.png" alt="الإنماء الذهبية"/>
+        <div class="da-title">⏱️ تقرير الأوفر تايم<small style="font-size:.75rem">شركة الإنماء الذهبية للمقاولات العامة</small></div>
+        <div style="width:80px"></div>
+      </div>
+      <div style="background:#f4f1e8;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px;font-size:.8rem;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+        <div>📅 <b>الشهر:</b> ${month}</div>
+        <div>🏗 <b>المشروع:</b> ${proj||'كل المشاريع'}</div>
+        <div>👥 <b>عدد الموظفين:</b> ${data.length}</div>
+        <div>⏱️ <b>إجمالي الساعات:</b> <span style="color:#0891b2">${grandHours} ساعة</span></div>
+        ${isMgr?`<div>💰 <b>إجمالي المبلغ:</b> <span style="color:#15803d">${grandAmount.toLocaleString()} ﷼</span></div>`:''}
+        <div>🔄 <b>المصدر:</b> التغطية المؤقتة</div>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead style="-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <tr style="background:#0891b2;color:#fff">
+            <th style="padding:7px;font-size:.72rem">#</th>
+            <th style="padding:7px;font-size:.72rem">الموظف</th>
+            <th style="padding:7px;font-size:.72rem">المشروع</th>
+            <th style="padding:7px;font-size:.72rem">الشفت الأصلي</th>
+            <th style="padding:7px;font-size:.72rem">تفاصيل أيام الأوفر</th>
+            <th style="padding:7px;font-size:.72rem">المجموع</th>
+            ${isMgr?`<th style="padding:7px;font-size:.72rem">سعر الساعة</th>
+            <th style="padding:7px;font-size:.72rem">المبلغ ﷼</th>`:''}
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+        <tfoot style="-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <tr style="background:#f4f1e8;font-weight:800">
+            <td colspan="${isMgr?5:5}" style="padding:8px;text-align:left">الإجمالي</td>
+            <td style="padding:8px;text-align:center;color:#0891b2;font-size:1.05rem">${grandHours}h</td>
+            ${isMgr?`<td></td>
+            <td style="padding:8px;text-align:center;color:#15803d;font-size:1.05rem">${grandAmount.toLocaleString()}</td>`:''}
+          </tr>
+        </tfoot>
+      </table>
+      <div style="margin-top:10px;font-size:.7rem;color:#64748b;text-align:center">* الأوفر تايم محسوب تلقائياً: كل يوم حضور خلال فترة التغطية المؤقتة = 8 ساعات</div>
+      <div class="da-foot" style="margin-top:24px">
+        <div class="da-sign">المشرف / التوقيع</div>
+        <div class="da-sign">المدير / التوقيع</div>
+      </div>
+    </div>`;
+  document.body.classList.add('printing-ot');
+  window.print();
+  document.body.classList.remove('printing-ot');
 }
 
 // ── EVALUATION SYSTEM ─────────────────────────────────────────

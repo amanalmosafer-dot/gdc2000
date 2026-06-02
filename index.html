@@ -233,15 +233,7 @@ td{padding:9px 12px;vertical-align:middle}
   .hdr-brand h1 span{display:none}
 }
 /* ── PRINT CARD (single employee) ── */
-#empPrintCard{display:none}
-body.printing-emp #empPrintCard{display:block!important}
-body.printing-emp>*:not(#empPrintCard){display:none!important}
-/* ── BRANDED PRINT SHEETS (attendance + evaluation) ── */
-#dailyAttPrint,#evalPrint{display:none}
-body.printing-att #dailyAttPrint{display:block!important}
-body.printing-att>*:not(#dailyAttPrint){display:none!important}
-body.printing-eval #evalPrint{display:block!important}
-body.printing-eval>*:not(#evalPrint){display:none!important}
+#empPrintCard,#dailyAttPrint,#evalPrint{display:none}
 .da-card{max-width:820px;margin:0 auto;background:#fff;font-family:'Tajawal','Segoe UI',Arial,sans-serif;direction:rtl;color:#0f172a}
 .da-hdr{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:3px solid #8d8253;padding-bottom:14px;margin-bottom:16px}
 .da-hdr img{height:42px;width:auto}
@@ -258,7 +250,7 @@ body.printing-eval>*:not(#evalPrint){display:none!important}
 .da-sum span{padding:6px 14px;border:1px solid #d6cfb8;border-radius:8px}
 .da-foot{display:flex;justify-content:space-between;margin-top:40px;font-size:.85rem}
 .da-sign{border-top:1px solid #94a3b8;padding-top:6px;min-width:200px;text-align:center;color:#64748b}
-@media print{ body.printing-att,body.printing-eval{background:#fff} .da-card{max-width:100%} }
+.da-card{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 #empPrintCard .pc-card{max-width:680px;margin:0 auto;background:#fff;font-family:'Segoe UI',Tahoma,Arial,sans-serif;direction:rtl;color:#0f172a}
 #empPrintCard .pc-hdr{padding:26px 30px;display:flex;align-items:center;gap:20px;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 #empPrintCard .pc-av{width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.2);border:3px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;flex-shrink:0;overflow:hidden}
@@ -279,33 +271,55 @@ body.printing-eval>*:not(#evalPrint){display:none!important}
 #empPrintCard .pc-foot{background:#f8fafc;padding:12px 30px;display:flex;justify-content:space-between;border:1px solid #e2e8f0;border-top:none;font-size:.73rem;color:#94a3b8;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 /* ── PRINT ── */
 @media print{
-  header,#iqAlertBar,.tabs,.toolbar,.proj-grid,.hdr-actions,.actions,.no-print{display:none!important}
-  body{background:#fff;color:#000}
-  .container{max-width:100%;margin:0;padding:0}
-  .tbl-wrap{box-shadow:none;border-radius:0;border:none}
-  table{font-size:.79rem}
-  thead th{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;cursor:default}
-  .badge,.sbadge,.bbadge,.iq-ok,.iq-warn,.iq-bad,.bp0,.bp1,.bp2,.bp3{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .grow td,.srow td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  /* ══ طباعة بطاقة الموظف ══ */
+  body.printing-emp *{display:none!important}
+  body.printing-emp #empPrintCard,
+  body.printing-emp #empPrintCard *{display:revert!important}
+  body.printing-emp{background:#fff!important;margin:0!important;padding:0!important}
+
+  /* ══ طباعة التحضير اليومي ══ */
+  body.printing-att *{display:none!important}
+  body.printing-att #dailyAttPrint,
+  body.printing-att #dailyAttPrint *{display:revert!important}
+  body.printing-att{background:#fff!important;margin:0!important;padding:0!important}
+
+  /* ══ طباعة التقييم ══ */
+  body.printing-eval *{display:none!important}
+  body.printing-eval #evalPrint,
+  body.printing-eval #evalPrint *{display:revert!important}
+  body.printing-eval{background:#fff!important;margin:0!important;padding:0!important}
+
+  /* ══ الطباعة العادية (قائمة الموظفين، التقارير...) ══ */
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) header,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #iqAlertBar,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .tabs,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .toolbar,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .proj-grid,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .hdr-actions,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .actions,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .no-print,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #toastWrap,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #devBanner,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #loginOverlay,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #modalBg,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #dailyAttPrint,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #evalPrint,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #empPrintCard{display:none!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval){background:#fff;color:#000}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .tab-content{display:none!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .tab-content.active{display:block!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .container{max-width:100%;margin:0;padding:0}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .tbl-wrap{box-shadow:none;border-radius:0;border:none}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) table{font-size:.79rem}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) thead th{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .print-title{display:block!important;text-align:center;font-size:1.2rem;font-weight:700;padding:10px}
+  .badge,.sbadge,.bbadge,.iq-ok,.iq-warn,.iq-bad{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .da-P,.da-A,.da-L,.da-T,.da-O{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .da-hdr{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   tbody tr{page-break-inside:avoid}
-  /* ── إظهار كامل التفاصيل عند الطباعة ── */
-  .exp-row{display:table-row!important}
+  .exp-row{display:table-row!important;page-break-inside:avoid}
   .exp-row td{padding:0!important;border-bottom:1px solid #e2e8f0!important}
   .exp-inner{padding:8px 14px!important;background:#fafafa!important;display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:6px 16px!important;font-size:.74rem!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .exp-lbl{font-size:.65rem!important}
-  .exp-val a{color:#166534!important;text-decoration:none!important}
-  .name-btn .arr{display:none!important}
-  .name-btn{cursor:default!important;font-size:.84rem!important}
-  tbody tr:not(.exp-row){page-break-after:avoid}
-  .exp-row{page-break-before:avoid;page-break-inside:avoid}
-  .iq-ok,.iq-warn,.iq-bad{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .st-active,.st-leave,.st-terminated{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .tab-content{display:none!important}
-  .tab-content.active{display:block!important}
-  .print-title{display:block!important;text-align:center;font-size:1.2rem;font-weight:700;padding:10px}
-  .grow{page-break-before:always}
-  .grow:first-of-type{page-break-before:avoid}
-  tbody tr.exp-row{page-break-inside:avoid}
 }
 /* ── TOOLS DROPDOWN ── */
 .tools-wrap{position:relative;display:inline-block}

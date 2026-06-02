@@ -235,6 +235,30 @@ td{padding:9px 12px;vertical-align:middle}
 #empPrintCard{display:none}
 body.printing-emp #empPrintCard{display:block!important}
 body.printing-emp>*:not(#empPrintCard){display:none!important}
+/* ── DAILY ATTENDANCE PRINT ── */
+#dailyAttPrint{display:none}
+body.printing-att #dailyAttPrint{display:block!important}
+body.printing-att>*:not(#dailyAttPrint){display:none!important}
+#dailyAttPrint .da-card{max-width:760px;margin:0 auto;background:#fff;font-family:'Tajawal','Segoe UI',Arial,sans-serif;direction:rtl;color:#0f172a}
+#dailyAttPrint .da-hdr{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:3px solid #8d8253;padding-bottom:14px;margin-bottom:16px}
+#dailyAttPrint .da-hdr img{height:42px;width:auto}
+#dailyAttPrint .da-title{font-size:1.25rem;font-weight:800;text-align:center;flex:1}
+#dailyAttPrint .da-title small{display:block;font-size:.8rem;font-weight:600;color:#64748b;margin-top:3px}
+#dailyAttPrint .da-meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:.85rem;margin-bottom:14px;font-weight:600}
+#dailyAttPrint .da-meta b{color:#8d8253}
+#dailyAttPrint table{width:100%;border-collapse:collapse;font-size:.84rem}
+#dailyAttPrint thead th{background:#f4f1e8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #d6cfb8;padding:8px 6px;font-weight:700;text-align:center}
+#dailyAttPrint tbody td{border:1px solid #d6cfb8;padding:7px 6px;text-align:center}
+#dailyAttPrint tbody td.nm{text-align:right;font-weight:600}
+#dailyAttPrint .da-P{color:#15803d;font-weight:800}
+#dailyAttPrint .da-A{color:#b91c1c;font-weight:800}
+#dailyAttPrint .da-L{color:#a16207;font-weight:800}
+#dailyAttPrint .da-T{color:#6d28d9;font-weight:800}
+#dailyAttPrint .da-sum{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:.9rem;font-weight:700}
+#dailyAttPrint .da-sum span{padding:6px 14px;border:1px solid #d6cfb8;border-radius:8px}
+#dailyAttPrint .da-foot{display:flex;justify-content:space-between;margin-top:40px;font-size:.85rem}
+#dailyAttPrint .da-sign{border-top:1px solid #94a3b8;padding-top:6px;min-width:200px;text-align:center;color:#64748b}
+@media print{ body.printing-att{background:#fff} #dailyAttPrint .da-card{max-width:100%} }
 #empPrintCard .pc-card{max-width:680px;margin:0 auto;background:#fff;font-family:'Segoe UI',Tahoma,Arial,sans-serif;direction:rtl;color:#0f172a}
 #empPrintCard .pc-hdr{padding:26px 30px;display:flex;align-items:center;gap:20px;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 #empPrintCard .pc-av{width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.2);border:3px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;flex-shrink:0;overflow:hidden}
@@ -794,6 +818,7 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
     <select id="attProj" onchange="renderAtt()"><option value="">كل المشاريع</option></select>
     <div class="spacer"></div>
     <div id="attSum" style="font-size:.83rem;display:flex;gap:12px;color:var(--txt2)"></div>
+    <button class="btn btn-info no-print" onclick="printDailyAtt()">🖨️ طباعة تحضير اليوم</button>
     <button class="btn btn-success no-print" onclick="markAllP()">✓ تحضير الكل</button>
   </div>
   <div class="tbl-wrap">
@@ -899,6 +924,9 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
 
 <!-- EMPLOYEE PRINT CARD -->
 <div id="empPrintCard"></div>
+
+<!-- DAILY ATTENDANCE PRINT SHEET -->
+<div id="dailyAttPrint"></div>
 
 <!-- DRAWER -->
 <div class="modal-bg" id="modalBg">
@@ -2871,6 +2899,63 @@ function printEmp(idx){
   document.body.classList.add('printing-emp');
   window.print();
   document.body.classList.remove('printing-emp');
+}
+
+function printDailyAtt(){
+  const date=document.getElementById('attDate').value;
+  if(!date){alert(t('errSelectDate'));return}
+  const proj=document.getElementById('attProj').value;
+  const myProj=getMyProject();
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
+  const day=attendance[date]||{};
+  const STMAP={P:['حاضر','da-P'],A:['غائب','da-A'],L:['إجازة','da-L'],T:['تأخير','da-T']};
+  let P=0,A=0,L=0,T=0,N=0;
+  const rows=list.map((e,i)=>{
+    const st=day[e.id]||'';
+    if(st==='P')P++;else if(st==='A')A++;else if(st==='L')L++;else if(st==='T')T++;else N++;
+    const cell=st&&STMAP[st]?`<span class="${STMAP[st][1]}">${STMAP[st][0]}</span>`:'<span style="color:#94a3b8">—</span>';
+    return `<tr>
+      <td>${i+1}</td>
+      <td class="nm">${e.name}</td>
+      <td>${e.empNum||'—'}</td>
+      <td>${e.project}</td>
+      <td>${SL[e.shift||'-']||'—'}</td>
+      <td>${cell}</td>
+    </tr>`;
+  }).join('');
+  // تنسيق التاريخ
+  let dlabel=date;try{dlabel=new Date(date).toLocaleDateString('ar-SA-u-nu-latn',{weekday:'long',year:'numeric',month:'long',day:'numeric'});}catch(e){}
+  document.getElementById('dailyAttPrint').innerHTML=`
+    <div class="da-card">
+      <div class="da-hdr">
+        <img src="logo.png" alt="الإنماء الذهبية"/>
+        <div class="da-title">تقرير التحضير اليومي<small>شركة الإنماء الذهبية للمقاولات العامة</small></div>
+        <div style="width:120px"></div>
+      </div>
+      <div class="da-meta">
+        <div>📅 التاريخ: <b>${dlabel}</b></div>
+        <div>🏗 المشروع: <b>${proj||'كل المشاريع'}</b></div>
+        <div>👥 العدد: <b>${list.length}</b></div>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>الاسم</th><th>رقم الموظف</th><th>المشروع</th><th>الشفت</th><th>الحالة</th></tr></thead>
+        <tbody>${rows||'<tr><td colspan="6">لا يوجد موظفون</td></tr>'}</tbody>
+      </table>
+      <div class="da-sum">
+        <span class="da-P">✓ حاضر: ${P}</span>
+        <span class="da-A">✗ غائب: ${A}</span>
+        <span class="da-L">⊙ إجازة: ${L}</span>
+        <span class="da-T">⏱ تأخير: ${T}</span>
+        ${N?`<span style="color:#94a3b8">○ لم يُسجّل: ${N}</span>`:''}
+      </div>
+      <div class="da-foot">
+        <div class="da-sign">اسم المشرف / التوقيع</div>
+        <div class="da-sign">المدير / التوقيع</div>
+      </div>
+    </div>`;
+  document.body.classList.add('printing-att');
+  window.print();
+  document.body.classList.remove('printing-att');
 }
 
 // ── PAYROLL ──────────────────────────────────────────────────

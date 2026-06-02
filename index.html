@@ -3095,82 +3095,64 @@ function printDailyAtt(){
 
 function printEmpMonthlyAtt(empId){
   const e=employees.find(x=>x.id===empId);if(!e)return;
-  // اسأل عن الشهر
   const curMonth=localDateStr(new Date()).substr(0,7);
   const month=prompt('اختر الشهر (مثال: 2026-06):',curMonth);
   if(!month)return;
   const days=getMonthDates(month);
+  const STMAP={P:['حاضر','da-P'],A:['غائب','da-A'],L:['إجازة','da-L'],T:['تأخير','da-T'],O:['راحة','da-O']};
+  const DNAMES=['أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
   const dayData=days.map(d=>{
     const s=(attendance[d]||{})[empId]||'';
     const dow=new Date(d).getDay();
-    const dayName=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'][dow];
-    const STMAP={P:['حاضر','da-P'],A:['غائب','da-A'],L:['إجازة','da-L'],T:['تأخير','da-T'],O:['راحة','da-O']};
-    const cell=s&&STMAP[s]?`<span class="${STMAP[s][1]}">${STMAP[s][0]}</span>`:(dow===5?'<span style="color:#94a3b8">جمعة</span>':'<span style="color:#94a3b8">—</span>');
-    return{d,dayName,cell,s};
+    const cell=s&&STMAP[s]?`<span class="${STMAP[s][1]}">${STMAP[s][0]}</span>`:(dow===5?'<span style="color:#bbb">جمعة</span>':'—');
+    return{d,dn:DNAMES[dow],cell};
   });
   const att=getAttCount(month,empId);
   const totalWork=att.P+att.A+att.T;
   const attPct=totalWork?Math.round((att.P+att.T)/totalWork*100):0;
-  const pi=PROJS.indexOf(e.project);
-  const rows=dayData.map((r,i)=>`<tr>
-    <td>${i+1}</td>
-    <td style="font-weight:600">${r.d.substr(5)}</td>
-    <td>${r.dayName}</td>
-    <td>${r.cell}</td>
-  </tr>`).join('');
+  // تقسيم لعمودين (1-16 يمين، 17-31 يسار)
+  const half=Math.ceil(days.length/2);
+  const mkRow=(r,i)=>`<td style="padding:2px 4px;font-size:.72rem;color:#555">${i+1}</td><td style="padding:2px 4px;font-size:.72rem">${r.d.substr(8)}</td><td style="padding:2px 4px;font-size:.72rem">${r.dn}</td><td style="padding:2px 5px;font-size:.75rem">${r.cell}</td>`;
+  let tblRows='';
+  for(let i=0;i<half;i++){
+    const left=dayData[i];
+    const right=dayData[i+half];
+    tblRows+=`<tr style="border-bottom:1px solid #e5e1d5">${mkRow(left,i)}<td style="width:8px;border-left:2px solid #d6cfb8"></td>${right?mkRow(right,i+half):'<td colspan="4"></td>'}</tr>`;
+  }
+  const mkSum=(n,lbl,bg,clr)=>`<div style="background:${bg};padding:6px 8px;border-radius:6px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact"><span style="font-size:1.1rem;font-weight:800;color:${clr}">${n}</span><br><span style="font-size:.62rem;font-weight:700;color:${clr}">${lbl}</span></div>`;
 
   document.getElementById('empAttPrint').innerHTML=`
-    <div class="da-card">
-      <div class="da-hdr">
-        <img src="logo.png" alt="الإنماء الذهبية"/>
-        <div class="da-title">تقرير الحضور الشهري<small>شركة الإنماء الذهبية للمقاولات العامة</small></div>
-        <div style="width:120px"></div>
+    <div class="da-card" style="font-size:.82rem;max-width:700px">
+      <div class="da-hdr" style="padding-bottom:10px;margin-bottom:10px">
+        <img src="logo.png" alt="الإنماء الذهبية" style="height:32px"/>
+        <div class="da-title" style="font-size:1.05rem">تقرير الحضور الشهري<small style="font-size:.7rem">شركة الإنماء الذهبية للمقاولات العامة</small></div>
+        <div style="width:80px"></div>
       </div>
-
-      <div style="background:#f4f1e8;border-radius:12px;padding:16px 18px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;font-size:.88rem;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-        <div>👤 <b>الاسم:</b> ${e.name}</div>
-        <div>🆔 <b>الرقم:</b> ${e.empNum||'—'}</div>
-        <div>🏗 <b>المشروع:</b> ${e.project}</div>
-        <div>⏰ <b>الشفت:</b> ${SL[e.shift||'-']||'—'}</div>
-        <div>📅 <b>الشهر:</b> ${month}</div>
-        <div>🏷 <b>المسمى:</b> ${e.title||'—'}</div>
+      <div style="background:#f4f1e8;border-radius:8px;padding:10px 14px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 14px;font-size:.76rem;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+        <div>👤 <b>${e.name}</b></div>
+        <div>🆔 ${e.empNum||'—'}</div>
+        <div>📅 <b>${month}</b></div>
+        <div>🏗 ${e.project}</div>
+        <div>⏰ ${SL[e.shift||'-']||'—'}</div>
+        <div>🏷 ${e.title||'—'}</div>
       </div>
-
-      <table>
-        <thead><tr><th>#</th><th>التاريخ</th><th>اليوم</th><th>الحالة</th></tr></thead>
-        <tbody>${rows}</tbody>
+      <table style="width:100%;border-collapse:collapse;border:1px solid #d6cfb8">
+        <thead><tr style="background:#f4f1e8;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <th style="padding:3px;font-size:.65rem">#</th><th style="padding:3px;font-size:.65rem">تاريخ</th><th style="padding:3px;font-size:.65rem">يوم</th><th style="padding:3px;font-size:.65rem">الحالة</th>
+          <th style="width:8px;border-left:2px solid #d6cfb8"></th>
+          <th style="padding:3px;font-size:.65rem">#</th><th style="padding:3px;font-size:.65rem">تاريخ</th><th style="padding:3px;font-size:.65rem">يوم</th><th style="padding:3px;font-size:.65rem">الحالة</th>
+        </tr></thead>
+        <tbody>${tblRows}</tbody>
       </table>
-
-      <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center">
-        <div style="background:#dcfce7;padding:12px;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-          <div style="font-size:1.5rem;font-weight:800;color:#15803d">${att.P}</div>
-          <div style="font-size:.78rem;font-weight:700;color:#15803d">أيام حضور</div>
-        </div>
-        <div style="background:#fee2e2;padding:12px;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-          <div style="font-size:1.5rem;font-weight:800;color:#b91c1c">${att.A}</div>
-          <div style="font-size:.78rem;font-weight:700;color:#b91c1c">أيام غياب</div>
-        </div>
-        <div style="background:#fef9c3;padding:12px;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-          <div style="font-size:1.5rem;font-weight:800;color:#a16207">${att.L}</div>
-          <div style="font-size:.78rem;font-weight:700;color:#a16207">أيام إجازة</div>
-        </div>
+      <div style="margin-top:10px;display:grid;grid-template-columns:repeat(6,1fr);gap:6px">
+        ${mkSum(att.P,'حضور','#dcfce7','#15803d')}
+        ${mkSum(att.A,'غياب','#fee2e2','#b91c1c')}
+        ${mkSum(att.L,'إجازة','#fef9c3','#a16207')}
+        ${mkSum(att.T,'تأخير','#ede9fe','#6d28d9')}
+        ${mkSum(att.O||0,'راحة','#cffafe','#0e7490')}
+        ${mkSum(attPct+'%','حضور','#dbeafe','#1d4ed8')}
       </div>
-      <div style="margin-top:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center">
-        <div style="background:#ede9fe;padding:12px;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-          <div style="font-size:1.5rem;font-weight:800;color:#6d28d9">${att.T}</div>
-          <div style="font-size:.78rem;font-weight:700;color:#6d28d9">تأخير</div>
-        </div>
-        <div style="background:#cffafe;padding:12px;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-          <div style="font-size:1.5rem;font-weight:800;color:#0e7490">${att.O||0}</div>
-          <div style="font-size:.78rem;font-weight:700;color:#0e7490">راحة</div>
-        </div>
-        <div style="background:#dbeafe;padding:12px;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-          <div style="font-size:1.5rem;font-weight:800;color:#1d4ed8">${attPct}%</div>
-          <div style="font-size:.78rem;font-weight:700;color:#1d4ed8">نسبة الحضور</div>
-        </div>
-      </div>
-
-      <div class="da-foot">
+      <div class="da-foot" style="margin-top:20px">
         <div class="da-sign">المشرف / التوقيع</div>
         <div class="da-sign">المدير / التوقيع</div>
       </div>

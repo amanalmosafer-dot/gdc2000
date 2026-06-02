@@ -233,7 +233,7 @@ td{padding:9px 12px;vertical-align:middle}
   .hdr-brand h1 span{display:none}
 }
 /* ── PRINT CARD (single employee) ── */
-#empPrintCard,#dailyAttPrint,#evalPrint{display:none}
+#empPrintCard,#dailyAttPrint,#evalPrint,#empAttPrint{display:none}
 .da-card{max-width:820px;margin:0 auto;background:#fff;font-family:'Tajawal','Segoe UI',Arial,sans-serif;direction:rtl;color:#0f172a}
 .da-hdr{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:3px solid #8d8253;padding-bottom:14px;margin-bottom:16px}
 .da-hdr img{height:42px;width:auto}
@@ -289,30 +289,36 @@ td{padding:9px 12px;vertical-align:middle}
   body.printing-eval #evalPrint *{display:revert!important}
   body.printing-eval{background:#fff!important;margin:0!important;padding:0!important}
 
+  /* ══ طباعة تقرير حضور موظف ══ */
+  body.printing-ematt *{display:none!important}
+  body.printing-ematt #empAttPrint,
+  body.printing-ematt #empAttPrint *{display:revert!important}
+  body.printing-ematt{background:#fff!important;margin:0!important;padding:0!important}
+
   /* ══ الطباعة العادية (قائمة الموظفين، التقارير...) ══ */
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) header,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #iqAlertBar,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .tabs,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .toolbar,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .proj-grid,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .hdr-actions,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .actions,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .no-print,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #toastWrap,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #devBanner,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #loginOverlay,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #modalBg,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #dailyAttPrint,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #evalPrint,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) #empPrintCard{display:none!important}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval){background:#fff;color:#000}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .tab-content{display:none!important}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .tab-content.active{display:block!important}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .container{max-width:100%;margin:0;padding:0}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .tbl-wrap{box-shadow:none;border-radius:0;border:none}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) table{font-size:.79rem}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) thead th{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval) .print-title{display:block!important;text-align:center;font-size:1.2rem;font-weight:700;padding:10px}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ematt) header,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ematt) #iqAlertBar,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .tabs,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .toolbar,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .proj-grid,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .hdr-actions,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .actions,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .no-print,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #toastWrap,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #devBanner,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #loginOverlay,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #modalBg,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #dailyAttPrint,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #evalPrint,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) #empPrintCard{display:none!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt){background:#fff;color:#000}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .tab-content{display:none!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .tab-content.active{display:block!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .container{max-width:100%;margin:0;padding:0}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .tbl-wrap{box-shadow:none;border-radius:0;border:none}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) table{font-size:.79rem}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) thead th{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt) .print-title{display:block!important;text-align:center;font-size:1.2rem;font-weight:700;padding:10px}
   .badge,.sbadge,.bbadge,.iq-ok,.iq-warn,.iq-bad{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .da-P,.da-A,.da-L,.da-T,.da-O{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .da-hdr{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -993,6 +999,9 @@ td{padding:9px 12px;vertical-align:middle}
 
 <!-- EVALUATION PRINT SHEET -->
 <div id="evalPrint"></div>
+
+<!-- EMPLOYEE MONTHLY ATTENDANCE PRINT -->
+<div id="empAttPrint"></div>
 
 <!-- TOAST NOTIFICATIONS -->
 <div id="toastWrap"></div>
@@ -2767,6 +2776,7 @@ function mkRow(e,n,pi){
       ${can('employees_edit')?`<button class="btn btn-warn btn-sm" onclick="openEdit(${idx})" title="تعديل">✏️</button>`:''}
       ${can('employees_delete')?`<button class="btn btn-danger btn-sm" onclick="delEmp(${idx})" title="حذف">🗑️</button>`:''}
       ${can('employees_view')?`<button class="btn btn-info btn-sm" onclick="printEmp(${idx})" title="${t('printEmpCardTitle')}">🖨️</button>`:''}
+      ${can('attendance')?`<button class="btn btn-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff" onclick="printEmpMonthlyAtt('${e.id}')" title="تقرير حضور شهري">📋</button>`:''}
       ${can('evaluation')?`<button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border)" onclick="quickEval('${e.id}')" title="تقييم">⭐</button>`:''}
     </div></td>`;
 
@@ -3081,6 +3091,93 @@ function printDailyAtt(){
   document.body.classList.add('printing-att');
   window.print();
   document.body.classList.remove('printing-att');
+}
+
+function printEmpMonthlyAtt(empId){
+  const e=employees.find(x=>x.id===empId);if(!e)return;
+  // اسأل عن الشهر
+  const curMonth=localDateStr(new Date()).substr(0,7);
+  const month=prompt('اختر الشهر (مثال: 2026-06):',curMonth);
+  if(!month)return;
+  const days=getMonthDates(month);
+  const dayData=days.map(d=>{
+    const s=(attendance[d]||{})[empId]||'';
+    const dow=new Date(d).getDay();
+    const dayName=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'][dow];
+    const STMAP={P:['حاضر','da-P'],A:['غائب','da-A'],L:['إجازة','da-L'],T:['تأخير','da-T'],O:['راحة','da-O']};
+    const cell=s&&STMAP[s]?`<span class="${STMAP[s][1]}">${STMAP[s][0]}</span>`:(dow===5?'<span style="color:#94a3b8">جمعة</span>':'<span style="color:#94a3b8">—</span>');
+    return{d,dayName,cell,s};
+  });
+  const att=getAttCount(month,empId);
+  const totalWork=att.P+att.A+att.T;
+  const attPct=totalWork?Math.round((att.P+att.T)/totalWork*100):0;
+  const pi=PROJS.indexOf(e.project);
+  const rows=dayData.map((r,i)=>`<tr>
+    <td>${i+1}</td>
+    <td style="font-weight:600">${r.d.substr(5)}</td>
+    <td>${r.dayName}</td>
+    <td>${r.cell}</td>
+  </tr>`).join('');
+
+  document.getElementById('empAttPrint').innerHTML=`
+    <div class="da-card">
+      <div class="da-hdr">
+        <img src="logo.png" alt="الإنماء الذهبية"/>
+        <div class="da-title">تقرير الحضور الشهري<small>شركة الإنماء الذهبية للمقاولات العامة</small></div>
+        <div style="width:120px"></div>
+      </div>
+
+      <div style="background:#f4f1e8;border-radius:12px;padding:16px 18px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;font-size:.88rem;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+        <div>👤 <b>الاسم:</b> ${e.name}</div>
+        <div>🆔 <b>الرقم:</b> ${e.empNum||'—'}</div>
+        <div>🏗 <b>المشروع:</b> ${e.project}</div>
+        <div>⏰ <b>الشفت:</b> ${SL[e.shift||'-']||'—'}</div>
+        <div>📅 <b>الشهر:</b> ${month}</div>
+        <div>🏷 <b>المسمى:</b> ${e.title||'—'}</div>
+      </div>
+
+      <table>
+        <thead><tr><th>#</th><th>التاريخ</th><th>اليوم</th><th>الحالة</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+
+      <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center">
+        <div style="background:#dcfce7;padding:12px;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <div style="font-size:1.5rem;font-weight:800;color:#15803d">${att.P}</div>
+          <div style="font-size:.78rem;font-weight:700;color:#15803d">أيام حضور</div>
+        </div>
+        <div style="background:#fee2e2;padding:12px;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <div style="font-size:1.5rem;font-weight:800;color:#b91c1c">${att.A}</div>
+          <div style="font-size:.78rem;font-weight:700;color:#b91c1c">أيام غياب</div>
+        </div>
+        <div style="background:#fef9c3;padding:12px;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <div style="font-size:1.5rem;font-weight:800;color:#a16207">${att.L}</div>
+          <div style="font-size:.78rem;font-weight:700;color:#a16207">أيام إجازة</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center">
+        <div style="background:#ede9fe;padding:12px;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <div style="font-size:1.5rem;font-weight:800;color:#6d28d9">${att.T}</div>
+          <div style="font-size:.78rem;font-weight:700;color:#6d28d9">تأخير</div>
+        </div>
+        <div style="background:#cffafe;padding:12px;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <div style="font-size:1.5rem;font-weight:800;color:#0e7490">${att.O||0}</div>
+          <div style="font-size:.78rem;font-weight:700;color:#0e7490">راحة</div>
+        </div>
+        <div style="background:#dbeafe;padding:12px;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <div style="font-size:1.5rem;font-weight:800;color:#1d4ed8">${attPct}%</div>
+          <div style="font-size:.78rem;font-weight:700;color:#1d4ed8">نسبة الحضور</div>
+        </div>
+      </div>
+
+      <div class="da-foot">
+        <div class="da-sign">المشرف / التوقيع</div>
+        <div class="da-sign">المدير / التوقيع</div>
+      </div>
+    </div>`;
+  document.body.classList.add('printing-ematt');
+  window.print();
+  document.body.classList.remove('printing-ematt');
 }
 
 // ── EVALUATION SYSTEM ─────────────────────────────────────────

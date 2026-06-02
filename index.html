@@ -538,6 +538,8 @@ body.printing-emp>*:not(#empPrintCard){display:none!important}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<!-- بيانات التطوير المحلي (يُحمّل فقط عند فتح الملف محلياً؛ غير موجود على الموقع) -->
+<script src="dev-seed.js" onerror="window.DEV_SEED=null"></script>
 </head>
 <body>
 
@@ -1530,6 +1532,15 @@ function doLogin(){
   const errEl=document.getElementById('loginErr');
   errEl.classList.remove('show');
   if(!uname||!pass){errEl.textContent=t('errLoginRequired');errEl.classList.add('show');return}
+  // وضع التطوير: دخول محلي مبسّط بدون Firebase
+  if(DEV_MODE){
+    if(uname==='admin'&&pass==='admin'){
+      currentUser={id:'devadmin',uid:'devadmin',username:'admin',role:'manager',permissions:[],assignedProjects:[]};
+    }else{
+      currentUser={id:'devsup',uid:'devsup',username:uname,role:'supervisor',permissions:['dashboard','employees_view','attendance','reports','payroll'],assignedProjects:[]};
+    }
+    sessionStorage.setItem('authUser',JSON.stringify(currentUser));showApp();return;
+  }
   const btn=document.querySelector('.login-btn');
   if(btn){btn.disabled=true;if(!btn.dataset.txt)btn.dataset.txt=btn.textContent;btn.textContent='⏳ ...';}
   auth.signInWithEmailAndPassword(uname2email(uname),pass)
@@ -1607,7 +1618,23 @@ function showApp(){
   showIqBanner();
 }
 
+function showDevBanner(){
+  if(document.getElementById('devBanner'))return;
+  const b=document.createElement('div');
+  b.id='devBanner';
+  b.textContent='🛠️ وضع التطوير المحلي — بيانات تجريبية معزولة (الموقع الحي غير متأثر) — دخول: admin / admin';
+  b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#f59e0b;color:#000;font-weight:700;font-size:.8rem;text-align:center;padding:6px 10px;font-family:Tajawal,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.3)';
+  document.body.appendChild(b);
+  document.body.style.paddingTop='30px';
+}
+
 function initAuth(){
+  if(DEV_MODE){
+    showDevBanner();
+    if(currentUser){showApp();}
+    else{document.getElementById('loginOverlay').classList.remove('hidden');}
+    return;
+  }
   // الجلسة تنتهي بإغلاق التبويب (أكثر أماناً)
   auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(()=>{});
   // عند تأكيد المصادقة: فعّل مزامنة البيانات. وإن لم يوجد مستخدم، أعِد لشاشة الدخول
@@ -1691,6 +1718,11 @@ function addUserFromForm(){
   if(users.find(u=>u.username===username)){errEl.textContent=t('errUserExists');return}
   const perms=role==='manager'?[]:Array.from(document.querySelectorAll('.nuPerm:checked')).map(cb=>cb.value);
   const assignedProjects=role==='manager'?[]:Array.from(document.querySelectorAll('.nuProjCb:checked')).map(cb=>cb.value);
+  // وضع التطوير: إنشاء محلي بدون Firebase
+  if(DEV_MODE){
+    const all=loadUsers();all.push({id:'u'+Date.now(),username,role,permissions:perms,assignedProjects});
+    saveUsers(all);errEl.style.color='#16a34a';errEl.textContent='✅ (محلي) تم';renderUsersModal();return;
+  }
   errEl.style.color='var(--txt2)';errEl.textContent='⏳ جاري إنشاء الحساب...';
   // إنشاء حساب Firebase Auth عبر نسخة ثانوية حتى لا يخرج المدير من حسابه
   const secApp=firebase.apps.find(a=>a.name==='sec')||firebase.initializeApp(firebaseConfig,'sec');
@@ -2062,6 +2094,20 @@ const auth=firebase.auth();
 var fbReady=false;
 // المستخدم يكتب اسمه فقط، ونحوّله داخلياً لبريد ثابت
 function uname2email(u){return u.includes('@')?u:u.toLowerCase()+'@gdc2000.local';}
+
+// ── وضع التطوير المحلي ────────────────────────────────────────
+// يُفعّل تلقائياً عند فتح الملف محلياً (file://) مع وجود بيانات تجريبية.
+// في هذا الوضع: لا اتصال بالقاعدة الحية إطلاقاً — كل شيء محلي وآمن.
+const DEV_MODE=((location.protocol==='file:')||location.hostname==='localhost'||location.hostname==='127.0.0.1')&&!!window.DEV_SEED;
+if(DEV_MODE&&localStorage.getItem('devSeeded')!=='1'){
+  try{
+    localStorage.setItem('employees',JSON.stringify(window.DEV_SEED.employees||[]));
+    localStorage.setItem('attendance',JSON.stringify(window.DEV_SEED.attendance||{}));
+    localStorage.setItem('payroll',JSON.stringify(window.DEV_SEED.payroll||{}));
+    localStorage.setItem('empV','12');localStorage.setItem('hqV','1');
+    localStorage.setItem('devSeeded','1');
+  }catch(e){console.warn('dev seed:',e);}
+}
 
 // ── LOAD DATA ────────────────────────────────────────────────
 let employees = JSON.parse(localStorage.getItem('employees')||'null');

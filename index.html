@@ -235,30 +235,29 @@ td{padding:9px 12px;vertical-align:middle}
 #empPrintCard{display:none}
 body.printing-emp #empPrintCard{display:block!important}
 body.printing-emp>*:not(#empPrintCard){display:none!important}
-/* ── DAILY ATTENDANCE PRINT ── */
-#dailyAttPrint{display:none}
+/* ── BRANDED PRINT SHEETS (attendance + evaluation) ── */
+#dailyAttPrint,#evalPrint{display:none}
 body.printing-att #dailyAttPrint{display:block!important}
 body.printing-att>*:not(#dailyAttPrint){display:none!important}
-#dailyAttPrint .da-card{max-width:760px;margin:0 auto;background:#fff;font-family:'Tajawal','Segoe UI',Arial,sans-serif;direction:rtl;color:#0f172a}
-#dailyAttPrint .da-hdr{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:3px solid #8d8253;padding-bottom:14px;margin-bottom:16px}
-#dailyAttPrint .da-hdr img{height:42px;width:auto}
-#dailyAttPrint .da-title{font-size:1.25rem;font-weight:800;text-align:center;flex:1}
-#dailyAttPrint .da-title small{display:block;font-size:.8rem;font-weight:600;color:#64748b;margin-top:3px}
-#dailyAttPrint .da-meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:.85rem;margin-bottom:14px;font-weight:600}
-#dailyAttPrint .da-meta b{color:#8d8253}
-#dailyAttPrint table{width:100%;border-collapse:collapse;font-size:.84rem}
-#dailyAttPrint thead th{background:#f4f1e8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #d6cfb8;padding:8px 6px;font-weight:700;text-align:center}
-#dailyAttPrint tbody td{border:1px solid #d6cfb8;padding:7px 6px;text-align:center}
-#dailyAttPrint tbody td.nm{text-align:right;font-weight:600}
-#dailyAttPrint .da-P{color:#15803d;font-weight:800}
-#dailyAttPrint .da-A{color:#b91c1c;font-weight:800}
-#dailyAttPrint .da-L{color:#a16207;font-weight:800}
-#dailyAttPrint .da-T{color:#6d28d9;font-weight:800}
-#dailyAttPrint .da-sum{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:.9rem;font-weight:700}
-#dailyAttPrint .da-sum span{padding:6px 14px;border:1px solid #d6cfb8;border-radius:8px}
-#dailyAttPrint .da-foot{display:flex;justify-content:space-between;margin-top:40px;font-size:.85rem}
-#dailyAttPrint .da-sign{border-top:1px solid #94a3b8;padding-top:6px;min-width:200px;text-align:center;color:#64748b}
-@media print{ body.printing-att{background:#fff} #dailyAttPrint .da-card{max-width:100%} }
+body.printing-eval #evalPrint{display:block!important}
+body.printing-eval>*:not(#evalPrint){display:none!important}
+.da-card{max-width:820px;margin:0 auto;background:#fff;font-family:'Tajawal','Segoe UI',Arial,sans-serif;direction:rtl;color:#0f172a}
+.da-hdr{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:3px solid #8d8253;padding-bottom:14px;margin-bottom:16px}
+.da-hdr img{height:42px;width:auto}
+.da-title{font-size:1.25rem;font-weight:800;text-align:center;flex:1}
+.da-title small{display:block;font-size:.8rem;font-weight:600;color:#64748b;margin-top:3px}
+.da-meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:.85rem;margin-bottom:14px;font-weight:600}
+.da-meta b{color:#8d8253}
+.da-card table{width:100%;border-collapse:collapse;font-size:.82rem}
+.da-card thead th{background:#f4f1e8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #d6cfb8;padding:8px 5px;font-weight:700;text-align:center}
+.da-card tbody td{border:1px solid #d6cfb8;padding:7px 5px;text-align:center}
+.da-card tbody td.nm{text-align:right;font-weight:600}
+.da-P{color:#15803d;font-weight:800}.da-A{color:#b91c1c;font-weight:800}.da-L{color:#a16207;font-weight:800}.da-T{color:#6d28d9;font-weight:800}
+.da-sum{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:.9rem;font-weight:700}
+.da-sum span{padding:6px 14px;border:1px solid #d6cfb8;border-radius:8px}
+.da-foot{display:flex;justify-content:space-between;margin-top:40px;font-size:.85rem}
+.da-sign{border-top:1px solid #94a3b8;padding-top:6px;min-width:200px;text-align:center;color:#64748b}
+@media print{ body.printing-att,body.printing-eval{background:#fff} .da-card{max-width:100%} }
 #empPrintCard .pc-card{max-width:680px;margin:0 auto;background:#fff;font-family:'Segoe UI',Tahoma,Arial,sans-serif;direction:rtl;color:#0f172a}
 #empPrintCard .pc-hdr{padding:26px 30px;display:flex;align-items:center;gap:20px;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 #empPrintCard .pc-av{width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.2);border:3px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;flex-shrink:0;overflow:hidden}
@@ -955,6 +954,7 @@ body.printing-att>*:not(#dailyAttPrint){display:none!important}
     <select id="evalProj" onchange="renderEvaluations()"><option value="">كل المشاريع</option></select>
     <div class="spacer"></div>
     <div id="evalSum" style="font-size:.83rem;color:var(--txt2)"></div>
+    <button class="btn btn-info no-print" onclick="printEvaluations()">🖨️ طباعة التقييمات</button>
   </div>
   <div class="tbl-wrap">
     <div class="tbl-hdr"><h2 id="evalTitle">تقييم الموظفين</h2></div>
@@ -975,6 +975,9 @@ body.printing-att>*:not(#dailyAttPrint){display:none!important}
 
 <!-- DAILY ATTENDANCE PRINT SHEET -->
 <div id="dailyAttPrint"></div>
+
+<!-- EVALUATION PRINT SHEET -->
+<div id="evalPrint"></div>
 
 <!-- TOAST NOTIFICATIONS -->
 <div id="toastWrap"></div>
@@ -3141,6 +3144,71 @@ function saveEvalForm(empId){
   const ov=document.getElementById('evalOverlay');if(ov)ov.remove();
   toast('تم حفظ التقييم بنجاح','ok');
   renderEvaluations();
+}
+
+function printEvaluations(){
+  const month=document.getElementById('evalMonth').value;
+  if(!month){toast('اختر الشهر أولاً','warn');return;}
+  const proj=document.getElementById('evalProj').value;
+  const myProj=getMyProject();
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
+  const monthData=evaluations[month]||{};
+  let nEx=0,nVg=0,nG=0,nN=0,sumScore=0,nEval=0;
+  const rows=list.map((e,i)=>{
+    const rec=monthData[e.id];
+    if(!rec){
+      return `<tr><td>${i+1}</td><td class="nm">${e.name}</td><td>${e.project}</td>
+        <td colspan="6" style="color:#94a3b8">—</td>
+        <td style="color:#94a3b8">غير مقيّم</td></tr>`;
+    }
+    const sc=computeEvalScore(rec,month,e.id);const r=evalRating(sc.total);
+    nEval++;sumScore+=sc.total;
+    if(sc.total>=90)nEx++;else if(sc.total>=75)nVg++;else if(sc.total>=60)nG++;else nN++;
+    return `<tr>
+      <td>${i+1}</td><td class="nm">${e.name}</td><td>${e.project}</td>
+      <td>${rec.quality||0}</td><td>${rec.productivity||0}</td><td>${rec.compliance||0}</td>
+      <td>${rec.teamwork||0}</td><td>${rec.safety||0}</td><td>${sc.attPct}%</td>
+      <td style="font-weight:800">${sc.total}</td>
+      <td style="font-weight:700">${r.label}</td>
+    </tr>`;
+  }).join('');
+  const avg=nEval?Math.round(sumScore/nEval):0;
+  document.getElementById('evalPrint').innerHTML=`
+    <div class="da-card">
+      <div class="da-hdr">
+        <img src="logo.png" alt="الإنماء الذهبية"/>
+        <div class="da-title">تقرير تقييم الموظفين<small>شركة الإنماء الذهبية للمقاولات العامة</small></div>
+        <div style="width:120px"></div>
+      </div>
+      <div class="da-meta">
+        <div>📅 الشهر: <b>${month}</b></div>
+        <div>🏗 المشروع: <b>${proj||'كل المشاريع'}</b></div>
+        <div>✅ المُقيَّمون: <b>${nEval} من ${list.length}</b></div>
+        <div>📊 متوسط النتيجة: <b>${avg}/100</b></div>
+      </div>
+      <table>
+        <thead><tr>
+          <th>#</th><th>الاسم</th><th>المشروع</th>
+          <th>جودة</th><th>إنتاج</th><th>التزام</th><th>تعاون</th><th>سلامة</th><th>مواظبة</th>
+          <th>النتيجة</th><th>التقدير</th>
+        </tr></thead>
+        <tbody>${rows||'<tr><td colspan="11">لا يوجد موظفون</td></tr>'}</tbody>
+      </table>
+      <div class="da-sum">
+        <span class="da-P">ممتاز: ${nEx}</span>
+        <span style="color:#1d4ed8">جيد جداً: ${nVg}</span>
+        <span class="da-L">جيد: ${nG}</span>
+        <span class="da-A">يحتاج متابعة: ${nN}</span>
+      </div>
+      <div style="font-size:.72rem;color:#94a3b8;margin-top:10px">* المعايير من ٥: جودة العمل · الإنتاجية · الالتزام بالتعليمات · التعاون · السلامة المهنية. المواظبة تُحتسب من سجل الحضور.</div>
+      <div class="da-foot">
+        <div class="da-sign">المُقيِّم / التوقيع</div>
+        <div class="da-sign">المدير / التوقيع</div>
+      </div>
+    </div>`;
+  document.body.classList.add('printing-eval');
+  window.print();
+  document.body.classList.remove('printing-eval');
 }
 
 // ── PAYROLL ──────────────────────────────────────────────────

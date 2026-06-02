@@ -193,6 +193,7 @@ td{padding:9px 12px;vertical-align:middle}
 .att-btn.A{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border-color:#dc2626}
 .att-btn.L{background:linear-gradient(135deg,#d97706,#b45309);color:#fff;border-color:#d97706}
 .att-btn.T{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-color:#7c3aed}
+.att-btn.O{background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;border-color:#0891b2}
 /* ── STAT CARDS (reports) ── */
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:20px}
 .stat-card{background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--sh);display:flex;align-items:center;gap:14px;border:1px solid var(--border)}
@@ -252,7 +253,7 @@ body.printing-eval>*:not(#evalPrint){display:none!important}
 .da-card thead th{background:#f4f1e8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #d6cfb8;padding:8px 5px;font-weight:700;text-align:center}
 .da-card tbody td{border:1px solid #d6cfb8;padding:7px 5px;text-align:center}
 .da-card tbody td.nm{text-align:right;font-weight:600}
-.da-P{color:#15803d;font-weight:800}.da-A{color:#b91c1c;font-weight:800}.da-L{color:#a16207;font-weight:800}.da-T{color:#6d28d9;font-weight:800}
+.da-P{color:#15803d;font-weight:800}.da-A{color:#b91c1c;font-weight:800}.da-L{color:#a16207;font-weight:800}.da-T{color:#6d28d9;font-weight:800}.da-O{color:#0891b2;font-weight:800}
 .da-sum{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:.9rem;font-weight:700}
 .da-sum span{padding:6px 14px;border:1px solid #d6cfb8;border-radius:8px}
 .da-foot{display:flex;justify-content:space-between;margin-top:40px;font-size:.85rem}
@@ -1233,7 +1234,7 @@ const T={
     // iqama badge
     iqExpiredSince:'منتهية منذ ',iqDaysLeft:' يوم متبقي',iqDay:' يوم',
     // attendance buttons
-    attP:'حاضر',attA:'غائب',attL:'إجازة',attT:'متأخر',
+    attP:'حاضر',attA:'غائب',attL:'إجازة',attT:'متأخر',attO:'راحة',
     attSumLbl:'ملخص شهري:',attSumH2:'ملخص الحضور الشهري',attSumTotalDays:'مجموع الأيام',
     // payroll
     payGrandLabel:'الصافي: ',payTotalLabel:'الإجمالي',
@@ -1363,7 +1364,7 @@ const T={
     // iqama badge
     iqExpiredSince:'Expired ',iqDaysLeft:' days left',iqDay:' days',
     // attendance buttons
-    attP:'Present',attA:'Absent',attL:'Leave',attT:'Late',
+    attP:'Present',attA:'Absent',attL:'Leave',attT:'Late',attO:'Off',
     attSumLbl:'Monthly Summary:',attSumH2:'Monthly Attendance Summary',attSumTotalDays:'Total Days',
     // payroll
     payGrandLabel:'Net: ',payTotalLabel:'Total',
@@ -1914,7 +1915,7 @@ function openAuditLog(){
   }else{
     body.innerHTML=logs.map(l=>{
       const d=new Date(l.time);
-      const ds=d.toLocaleDateString('ar-SA')+' '+d.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+      const ds=fmtDateTime(d);
       return `<div class="audit-row">
         <span class="audit-icon">${l.icon}</span>
         <div class="audit-info">
@@ -1958,7 +1959,7 @@ function showPayslip(empId,month){
     <div class="payslip-row"><span class="payslip-lbl">${t('psExtraDeduct')}</span><span class="payslip-val" style="color:#dc2626">${extraDeduct?'−'+extraDeduct.toLocaleString()+' '+t('sar'):'—'}</span></div>
     ${d.notes?`<div class="payslip-row"><span class="payslip-lbl">${t('psNotes')}</span><span class="payslip-val">${d.notes}</span></div>`:''}
     <div class="payslip-net"><span class="plbl">${t('psNetPay')}</span><span class="pval">${net.toLocaleString()} ${t('sar')}</span></div>
-    <div style="text-align:center;font-size:.72rem;color:#94a3b8;margin-top:12px;padding-top:10px;border-top:1px dashed #e2e8f0">${t('sysTitle')} — ${new Date().toLocaleDateString(currentLang==='ar'?'ar-SA':'en-US')}</div>`;
+    <div style="text-align:center;font-size:.72rem;color:#94a3b8;margin-top:12px;padding-top:10px;border-top:1px dashed #e2e8f0">${t('sysTitle')} — ${currentLang==='ar'?fmtDate(new Date()):new Date().toLocaleDateString('en-US')}</div>`;
   document.getElementById('payslipModal').classList.add('open');
 }
 function printPayslip(){
@@ -2181,6 +2182,13 @@ const auth=firebase.auth();
 var fbReady=false;
 // المستخدم يكتب اسمه فقط، ونحوّله داخلياً لبريد ثابت
 function uname2email(u){return u.includes('@')?u:u.toLowerCase()+'@gdc2000.local';}
+
+// ── تنسيق التواريخ (ميلادي دائماً بأرقام إنجليزية على كل الأجهزة) ──
+function fmtDate(d,opts){try{return new Date(d).toLocaleDateString('ar-SA-u-nu-latn-ca-gregory',opts||{year:'numeric',month:'2-digit',day:'2-digit'});}catch(e){return String(d);}}
+function fmtDateLong(d){return fmtDate(d,{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
+function fmtDateTime(d){try{return new Date(d).toLocaleString('ar-SA-u-nu-latn-ca-gregory',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(e){return String(d);}}
+// ⚠️ دالة آمنة للحصول على تاريخ محلي بصيغة YYYY-MM-DD (بدون toISOString الذي يعطي UTC)
+function localDateStr(d){const dd=new Date(d);return dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');}
 
 // ── إشعارات أنيقة (Toast) ────────────────────────────────────
 function toast(msg,type){
@@ -2521,7 +2529,7 @@ function renderDashboard(){
     +(medAlerts.length?`<div style="padding:6px 10px 3px;font-size:.74rem;font-weight:700;color:var(--txt2)">🏥 تنبيهات الفحص الطبي</div>${medRows}`:'');
 
   // Today's attendance summary
-  const todayKey=new Date().toISOString().split('T')[0];
+  const todayKey=localDateStr(new Date());
   const todayAtt=attendance[todayKey]||{};
   let P=0,A=0,L=0,T=0;
   employees.forEach(e=>{const s=todayAtt[e.id];if(s==='P')P++;else if(s==='A')A++;else if(s==='L')L++;else if(s==='T')T++});
@@ -2551,7 +2559,7 @@ function backupData(){
   const json=JSON.stringify(data,null,2);
   const a=document.createElement('a');
   a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
-  a.download='employees-backup-'+new Date().toISOString().split('T')[0]+'.json';
+  a.download='employees-backup-'+localDateStr(new Date())+'.json';
   a.click();
 }
 function restoreData(inp){
@@ -2971,7 +2979,7 @@ function printEmp(idx){
       </div>
       <div class="pc-foot">
         <span>${t('sysTitle')}</span>
-        <span>${t('pcPrintDate')} ${new Date().toLocaleDateString(currentLang==='ar'?'ar-SA-u-nu-latn':'en-US')}</span>
+        <span>${t('pcPrintDate')} ${currentLang==='ar'?fmtDate(new Date()):new Date().toLocaleDateString('en-US')}</span>
       </div>
     </div>`;
 
@@ -2987,11 +2995,11 @@ function printDailyAtt(){
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
   const day=attendance[date]||{};
-  const STMAP={P:['حاضر','da-P'],A:['غائب','da-A'],L:['إجازة','da-L'],T:['تأخير','da-T']};
-  let P=0,A=0,L=0,T=0,N=0;
+  const STMAP={P:['حاضر','da-P'],A:['غائب','da-A'],L:['إجازة','da-L'],T:['تأخير','da-T'],O:['راحة','da-O']};
+  let P=0,A=0,L=0,T=0,O=0,N=0;
   const rows=list.map((e,i)=>{
     const st=day[e.id]||'';
-    if(st==='P')P++;else if(st==='A')A++;else if(st==='L')L++;else if(st==='T')T++;else N++;
+    if(st==='P')P++;else if(st==='A')A++;else if(st==='L')L++;else if(st==='T')T++;else if(st==='O')O++;else N++;
     const cell=st&&STMAP[st]?`<span class="${STMAP[st][1]}">${STMAP[st][0]}</span>`:'<span style="color:#94a3b8">—</span>';
     return `<tr>
       <td>${i+1}</td>
@@ -3003,7 +3011,7 @@ function printDailyAtt(){
     </tr>`;
   }).join('');
   // تنسيق التاريخ
-  let dlabel=date;try{dlabel=new Date(date).toLocaleDateString('ar-SA-u-nu-latn',{weekday:'long',year:'numeric',month:'long',day:'numeric'});}catch(e){}
+  let dlabel=fmtDateLong(date);
   document.getElementById('dailyAttPrint').innerHTML=`
     <div class="da-card">
       <div class="da-hdr">
@@ -3025,6 +3033,7 @@ function printDailyAtt(){
         <span class="da-A">✗ غائب: ${A}</span>
         <span class="da-L">⊙ إجازة: ${L}</span>
         <span class="da-T">⏱ تأخير: ${T}</span>
+        ${O?`<span class="da-O">🛌 راحة: ${O}</span>`:''}
         ${N?`<span style="color:#94a3b8">○ لم يُسجّل: ${N}</span>`:''}
       </div>
       <div class="da-foot">
@@ -3061,7 +3070,7 @@ function evalRating(tot){
 }
 function renderEvaluations(){
   const monthEl=document.getElementById('evalMonth');
-  if(monthEl&&!monthEl.value)monthEl.value=new Date().toISOString().substr(0,7);
+  if(monthEl&&!monthEl.value)monthEl.value=localDateStr(new Date()).substr(0,7);
   const month=monthEl?monthEl.value:'';
   const proj=document.getElementById('evalProj').value;
   const myProj=getMyProject();
@@ -3080,7 +3089,7 @@ function renderEvaluations(){
       const sc=computeEvalScore(rec,month,e.id);const r=evalRating(sc.total);
       scoreCell=`<span class="ev-score-badge ${r.cls}">${sc.total}<small style="font-weight:600">/100</small></span>`;
       ratingCell=`<span style="font-weight:700">${r.stars} ${r.label}</span>`;
-      lastCell=rec.at?new Date(rec.at).toLocaleDateString('ar-SA-u-nu-latn'):'—';
+      lastCell=rec.at?fmtDate(rec.at):'—';
     }
     const tr=document.createElement('tr');
     tr.innerHTML=`<td style="color:var(--txt2)">${i+1}</td><td><strong>${e.name}</strong></td>
@@ -3214,12 +3223,12 @@ function printEvaluations(){
 // ── PAYROLL ──────────────────────────────────────────────────
 function getAttCount(month, empId){
   const days=Object.keys(attendance).filter(d=>d.startsWith(month));
-  let P=0,A=0,L=0,T=0;
+  let P=0,A=0,L=0,T=0,O=0;
   days.forEach(d=>{
     const s=(attendance[d]||{})[empId];
-    if(s==='P')P++;else if(s==='A')A++;else if(s==='L')L++;else if(s==='T')T++;
+    if(s==='P')P++;else if(s==='A')A++;else if(s==='L')L++;else if(s==='T')T++;else if(s==='O')O++;
   });
-  return{P,A,L,T,total:days.length};
+  return{P,A,L,T,O,total:days.length};
 }
 
 function renderPayroll(){
@@ -3427,10 +3436,10 @@ function renderAtt(){
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj});
   const day=date?(attendance[date]||{}):{};
   const tbody=document.getElementById('attBody');tbody.innerHTML='';
-  let P=0,A=0,L=0,T=0;
+  let P=0,A=0,L=0,T=0,O=0;
   list.forEach((e,i)=>{
     const st=day[e.id]||'';
-    if(st==='P')P++;else if(st==='A')A++;else if(st==='L')L++;else if(st==='T')T++;
+    if(st==='P')P++;else if(st==='A')A++;else if(st==='L')L++;else if(st==='T')T++;else if(st==='O')O++;
     const pi=PROJS.indexOf(e.project);
     const tr=document.createElement('tr');
     tr.innerHTML=`
@@ -3438,13 +3447,13 @@ function renderAtt(){
       <td><strong>${e.name}</strong></td>
       <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
       <td>${e.shift&&e.shift!=='-'?`<span class="sbadge">${SL[e.shift]||e.shift}</span>`:'—'}</td>
-      <td><div style="display:flex;gap:6px">
-        ${['P','A','L','T'].map(s=>`<button class="att-btn ${st===s?s:''}" data-eid="${e.id}" data-s="${s}" onclick="setAtt('${date}','${e.id}','${s}',this)">${t('att'+s)}</button>`).join('')}
+      <td><div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${['P','A','L','T','O'].map(s=>`<button class="att-btn ${st===s?s:''}" data-eid="${e.id}" data-s="${s}" onclick="setAtt('${date}','${e.id}','${s}',this)">${t('att'+s)}</button>`).join('')}
       </div></td>`;
     tbody.appendChild(tr);
   });
   document.getElementById('attSum').innerHTML=
-    `<span style="color:#16a34a">✓ ${P}</span><span style="color:#dc2626">✗ ${A}</span><span style="color:#d97706">⊙ ${L}</span><span style="color:#7c3aed">⏱ ${T}</span>`;
+    `<span style="color:#16a34a">✓ ${P}</span><span style="color:#dc2626">✗ ${A}</span><span style="color:#d97706">⊙ ${L}</span><span style="color:#7c3aed">⏱ ${T}</span><span style="color:#0891b2">🛌 ${O}</span>`;
 }
 
 function setAtt(date,empId,status,btn){
@@ -3508,19 +3517,38 @@ function exportAttCSV(){
 
 // ── REPORTS ──────────────────────────────────────────────────
 // ── REPORTS HELPERS ───────────────────────────────────────────
-function getWeekStr(date){
+// الأسبوع يبدأ من السبت (6) وينتهي الخميس (4) — الأسبوع السعودي
+function getWeekStart(date){
+  // يرجّع تاريخ السبت اللي يبدأ منه الأسبوع الحالي
   const d=new Date(date);d.setHours(0,0,0,0);
-  d.setDate(d.getDate()+4-(d.getDay()||7));
-  const y=new Date(d.getFullYear(),0,1);
-  const w=Math.ceil(((d-y)/86400000+1)/7);
-  return`${d.getFullYear()}-W${String(w).padStart(2,'0')}`;
+  const day=d.getDay(); // 0=أحد 6=سبت
+  const diff=(day===6)?0:(day+1); // كم يوم من السبت الأخير
+  d.setDate(d.getDate()-diff);
+  return d;
+}
+function getWeekStr(date){
+  // رقم الأسبوع بالتقويم السعودي (السبت أول الأسبوع)
+  const sat=getWeekStart(date);
+  const yearStart=new Date(sat.getFullYear(),0,1);
+  const firstSat=new Date(yearStart);
+  firstSat.setDate(yearStart.getDate()+(6-yearStart.getDay()+7)%7);
+  const week=Math.floor((sat-firstSat)/604800000)+1;
+  return`${sat.getFullYear()}-W${String(week<1?1:week).padStart(2,'0')}`;
 }
 function getWeekDates(ws){
-  const[yr,wk]=ws.split('-W');
-  const jan4=new Date(+yr,0,4);
-  const mon=new Date(jan4);
-  mon.setDate(jan4.getDate()-(jan4.getDay()||7)+1+7*(+wk-1));
-  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return d.toISOString().split('T')[0];});
+  // يرجّع 7 أيام السبت→الجمعة بناءً على weekStr أو يقبل تاريخ مباشر
+  let sat;
+  if(typeof ws==='string'&&ws.includes('-W')){
+    const[yr,wk]=ws.split('-W');
+    const yearStart=new Date(+yr,0,1);
+    const firstSat=new Date(yearStart);
+    firstSat.setDate(yearStart.getDate()+(6-yearStart.getDay()+7)%7);
+    sat=new Date(firstSat.getTime()+(+wk-1)*604800000);
+  }else{
+    sat=getWeekStart(ws||new Date());
+  }
+  return Array.from({length:6},(_,i)=>{const d=new Date(sat);d.setDate(sat.getDate()+i);return localDateStr(d);});
+  // 6 أيام: السبت الأحد الاثنين الثلاثاء الأربعاء الخميس (الجمعة إجازة)
 }
 function getMonthDates(ms){
   const[yr,mo]=ms.split('-').map(Number);
@@ -3533,9 +3561,9 @@ function prevMonthStr(ms){
   return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 }
 function getAttSummary(dates,empId){
-  let P=0,A=0,L=0,T=0;
-  dates.forEach(d=>{const s=(attendance[d]||{})[empId];if(s==='P')P++;else if(s==='A')A++;else if(s==='L')L++;else if(s==='T')T++;});
-  return{P,A,L,T};
+  let P=0,A=0,L=0,T=0,O=0;
+  dates.forEach(d=>{const s=(attendance[d]||{})[empId];if(s==='P')P++;else if(s==='A')A++;else if(s==='L')L++;else if(s==='T')T++;else if(s==='O')O++;});
+  return{P,A,L,T,O};
 }
 function pct(a,b){return b?Math.round(a/b*100):0;}
 function attChip(p){
@@ -3567,7 +3595,7 @@ function renderReports(){
     }else{el.innerHTML=opts;el.disabled=false;}
   });
   // default picker values
-  const todayStr=new Date().toISOString().split('T')[0];
+  const todayStr=localDateStr(new Date());
   const thisMonth=todayStr.substr(0,7);
   const wp=document.getElementById('repWeekPick');if(wp&&!wp.value)wp.value=getWeekStr(new Date());
   const mp=document.getElementById('repMonthPick');if(mp&&!mp.value)mp.value=thisMonth;
@@ -3582,7 +3610,7 @@ function renderLiveDashboard(){
   const myProj=getMyProject();
   const list=employees.filter(e=>!myProj||myProj.includes(e.project));
   const total=list.length;
-  const todayStr=new Date().toISOString().split('T')[0];
+  const todayStr=localDateStr(new Date());
   const thisMonth=todayStr.substr(0,7);
   const isMgr=currentUser&&currentUser.role==='manager';
 
@@ -3678,10 +3706,10 @@ function renderWeeklyReport(){
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
   const wDates=getWeekDates(weekStr);
-  const dayNames=['الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت','الأحد'];
+  const dayNames=['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس']; // الأسبوع السعودي
   const monthStr=wDates[0].substr(0,7);
   const mPay=payroll[monthStr]||{};
-  const todayStr=new Date().toISOString().split('T')[0];
+  const todayStr=localDateStr(new Date());
   const workDays=wDates.filter(d=>d<=todayStr).length;
 
   // totals
@@ -3711,8 +3739,8 @@ function renderWeeklyReport(){
     const pi=PROJS.indexOf(e.project);
     const cells=wDates.map(d=>{
       const st=(attendance[d]||{})[e.id]||'';
-      const bg=st==='P'?'#dcfce7':st==='A'?'#fee2e2':st==='L'?'#fef9c3':st==='T'?'#ede9fe':'';
-      const lbl=st==='P'?'✓':st==='A'?'✗':st==='L'?'إج':st==='T'?'⏱':'—';
+      const bg=st==='P'?'#dcfce7':st==='A'?'#fee2e2':st==='L'?'#fef9c3':st==='T'?'#ede9fe':st==='O'?'#cffafe':'';
+      const lbl=st==='P'?'✓':st==='A'?'✗':st==='L'?'إج':st==='T'?'⏱':st==='O'?'🛌':'—';
       return`<td style="text-align:center;background:${bg};border-radius:4px;font-size:.82rem;padding:4px 2px">${lbl}</td>`;
     }).join('');
     return`<tr>
@@ -3722,6 +3750,7 @@ function renderWeeklyReport(){
       <td style="text-align:center;font-weight:700;color:#16a34a">${s.P}</td>
       <td style="text-align:center;color:#dc2626">${s.A}</td>
       <td style="text-align:center;color:#d97706">${s.L}</td>
+      <td style="text-align:center;color:#0891b2">${s.O}</td>
       <td style="text-align:center">${attChip(pp2)}</td>
     </tr>`;
   }).join('');
@@ -3748,7 +3777,7 @@ function renderWeeklyReport(){
         <table class="rep-tbl">
           <thead><tr><th>#</th><th>الاسم</th><th>المشروع</th>
             ${dayNames.map((d,i)=>`<th style="font-size:.72rem;min-width:38px">${d}<br><span style="color:var(--txt2);font-size:.68rem">${wDates[i].substr(5)}</span></th>`).join('')}
-            <th>✓</th><th>✗</th><th>إج</th><th>%</th></tr></thead>
+            <th>✓</th><th>✗</th><th>إج</th><th>🛌</th><th>%</th></tr></thead>
           <tbody>${empRows||'<tr><td colspan="12" style="text-align:center;color:var(--txt2)">لا توجد بيانات</td></tr>'}</tbody>
         </table>
       </div>
@@ -3765,7 +3794,7 @@ function renderMonthlyReport(){
   const mDates=getMonthDates(monthStr);
   const mPay=payroll[monthStr]||{};
   const isMgr=currentUser&&currentUser.role==='manager';
-  const todayStr=new Date().toISOString().split('T')[0];
+  const todayStr=localDateStr(new Date());
   const recDates=mDates.filter(d=>d<=todayStr);
 
   let totP=0,totA=0,totL=0,totT=0,totOT=0;
@@ -3970,7 +3999,7 @@ function initSelects(){
 document.getElementById('modalBg').addEventListener('click',function(e){if(e.target===this)closeModal()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
-const today=new Date().toISOString().split('T')[0];
+const today=localDateStr(new Date());
 const thisMonth=today.substr(0,7);
 document.getElementById('attDate').value=today;
 document.getElementById('payMonth').value=thisMonth;

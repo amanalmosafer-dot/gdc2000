@@ -23,6 +23,10 @@
       ".read": "auth != null && root.child('users').child(auth.uid).exists()",
       ".write": "auth != null && root.child('users').child(auth.uid).exists()"
     },
+    "coverages": {
+      ".read": "auth != null && root.child('users').child(auth.uid).exists()",
+      ".write": "auth != null && root.child('users').child(auth.uid).exists()"
+    },
     "auditLog": {
       ".read": "auth != null && root.child('users').child(auth.uid).exists()",
       ".write": "auth != null && root.child('users').child(auth.uid).exists()"

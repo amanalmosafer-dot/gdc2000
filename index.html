@@ -2315,11 +2315,26 @@ saveEmps();
 let attendance=JSON.parse(localStorage.getItem('attendance')||'{}');
 let payroll=JSON.parse(localStorage.getItem('payroll')||'{}');
 let evaluations=JSON.parse(localStorage.getItem('evaluations')||'{}');
+// التغطية المؤقتة للشفتات: {id, empId, coverShift, fromDate, toDate, reason}
+let coverages=JSON.parse(localStorage.getItem('coverages')||'[]');
 
 function saveEmps(){localStorage.setItem('employees',JSON.stringify(employees));if(fbReady){const o={};employees.forEach(e=>{o[e.id]=e;});db.ref('employees').set(o);}}
 function saveAtt(){localStorage.setItem('attendance',JSON.stringify(attendance));if(fbReady)db.ref('attendance').set(attendance);}
 function savePay(){localStorage.setItem('payroll',JSON.stringify(payroll));if(fbReady)db.ref('payroll').set(payroll);}
 function saveEval(){localStorage.setItem('evaluations',JSON.stringify(evaluations));if(fbReady)db.ref('evaluations').set(evaluations);}
+function saveCoverages(){localStorage.setItem('coverages',JSON.stringify(coverages));if(fbReady)db.ref('coverages').set(coverages);}
+// دالة مساعدة: تحصل على الشفت الفعلي للموظف في تاريخ معين (مع التغطية المؤقتة)
+function getEmpShiftOnDate(empId,date){
+  const e=employees.find(x=>x.id===empId);
+  const base=e?(e.shift||'-'):'-';
+  // ابحث عن تغطية نشطة في هذا التاريخ
+  const cov=coverages.find(c=>c.empId===empId&&c.fromDate<=date&&c.toDate>=date);
+  return cov?cov.coverShift:base;
+}
+// تحقق إذا الموظف في تغطية مؤقتة اليوم
+function getActiveCoverage(empId,date){
+  return coverages.find(c=>c.empId===empId&&c.fromDate<=date&&c.toDate>=date)||null;
+}
 
 // ── FIREBASE REAL-TIME SYNC ───────────────────────────────────
 function renderActive(){
@@ -2354,6 +2369,11 @@ function attachDataListeners(){
   },onErr);
   db.ref('evaluations').on('value',snap=>{
     evaluations=snap.val()||{};localStorage.setItem('evaluations',JSON.stringify(evaluations));
+    renderActive();
+  },onErr);
+  db.ref('coverages').on('value',snap=>{
+    const v=snap.val();
+    coverages=v?Object.values(v):[];localStorage.setItem('coverages',JSON.stringify(coverages));
     renderActive();
   },onErr);
   db.ref('users').on('value',snap=>{
@@ -2743,10 +2763,11 @@ function mkRow(e,n,pi){
     </td>
     <td>${projBadge}</td>
     <td>${e.title||'—'}</td>
-    <td class="no-print"><div class="actions">
+    <td class="no-print"><div class="actions" style="gap:4px;flex-wrap:wrap">
+      ${can('employees_edit')?`<button class="btn btn-warn btn-sm" onclick="openEdit(${idx})" title="تعديل">✏️</button>`:''}
+      ${can('employees_delete')?`<button class="btn btn-danger btn-sm" onclick="delEmp(${idx})" title="حذف">🗑️</button>`:''}
       ${can('employees_view')?`<button class="btn btn-info btn-sm" onclick="printEmp(${idx})" title="${t('printEmpCardTitle')}">🖨️</button>`:''}
-      ${can('employees_edit')?`<button class="btn btn-warn btn-sm" onclick="openEdit(${idx})">${t('btnEdit')}</button>`:''}
-      ${can('employees_delete')?`<button class="btn btn-danger btn-sm" onclick="delEmp(${idx})">${t('btnDelete')}</button>`:''}
+      ${can('evaluation')?`<button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border)" onclick="quickEval('${e.id}')" title="تقييم">⭐</button>`:''}
     </div></td>`;
 
   const sal=e.baseSalary?Number(e.baseSalary).toLocaleString()+' '+t('sar'):'—';
@@ -2773,7 +2794,9 @@ function mkRow(e,n,pi){
     <div class="exp-item"><span class="exp-lbl">${t('expStart')}</span><span class="exp-val">${e.startDate||'—'}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expSal')}</span><span class="exp-val" style="font-weight:700;color:var(--ok)">${sal}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expOT')}</span><span class="exp-val">${e.overtimeRate?e.overtimeRate+' '+t('sarH'):'—'}</span></div>
+    ${(()=>{const today=localDateStr(new Date());const cov=getActiveCoverage(e.id,today);return cov?`<div class="exp-item full"><span class="exp-lbl">🔄 تغطية مؤقتة نشطة</span><span class="exp-val"><span class="chip-warn">📅 ${cov.fromDate} → ${cov.toDate} | الشفت: ${SL[cov.coverShift]||cov.coverShift}</span>${can('employees_edit')?`<button class="btn btn-danger btn-sm" style="margin-right:8px" onclick="endCoverage('${cov.id}')">إنهاء</button>`:''}</span></div>`:'';})()}
   </div>
+  ${can('employees_edit')?`<div style="padding:8px 14px 4px;text-align:right"><button class="btn btn-sm no-print" style="background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;font-size:.78rem" onclick="openCoverageModal('${e.id}')">🔄 تغطية مؤقتة</button></div>`:''}
   <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:10px">
     <div style="font-size:.75rem;font-weight:700;color:var(--txt2);margin-bottom:8px;padding:0 14px">🏥 الفحص الطبي والتطعيمات</div>
     <div class="exp-inner" style="padding-top:0">
@@ -3115,6 +3138,69 @@ function renderEvaluations(){
   const sumEl=document.getElementById('evalSum');if(sumEl)sumEl.textContent=`${done} مقيّم من ${list.length}`;
   const ttl=document.getElementById('evalTitle');if(ttl)ttl.textContent='تقييم الموظفين — '+(month||'');
 }
+// ── التغطية المؤقتة للشفتات ───────────────────────────────────
+function openCoverageModal(empId){
+  const e=employees.find(x=>x.id===empId);if(!e)return;
+  const today=localDateStr(new Date());
+  const shiftOpts=Object.entries(SL).filter(([k])=>k!=='-').map(([k,v])=>`<option value="${k}" ${k===e.shift?'selected':''}>${v}</option>`).join('');
+  const div=document.createElement('div');
+  div.id='covOverlay';
+  div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);direction:rtl;padding:16px';
+  div.innerHTML=`<div style="background:var(--surface);border-radius:16px;padding:24px;width:480px;max-width:96vw">
+    <h3 style="font-size:1rem;font-weight:800;margin-bottom:4px">🔄 تغطية مؤقتة: ${e.name}</h3>
+    <div style="color:var(--txt2);font-size:.82rem;margin-bottom:18px">الشفت الأصلي: ${SL[e.shift||'-']||'—'} | المشروع: ${e.project}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div><label style="display:block;font-size:.78rem;font-weight:700;color:var(--txt2);margin-bottom:5px">من تاريخ</label>
+        <input type="date" id="covFrom" value="${today}" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface2);color:var(--txt)"/></div>
+      <div><label style="display:block;font-size:.78rem;font-weight:700;color:var(--txt2);margin-bottom:5px">إلى تاريخ</label>
+        <input type="date" id="covTo" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface2);color:var(--txt)"/></div>
+    </div>
+    <div style="margin-bottom:12px"><label style="display:block;font-size:.78rem;font-weight:700;color:var(--txt2);margin-bottom:5px">الشفت المؤقت (سيغطّي فيه)</label>
+      <select id="covShift" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface2);color:var(--txt)">${shiftOpts}</select></div>
+    <div style="margin-bottom:18px"><label style="display:block;font-size:.78rem;font-weight:700;color:var(--txt2);margin-bottom:5px">السبب (اختياري)</label>
+      <input type="text" id="covReason" placeholder="مثال: تغطية غياب موظف المساء" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface2);color:var(--txt);box-sizing:border-box"/></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" onclick="document.getElementById('covOverlay').remove()">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveCoverage('${empId}')">✅ تفعيل التغطية</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+}
+
+function saveCoverage(empId){
+  const from=document.getElementById('covFrom').value;
+  const to=document.getElementById('covTo').value;
+  const shift=document.getElementById('covShift').value;
+  const reason=document.getElementById('covReason').value.trim();
+  if(!from||!to){toast('حدد تاريخ البداية والنهاية','warn');return;}
+  if(to<from){toast('تاريخ النهاية قبل البداية!','err');return;}
+  if(!shift){toast('اختر الشفت المؤقت','warn');return;}
+  // إنهاء أي تغطية سابقة لنفس الموظف
+  coverages=coverages.filter(c=>c.empId!==empId);
+  coverages.push({id:'cov'+Date.now(),empId,coverShift:shift,fromDate:from,toDate:to,reason,by:currentUser?currentUser.username:''});
+  saveCoverages();
+  const ov=document.getElementById('covOverlay');if(ov)ov.remove();
+  const e=employees.find(x=>x.id===empId);
+  toast(`تم تفعيل تغطية ${e?e.name:''} في ${SL[shift]||shift} حتى ${to}`,'ok');
+  if(typeof logAudit==='function')logAudit('🔄','تغطية مؤقتة',`${e?e.name:''}: ${SL[shift]||shift} (${from}→${to})`);
+  renderActive();
+}
+
+function endCoverage(covId){
+  coverages=coverages.filter(c=>c.id!==covId);
+  saveCoverages();
+  toast('تم إنهاء التغطية المؤقتة','ok');
+  renderActive();
+}
+
+function quickEval(empId){
+  // انتقل لتبويب التقييم مع تعيين الشهر ثم افتح نافذة التقييم
+  switchTab('evaluation',document.getElementById('tab-btn-evaluation'));
+  const em=document.getElementById('evalMonth');
+  if(em&&!em.value)em.value=localDateStr(new Date()).substr(0,7);
+  renderEvaluations();
+  setTimeout(()=>openEvalModal(empId),100);
+}
 function openEvalModal(empId){
   if(!can('evaluation')){toast('لا تملك صلاحية التقييم','err');return;}
   const month=document.getElementById('evalMonth').value;
@@ -3455,12 +3541,16 @@ function renderAtt(){
     const st=day[e.id]||'';
     if(st==='P')P++;else if(st==='A')A++;else if(st==='L')L++;else if(st==='T')T++;else if(st==='O')O++;
     const pi=PROJS.indexOf(e.project);
+    const cov=date?getActiveCoverage(e.id,date):null;
+    const shiftDisplay=cov
+      ?`<span class="sbadge">${SL[e.shift||'-']||'—'}</span> <span class="sbadge" style="background:#0891b2;color:#fff" title="تغطية مؤقتة حتى ${cov.toDate}">🔄 ${SL[cov.coverShift]||cov.coverShift}</span>`
+      :(e.shift&&e.shift!=='-'?`<span class="sbadge">${SL[e.shift]||e.shift}</span>`:'—');
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td style="color:var(--txt2)">${i+1}</td>
-      <td><strong>${e.name}</strong></td>
+      <td><strong>${e.name}</strong>${cov?`<span style="font-size:.65rem;color:#0891b2;margin-right:4px"> 🔄</span>`:''}</td>
       <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
-      <td>${e.shift&&e.shift!=='-'?`<span class="sbadge">${SL[e.shift]||e.shift}</span>`:'—'}</td>
+      <td>${shiftDisplay}</td>
       <td><div style="display:flex;gap:6px;flex-wrap:wrap">
         ${['P','A','L','T','O'].map(s=>`<button class="att-btn ${st===s?s:''}" data-eid="${e.id}" data-s="${s}" onclick="setAtt('${date}','${e.id}','${s}',this)">${t('att'+s)}</button>`).join('')}
       </div></td>`;

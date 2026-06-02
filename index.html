@@ -838,7 +838,7 @@ td{padding:9px 12px;vertical-align:middle}
         <th id="pth-abs" style="color:#dc2626">❌ غياب</th>
         <th id="pth-leave" style="color:#d97706">🟡 إجازة</th>
         <th id="pth-deduct" style="color:#dc2626">خصم الغياب</th>
-        <th id="pth-oth" title="أوفر يدوي + تلقائي من التغطية المؤقتة">ساعات أوفر (يدوي)</th>
+        <th id="pth-oth" title="محسوب تلقائياً من التغطية المؤقتة">ساعات أوفر 🔄</th>
         <th id="pth-hr">سعر الساعة</th>
         <th id="pth-ott" style="color:#16a34a">إجمالي الأوفر</th>
         <th id="pth-bonus" style="color:#2563eb">مكافآت</th>
@@ -1960,7 +1960,7 @@ function showPayslip(empId,month){
   const hourlyRate=e.baseSalary?+(e.baseSalary/30/8).toFixed(2):0;
   const att=month?getAttCount(month,e.id):{P:0,A:0,L:0,T:0};
   const absDeduct=+(att.A*dailyRate).toFixed(2);
-  const otHours=d.overtimeHours||0;
+  const otHours=getCoverageOT(empId,month);
   const otTotal=+(otHours*hourlyRate).toFixed(2);
   const bonus=d.bonus||0;
   const extraDeduct=d.extraDeductions||0;
@@ -3123,6 +3123,7 @@ function printEmpMonthlyAtt(empId){
   const att=getAttCount(month,empId);
   const totalWork=att.P+att.A+att.T;
   const attPct=totalWork?Math.round((att.P+att.T)/totalWork*100):0;
+  const covOT=getCoverageOT(empId,month);
   // تقسيم لعمودين (1-16 يمين، 17-31 يسار)
   const half=Math.ceil(days.length/2);
   const mkRow=(r,i)=>`<td style="padding:2px 4px;font-size:.72rem;color:#555">${i+1}</td><td style="padding:2px 4px;font-size:.72rem">${r.d.substr(8)}</td><td style="padding:2px 4px;font-size:.72rem">${r.dn}</td><td style="padding:2px 5px;font-size:.75rem">${r.cell}</td>`;
@@ -3157,13 +3158,14 @@ function printEmpMonthlyAtt(empId){
         </tr></thead>
         <tbody>${tblRows}</tbody>
       </table>
-      <div style="margin-top:10px;display:grid;grid-template-columns:repeat(6,1fr);gap:6px">
+      <div style="margin-top:10px;display:grid;grid-template-columns:repeat(7,1fr);gap:6px">
         ${mkSum(att.P,'حضور','#dcfce7','#15803d')}
         ${mkSum(att.A,'غياب','#fee2e2','#b91c1c')}
         ${mkSum(att.L,'إجازة','#fef9c3','#a16207')}
         ${mkSum(att.T,'تأخير','#ede9fe','#6d28d9')}
         ${mkSum(att.O||0,'راحة','#cffafe','#0e7490')}
-        ${mkSum(attPct+'%','حضور','#dbeafe','#1d4ed8')}
+        ${mkSum(covOT+'h','أوفر','#fce7f3','#be185d')}
+        ${mkSum(attPct+'%','نسبة','#dbeafe','#1d4ed8')}
       </div>
       <div class="da-foot" style="margin-top:20px">
         <div class="da-sign">المشرف / التوقيع</div>
@@ -3449,17 +3451,15 @@ function renderPayroll(){
     const absDeduct=+(att.A*dailyRate).toFixed(2);
     const extraDeduct=d.extraDeductions||0;
     const bonus=d.bonus||0;
-    const manualOT=d.overtimeHours||0;
-    const covOT=month?getCoverageOT(e.id,month):0;
-    const otHours=manualOT+covOT;
+    // ساعات الأوفر = تلقائي 100% من التغطية المؤقتة (لا تدخل يدوي)
+    const otHours=month?getCoverageOT(e.id,month):0;
     const otTotal=+(otHours*hourlyRate).toFixed(2);
     const net=(e.baseSalary||0)-absDeduct+otTotal+bonus-extraDeduct;
     grand+=net;totalAbsDeduct+=absDeduct;totalOT+=otTotal;totalBonus+=bonus;
 
     const pi=PROJS.indexOf(e.project);
-    // عرض إجمالي الساعات في الخانة (يدوي + تغطية تلقائية)
-    const otTitle=covOT?`تلقائي من التغطية: ${covOT} ساعة + يدوي: ${manualOT} ساعة`:'';
-    const otBg=covOT?'background:linear-gradient(135deg,#cffafe,#e0f2fe);border-color:#0891b2;font-weight:700':'';
+    // العرض: رقم ثابت محسوب تلقائياً (مو خانة إدخال)
+    const otCell=otHours?`<span style="font-weight:800;color:#0891b2;font-size:1rem" title="محسوب تلقائياً من التغطية المؤقتة">${otHours}</span>`:'<span style="color:var(--txt2)">—</span>';
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td style="color:var(--txt2);font-size:.76rem">${i+1}</td>
@@ -3471,8 +3471,7 @@ function renderPayroll(){
       <td style="color:#dc2626;font-weight:600;text-align:center">${att.A}</td>
       <td style="color:#d97706;font-weight:600;text-align:center">${att.L}</td>
       ${isMgr?`<td style="color:#dc2626;font-weight:600" id="abd-${e.id}">${absDeduct?absDeduct.toLocaleString():'—'}</td>`:''}
-      <td><input class="pay-input" type="number" min="0" step=".5" value="${otHours||''}" placeholder="0" data-cov="${covOT}" title="${otTitle}" style="${otBg}"
-          oninput="onPay('${month}','${e.id}','overtimeHours',Math.max(0,(parseFloat(this.value)||0)-${covOT}))"/></td>
+      <td style="text-align:center">${otCell}</td>
       ${isMgr?`
       <td style="color:var(--txt2);font-size:.8rem">${hourlyRate}</td>
       <td style="color:#16a34a;font-weight:600" id="ot-${e.id}">${otTotal?otTotal.toLocaleString():'—'}</td>
@@ -3540,7 +3539,7 @@ function onPay(month,empId,field,val){
   const att=getAttCount(month,empId);
   const absDeduct=+(att.A*dailyRate).toFixed(2);
   const covOT=getCoverageOT(empId,month);
-  const totalOTHours=(d.overtimeHours||0)+covOT;
+  const totalOTHours=covOT;
   const otTotal=+(totalOTHours*hourlyRate).toFixed(2);
   const net=(e.baseSalary||0)-absDeduct+otTotal+(d.bonus||0)-(d.extraDeductions||0);
   const otEl=document.getElementById('ot-'+empId);
@@ -3557,7 +3556,7 @@ function onPay(month,empId,field,val){
     const hr=em.baseSalary?+(em.baseSalary/30/8).toFixed(2):0;
     const ac=getAttCount(month,em.id);
     const ab=+(ac.A*dr).toFixed(2);
-    const ot=+(((dd.overtimeHours||0)+getCoverageOT(em.id,month))*hr).toFixed(2);
+    const ot=+(getCoverageOT(em.id,month)*hr).toFixed(2);
     grand+=(em.baseSalary||0)-ab+ot+(dd.bonus||0)-(dd.extraDeductions||0);
   });
   const gc=document.getElementById('grandCell');
@@ -3620,7 +3619,7 @@ function exportPayCSV(){
     const att=month?getAttCount(month,e.id):{P:0,A:0,L:0,T:0};
     const absDeduct=+(att.A*dailyRate).toFixed(2);
     const covOT=month?getCoverageOT(e.id,month):0;
-    const totalOTHours=(d.overtimeHours||0)+covOT;
+    const totalOTHours=covOT;
     const otTotal=+(totalOTHours*hourlyRate).toFixed(2);
     const net=(e.baseSalary||0)-absDeduct+otTotal+(d.bonus||0)-(d.extraDeductions||0);
     rows.push([e.name,e.project,e.baseSalary||0,att.P+att.T,att.A,att.L,absDeduct,totalOTHours,hourlyRate,otTotal,d.bonus||0,d.extraDeductions||0,net,d.notes||'']);
@@ -3835,7 +3834,7 @@ function renderLiveDashboard(){
   const recDates=mDates.filter(d=>d<=todayStr);
   let mP=0,mA=0,mL=0,mT=0,mOT=0;
   const mPay=payroll[thisMonth]||{};
-  list.forEach(e=>{const s=getAttSummary(mDates,e.id);mP+=s.P;mA+=s.A;mL+=s.L;mT+=s.T;mOT+=(mPay[e.id]?.overtimeHours||0)+getCoverageOT(e.id,thisMonth);});
+  list.forEach(e=>{const s=getAttSummary(mDates,e.id);mP+=s.P;mA+=s.A;mL+=s.L;mT+=s.T;mOT+=getCoverageOT(e.id,thisMonth);});
 
   // project bars (monthly)
   const projBreak=PROJS.map((proj,pi)=>{
@@ -4003,14 +4002,14 @@ function renderMonthlyReport(){
   const recDates=mDates.filter(d=>d<=todayStr);
 
   let totP=0,totA=0,totL=0,totT=0,totOT=0;
-  list.forEach(e=>{const s=getAttSummary(mDates,e.id);totP+=s.P;totA+=s.A;totL+=s.L;totT+=s.T;totOT+=(mPay[e.id]?.overtimeHours||0)+getCoverageOT(e.id,monthStr);});
+  list.forEach(e=>{const s=getAttSummary(mDates,e.id);totP+=s.P;totA+=s.A;totL+=s.L;totT+=s.T;totOT+=getCoverageOT(e.id,monthStr);});
   const possibleDays=list.length*(recDates.length||1);
   const attPct=pct(totP+totT,possibleDays);
 
   const projRows=PROJS.map((p,pi)=>{
     const pList=list.filter(e=>e.project===p);if(!pList.length)return'';
     let pp=0,pa=0,pl=0,pt=0,pot=0;
-    pList.forEach(e=>{const s=getAttSummary(mDates,e.id);pp+=s.P;pa+=s.A;pl+=s.L;pt+=s.T;pot+=(mPay[e.id]?.overtimeHours||0)+getCoverageOT(e.id,monthStr);});
+    pList.forEach(e=>{const s=getAttSummary(mDates,e.id);pp+=s.P;pa+=s.A;pl+=s.L;pt+=s.T;pot+=getCoverageOT(e.id,monthStr);});
     const pp2=pct(pp+pt,pList.length*(recDates.length||1));
     return`<tr>
       <td><span class="badge ${BC[pi]}">${p}</span></td>
@@ -4031,7 +4030,7 @@ function renderMonthlyReport(){
     const hr=e.baseSalary?+(e.baseSalary/30/8).toFixed(2):0;
     const absD=+(s.A*dr).toFixed(2);
     const covOT=getCoverageOT(e.id,monthStr);
-    const totalOTHours=(pay.overtimeHours||0)+covOT;
+    const totalOTHours=covOT;
     const otAmt=+(totalOTHours*hr).toFixed(2);
     const net=(e.baseSalary||0)-absD+otAmt+(pay.bonus||0)-(pay.extraDeductions||0);
     const pp2=recDates.length?pct(s.P+s.T,recDates.length):0;
@@ -4095,9 +4094,9 @@ function renderCompareReport(){
     let P=0,A=0,L=0,T=0,OT=0,net=0;
     list.forEach(e=>{
       const s=getAttSummary(d,e.id);const cOT=getCoverageOT(e.id,ms);
-      P+=s.P;A+=s.A;L+=s.L;T+=s.T;OT+=(pay[e.id]?.overtimeHours||0)+cOT;
+      P+=s.P;A+=s.A;L+=s.L;T+=s.T;OT+=cOT;
       if(isMgr){const p=pay[e.id]||{};const dr=e.baseSalary?e.baseSalary/30:0;const hr=e.baseSalary?e.baseSalary/30/8:0;
-        net+=(e.baseSalary||0)-(s.A*dr)+(((p.overtimeHours||0)+cOT)*hr)+(p.bonus||0)-(p.extraDeductions||0);}
+        net+=(e.baseSalary||0)-(s.A*dr)+(cOT*hr)+(p.bonus||0)-(p.extraDeductions||0);}
     });
     return{P,A,L,T,OT,net:Math.round(net)};
   }
@@ -4119,8 +4118,8 @@ function renderCompareReport(){
   const empRows=list.map((e,i)=>{
     const d1=getMonthDates(m1),d2=getMonthDates(m2);
     const a1=getAttSummary(d1,e.id),a2=getAttSummary(d2,e.id);
-    const ot1=((payroll[m1]||{})[e.id]?.overtimeHours||0)+getCoverageOT(e.id,m1);
-    const ot2=((payroll[m2]||{})[e.id]?.overtimeHours||0)+getCoverageOT(e.id,m2);
+    const ot1=getCoverageOT(e.id,m1);
+    const ot2=getCoverageOT(e.id,m2);
     const pi=PROJS.indexOf(e.project);
     return`<tr>
       <td>${i+1}</td><td style="font-weight:600">${e.name}</td>

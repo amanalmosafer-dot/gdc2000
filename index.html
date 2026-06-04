@@ -2336,12 +2336,15 @@ let payroll=JSON.parse(localStorage.getItem('payroll')||'{}');
 let evaluations=JSON.parse(localStorage.getItem('evaluations')||'{}');
 // التغطية المؤقتة للشفتات: {id, empId, coverShift, fromDate, toDate, reason}
 let coverages=JSON.parse(localStorage.getItem('coverages')||'[]');
+// أوفر تايم يدوي بساعات محددة: [{id, empId, date, hours, reason, by}]
+let overtimes=JSON.parse(localStorage.getItem('overtimes')||'[]');
 
 function saveEmps(){localStorage.setItem('employees',JSON.stringify(employees));if(fbReady){const o={};employees.forEach(e=>{o[e.id]=e;});db.ref('employees').set(o);}}
 function saveAtt(){localStorage.setItem('attendance',JSON.stringify(attendance));if(fbReady)db.ref('attendance').set(attendance);}
 function savePay(){localStorage.setItem('payroll',JSON.stringify(payroll));if(fbReady)db.ref('payroll').set(payroll);}
 function saveEval(){localStorage.setItem('evaluations',JSON.stringify(evaluations));if(fbReady)db.ref('evaluations').set(evaluations);}
 function saveCoverages(){localStorage.setItem('coverages',JSON.stringify(coverages));if(fbReady)db.ref('coverages').set(coverages);}
+function saveOvertimes(){localStorage.setItem('overtimes',JSON.stringify(overtimes));if(fbReady)db.ref('overtimes').set(overtimes);}
 // دالة مساعدة: تحصل على الشفت الفعلي للموظف في تاريخ معين (مع التغطية المؤقتة)
 function getEmpShiftOnDate(empId,date){
   const e=employees.find(x=>x.id===empId);
@@ -2355,30 +2358,43 @@ function getActiveCoverage(empId,date){
   return coverages.find(c=>c.empId===empId&&c.fromDate<=date&&c.toDate>=date)||null;
 }
 // حساب ساعات الأوفر تايم التلقائية من التغطية المؤقتة لشهر معيّن
-// كل يوم حضّر فيه (P أو T) خلال فترة التغطية = 8 ساعات أوفر
+// إجمالي ساعات الأوفر تايم لشهر = تغطية مؤقتة (8h/يوم) + أوفر يدوي بساعات محددة
 function getCoverageOT(empId,month){
   const monthDays=getMonthDates(month);
   let hours=0;
+  // 1) من التغطية المؤقتة
   monthDays.forEach(d=>{
     const cov=getActiveCoverage(empId,d);
     if(!cov)return;
     const st=(attendance[d]||{})[empId]||'';
     if(st==='P'||st==='T')hours+=8;
   });
+  // 2) من الأوفر اليدوي
+  (overtimes||[]).forEach(o=>{
+    if(o.empId===empId&&o.date&&o.date.startsWith(month))hours+=(o.hours||0);
+  });
   return hours;
 }
-// تفاصيل أيام الأوفر تايم: [{date, dayName, shift, status, hours}]
+// تفاصيل أيام الأوفر تايم
 function getCoverageOTDetails(empId,month){
   const monthDays=getMonthDates(month);
   const DNAMES=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
   const out=[];
+  // من التغطية المؤقتة
   monthDays.forEach(d=>{
     const cov=getActiveCoverage(empId,d);
     if(!cov)return;
     const st=(attendance[d]||{})[empId]||'';
     if(st!=='P'&&st!=='T')return;
-    out.push({date:d,dayName:DNAMES[new Date(d).getDay()],shift:SL[cov.coverShift]||cov.coverShift,status:st==='P'?'حاضر':'متأخر',hours:8});
+    out.push({date:d,dayName:DNAMES[new Date(d).getDay()],shift:SL[cov.coverShift]||cov.coverShift,status:st==='P'?'حاضر':'متأخر',hours:8,source:'تغطية'});
   });
+  // من الأوفر اليدوي
+  (overtimes||[]).forEach(o=>{
+    if(o.empId!==empId||!o.date||!o.date.startsWith(month))return;
+    out.push({date:o.date,dayName:DNAMES[new Date(o.date).getDay()],shift:o.reason||'إضافي',status:'يدوي',hours:o.hours||0,source:'يدوي',id:o.id});
+  });
+  // رتّب بالتاريخ
+  out.sort((a,b)=>a.date.localeCompare(b.date));
   return out;
 }
 
@@ -2420,6 +2436,11 @@ function attachDataListeners(){
   db.ref('coverages').on('value',snap=>{
     const v=snap.val();
     coverages=v?Object.values(v):[];localStorage.setItem('coverages',JSON.stringify(coverages));
+    renderActive();
+  },onErr);
+  db.ref('overtimes').on('value',snap=>{
+    const v=snap.val();
+    overtimes=v?Object.values(v):[];localStorage.setItem('overtimes',JSON.stringify(overtimes));
     renderActive();
   },onErr);
   db.ref('users').on('value',snap=>{
@@ -2843,7 +2864,10 @@ function mkRow(e,n,pi){
     <div class="exp-item"><span class="exp-lbl">${t('expOT')}</span><span class="exp-val">${e.overtimeRate?e.overtimeRate+' '+t('sarH'):'—'}</span></div>
     ${(()=>{const today=localDateStr(new Date());const cov=getActiveCoverage(e.id,today);return cov?`<div class="exp-item full"><span class="exp-lbl">🔄 تغطية مؤقتة نشطة</span><span class="exp-val"><span class="chip-warn">📅 ${cov.fromDate} → ${cov.toDate} | الشفت: ${SL[cov.coverShift]||cov.coverShift}</span>${can('employees_edit')?`<button class="btn btn-danger btn-sm" style="margin-right:8px" onclick="endCoverage('${cov.id}')">إنهاء</button>`:''}</span></div>`:'';})()}
   </div>
-  ${can('employees_edit')?`<div style="padding:8px 14px 4px;text-align:right"><button class="btn btn-sm no-print" style="background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;font-size:.78rem" onclick="openCoverageModal('${e.id}')">🔄 تغطية مؤقتة</button></div>`:''}
+  ${can('employees_edit')?`<div style="padding:8px 14px 4px;text-align:right;display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">
+    <button class="btn btn-sm no-print" style="background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;font-size:.78rem" onclick="openCoverageModal('${e.id}')">🔄 تغطية مؤقتة</button>
+    <button class="btn btn-sm no-print" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:.78rem" onclick="openOvertimeModal('${e.id}')">⏱️ إضافة ساعات أوفر</button>
+  </div>`:''}
   <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:10px">
     <div style="font-size:.75rem;font-weight:700;color:var(--txt2);margin-bottom:8px;padding:0 14px">🏥 الفحص الطبي والتطعيمات</div>
     <div class="exp-inner" style="padding-top:0">
@@ -3230,13 +3254,15 @@ function printOvertimeReport(){
     const pi=PROJS.indexOf(rec.emp.project);
     const projBadge=pi>=0?`<span class="badge ${BC[pi]||''}" style="-webkit-print-color-adjust:exact;print-color-adjust:exact">${rec.emp.project}</span>`:rec.emp.project;
     // تفاصيل الأيام (مدمجة في خلية واحدة)
-    const dayCells=rec.details.map(d=>
-      `<div style="padding:3px 6px;border-bottom:1px dashed #e2e8f0;font-size:.72rem;display:flex;justify-content:space-between;gap:8px">
+    const dayCells=rec.details.map(d=>{
+      const srcColor=d.source==='يدوي'?'#7c3aed':'#0891b2';
+      const srcIcon=d.source==='يدوي'?'⏱️':'🔄';
+      return `<div style="padding:3px 6px;border-bottom:1px dashed #e2e8f0;font-size:.72rem;display:flex;justify-content:space-between;gap:8px">
         <span style="font-weight:700">${d.date.substr(8)}/${d.date.substr(5,2)}</span>
         <span style="color:#64748b">${d.dayName}</span>
-        <span style="color:#0891b2;font-weight:600">${d.shift}</span>
+        <span style="color:${srcColor};font-weight:600">${srcIcon} ${d.shift}</span>
         <span style="color:#15803d;font-weight:700">${d.hours}h</span>
-      </div>`).join('');
+      </div>`;}).join('');
     return `<tr>
       <td style="text-align:center;font-weight:600">${idx+1}</td>
       <td style="font-weight:700;font-size:.85rem">${rec.emp.name}<br><span style="font-size:.7rem;color:#64748b">${rec.emp.empNum||'—'}</span></td>
@@ -3287,7 +3313,7 @@ function printOvertimeReport(){
           </tr>
         </tfoot>
       </table>
-      <div style="margin-top:10px;font-size:.7rem;color:#64748b;text-align:center">* الأوفر تايم محسوب تلقائياً: كل يوم حضور خلال فترة التغطية المؤقتة = 8 ساعات</div>
+      <div style="margin-top:10px;font-size:.7rem;color:#64748b;text-align:center">* الأوفر تايم: 🔄 تغطية مؤقتة (8h/يوم) + ⏱️ ساعات إضافية يدوية</div>
       <div class="da-foot" style="margin-top:24px">
         <div class="da-sign">المشرف / التوقيع</div>
         <div class="da-sign">المدير / التوقيع</div>
@@ -3405,6 +3431,76 @@ function endCoverage(covId){
   coverages=coverages.filter(c=>c.id!==covId);
   saveCoverages();
   toast('تم إنهاء التغطية المؤقتة','ok');
+  renderActive();
+}
+
+// ── إضافة ساعات أوفر يدوي ───────────────────────────────────
+function openOvertimeModal(empId){
+  const e=employees.find(x=>x.id===empId);if(!e)return;
+  const today=localDateStr(new Date());
+  // اعرض كل الأوفر اليدوي السابق لهذا الموظف
+  const empOTs=(overtimes||[]).filter(o=>o.empId===empId).sort((a,b)=>b.date.localeCompare(a.date));
+  const listHTML=empOTs.length?empOTs.map(o=>
+    `<div style="display:flex;gap:8px;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:7px;margin-bottom:5px;font-size:.83rem">
+       <span style="font-weight:700;color:#7c3aed">⏱️ ${o.hours}h</span>
+       <span style="color:var(--txt2)">📅 ${o.date}</span>
+       <span style="flex:1;color:var(--txt2);font-size:.78rem">${o.reason||'—'}</span>
+       <button class="btn btn-danger btn-sm" onclick="delOvertime('${o.id}','${empId}')" title="حذف">🗑️</button>
+     </div>`).join(''):'<div style="text-align:center;padding:14px;color:var(--txt2);font-size:.85rem">لا يوجد أوفر تايم يدوي مسجّل</div>';
+
+  const div=document.createElement('div');
+  div.id='otOverlay';
+  div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);direction:rtl;padding:16px';
+  div.innerHTML=`<div style="background:var(--surface);border-radius:16px;padding:24px;width:520px;max-width:96vw;max-height:92vh;overflow-y:auto">
+    <h3 style="font-size:1rem;font-weight:800;margin-bottom:4px">⏱️ ساعات أوفر تايم: ${e.name}</h3>
+    <div style="color:var(--txt2);font-size:.82rem;margin-bottom:16px">${e.project} · ${SL[e.shift||'-']||'—'}</div>
+
+    <div style="background:#f3e8ff;border:1px solid #d8b4fe;border-radius:10px;padding:14px;margin-bottom:14px">
+      <div style="font-weight:700;font-size:.85rem;color:#6d28d9;margin-bottom:10px">➕ تسجيل أوفر تايم جديد</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
+        <div><label style="display:block;font-size:.75rem;font-weight:700;color:var(--txt2);margin-bottom:4px">التاريخ</label>
+          <input type="date" id="otDate" value="${today}" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;background:#fff;box-sizing:border-box"/></div>
+        <div><label style="display:block;font-size:.75rem;font-weight:700;color:var(--txt2);margin-bottom:4px">عدد الساعات</label>
+          <input type="number" id="otHours" min="0.5" step="0.5" placeholder="مثال: 4" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;background:#fff;box-sizing:border-box"/></div>
+      </div>
+      <input type="text" id="otReason" placeholder="السبب (اختياري — مثال: تعويض غياب يومي)" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;background:#fff;box-sizing:border-box;margin-bottom:10px"/>
+      <button class="btn btn-primary" style="width:100%;background:#7c3aed" onclick="saveOvertime('${empId}')">✅ إضافة</button>
+    </div>
+
+    <div style="font-weight:700;font-size:.82rem;color:var(--txt2);margin-bottom:8px">📋 السجل السابق</div>
+    <div style="max-height:240px;overflow-y:auto">${listHTML}</div>
+
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button class="btn btn-secondary" style="width:100%" onclick="document.getElementById('otOverlay').remove()">إغلاق</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+}
+
+function saveOvertime(empId){
+  const date=document.getElementById('otDate').value;
+  const hours=parseFloat(document.getElementById('otHours').value);
+  const reason=document.getElementById('otReason').value.trim();
+  if(!date){toast('حدد التاريخ','warn');return;}
+  if(!hours||hours<=0){toast('أدخل عدد ساعات صحيح','warn');return;}
+  if(hours>24){toast('الساعات لا يمكن أن تتجاوز 24','err');return;}
+  overtimes.push({id:'ot'+Date.now(),empId,date,hours,reason,by:currentUser?currentUser.username:''});
+  saveOvertimes();
+  const e=employees.find(x=>x.id===empId);
+  toast(`✅ تم إضافة ${hours} ساعة أوفر لـ ${e?e.name:''}`,'ok');
+  if(typeof logAudit==='function')logAudit('⏱️','أوفر تايم يدوي',`${e?e.name:''}: ${hours}h في ${date}`);
+  const ov=document.getElementById('otOverlay');if(ov)ov.remove();
+  openOvertimeModal(empId); // أعد فتح النافذة لإظهار السجل المحدّث
+  renderActive();
+}
+
+function delOvertime(otId,empId){
+  if(!confirm('حذف هذا التسجيل؟'))return;
+  overtimes=overtimes.filter(o=>o.id!==otId);
+  saveOvertimes();
+  toast('تم الحذف','ok');
+  const ov=document.getElementById('otOverlay');if(ov)ov.remove();
+  openOvertimeModal(empId);
   renderActive();
 }
 

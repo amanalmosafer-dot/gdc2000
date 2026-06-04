@@ -235,10 +235,15 @@ td{padding:9px 12px;vertical-align:middle}
 /* ── PRINT CARD (single employee) ── */
 #empPrintCard,#dailyAttPrint,#evalPrint,#empAttPrint,#otReportPrint{display:none}
 .da-card{max-width:820px;margin:0 auto;background:#fff;font-family:'Tajawal','Segoe UI',Arial,sans-serif;direction:rtl;color:#0f172a}
-.da-hdr{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:3px solid #8d8253;padding-bottom:14px;margin-bottom:16px}
-.da-hdr img{height:42px;width:auto}
-.da-title{font-size:1.25rem;font-weight:800;text-align:center;flex:1}
-.da-title small{display:block;font-size:.8rem;font-weight:600;color:#64748b;margin-top:3px}
+.da-hdr{position:relative;padding:14px 0 16px;margin-bottom:18px;border-bottom:3px double #8d8253}
+.da-hdr-row{display:grid;grid-template-columns:140px 1fr 140px;align-items:center;gap:14px}
+.da-hdr-logo{height:50px;width:auto;justify-self:start}
+.da-hdr-rep{justify-self:end;font-size:.7rem;color:#94a3b8;text-align:left;line-height:1.5;font-family:'Calibri',Arial,sans-serif}
+.da-hdr-rep b{color:#475569;display:block;font-size:.75rem}
+.da-title{text-align:center;line-height:1.2}
+.da-title-main{font-size:1.4rem;font-weight:800;color:#0f2444;letter-spacing:-.02em}
+.da-title-sub{font-size:.78rem;font-weight:600;color:#8d8253;margin-top:4px;letter-spacing:.05em}
+.da-title-en{font-size:.7rem;color:#94a3b8;font-family:'Calibri',Arial,sans-serif;margin-top:2px;font-style:italic}
 .da-meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:.85rem;margin-bottom:14px;font-weight:600}
 .da-meta b{color:#8d8253}
 .da-card table{width:100%;border-collapse:collapse;font-size:.82rem}
@@ -2223,6 +2228,69 @@ function fmtDateTime(d){try{return new Date(d).toLocaleString('ar-SA-u-nu-latn-c
 // ⚠️ دالة آمنة للحصول على تاريخ محلي بصيغة YYYY-MM-DD (بدون toISOString الذي يعطي UTC)
 function localDateStr(d){const dd=new Date(d);return dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');}
 
+// ── طباعة: اختيار اللغة وبناء الترويسة الموحّدة ───────────────
+function askPrintLang(){
+  // يرجّع 'ar' أو 'en' أو null (إلغاء)
+  const c=confirm('اضغط OK للطباعة بالعربية | Click OK for Arabic\nاضغط Cancel للطباعة بالإنجليزية | Click Cancel for English');
+  return c?'ar':'en';
+}
+
+// ترويسة موحّدة احترافية لكل التقارير
+// titleAr, titleEn: عنوان التقرير
+// lang: 'ar' أو 'en'
+function buildReportHeader(titleAr,titleEn,lang){
+  const isAr=lang==='ar';
+  const compAr='شركة الإنماء الذهبية للمقاولات العامة';
+  const compEn='Golden Development for General Contracting';
+  const now=new Date();
+  const dateStr=fmtDate(now);
+  const repNoLbl=isAr?'رقم التقرير':'Report No.';
+  const repDateLbl=isAr?'تاريخ الإصدار':'Issue Date';
+  const repNo='GDC-'+now.getFullYear()+(String(now.getMonth()+1).padStart(2,'0'))+'-'+String(Math.floor(Math.random()*10000)).padStart(4,'0');
+  return `
+    <div class="da-hdr">
+      <div class="da-hdr-row">
+        <img class="da-hdr-logo" src="logo.png" alt="${isAr?'الإنماء الذهبية':'Golden Development'}"/>
+        <div class="da-title" dir="${isAr?'rtl':'ltr'}">
+          <div class="da-title-main">${isAr?titleAr:titleEn}</div>
+          <div class="da-title-sub">${isAr?compAr:compEn}</div>
+          <div class="da-title-en">${isAr?titleEn:titleAr}</div>
+        </div>
+        <div class="da-hdr-rep" dir="${isAr?'rtl':'ltr'}">
+          <b>${repNoLbl}</b><span>${repNo}</span><br/>
+          <b style="margin-top:4px">${repDateLbl}</b><span>${dateStr}</span>
+        </div>
+      </div>
+    </div>`;
+}
+// قاموس مصغّر للمسميات
+function L(lang,key){
+  const D={
+    month:['الشهر','Month'], project:['المشروع','Project'], allProj:['كل المشاريع','All Projects'],
+    employee:['الموظف','Employee'], employees:['الموظفون','Employees'], empCount:['عدد الموظفين','Employee Count'],
+    date:['التاريخ','Date'], day:['اليوم','Day'], status:['الحالة','Status'], shift:['الشفت','Shift'],
+    name:['الاسم','Name'], num:['الرقم','ID'], project_:['المشروع','Project'],
+    present:['حاضر','Present'], absent:['غائب','Absent'], leave:['إجازة','Leave'], late:['تأخير','Late'], off:['راحة','Off'],
+    notMarked:['لم يُسجّل','Not Marked'], total:['الإجمالي','Total'], hours:['الساعات','Hours'],
+    supervisorSign:['المشرف / التوقيع','Supervisor / Signature'], managerSign:['المدير / التوقيع','Manager / Signature'],
+    notes:['ملاحظات','Notes'], avg:['المتوسط','Average'], score:['النتيجة','Score'], rating:['التقدير','Rating'],
+    quality:['جودة العمل','Work Quality'], productivity:['الإنتاجية','Productivity'], compliance:['الالتزام','Compliance'],
+    teamwork:['التعاون','Teamwork'], safety:['السلامة','Safety'], attendance_:['المواظبة','Attendance'],
+    excellent:['ممتاز','Excellent'], veryGood:['جيد جداً','Very Good'], good:['جيد','Good'], needsFollowup:['يحتاج متابعة','Needs Follow-up'],
+    notRated:['غير مقيّم','Not Rated'], evaluated:['المُقيَّمون','Evaluated'],
+    daysWork:['أيام حضور','Working Days'], daysAbs:['أيام غياب','Absent Days'], daysLeave:['أيام إجازة','Leave Days'],
+    attRate:['نسبة الحضور','Attendance %'], overtime:['أوفر تايم','Overtime'],
+    coverage:['تغطية','Coverage'], manual:['يدوي','Manual'],
+    otSource:['المصدر','Source'], pricePerHour:['سعر الساعة','Hourly Rate'], amount:['المبلغ','Amount'],
+    originalShift:['الشفت الأصلي','Original Shift'], otDetails:['تفاصيل الأوفر','OT Details'],
+    totalSar:['الإجمالي ﷼','Total SAR'], totalHours:['إجمالي الساعات','Total Hours'],
+    daily:['التحضير اليومي','Daily Attendance'], monthly:['التقرير الشهري','Monthly Report'],
+    evaluation:['تقرير التقييم','Evaluation Report'], overtimeReport:['تقرير الأوفر تايم','Overtime Report'],
+    individualMonth:['تقرير الحضور الشهري','Individual Monthly Attendance'],
+  };
+  return (D[key]||[key,key])[lang==='en'?1:0];
+}
+
 // ── إشعارات أنيقة (Toast) ────────────────────────────────────
 function toast(msg,type){
   type=type||'info';
@@ -3099,54 +3167,45 @@ function printEmp(idx){
 function printDailyAtt(){
   const date=document.getElementById('attDate').value;
   if(!date){toast(t('errSelectDate'),'err');return}
+  const lang=askPrintLang();const isAr=lang==='ar';
   const proj=document.getElementById('attProj').value;
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
   const day=attendance[date]||{};
-  const STMAP={P:['حاضر','da-P'],A:['غائب','da-A'],L:['إجازة','da-L'],T:['تأخير','da-T'],O:['راحة','da-O']};
-  let P=0,A=0,L=0,T=0,O=0,N=0;
+  const STMAP={P:['da-P',L(lang,'present')],A:['da-A',L(lang,'absent')],L:['da-L',L(lang,'leave')],T:['da-T',L(lang,'late')],O:['da-O',L(lang,'off')]};
+  let P=0,A=0,L_=0,T=0,O=0,N=0;
   const rows=list.map((e,i)=>{
     const st=day[e.id]||'';
-    if(st==='P')P++;else if(st==='A')A++;else if(st==='L')L++;else if(st==='T')T++;else if(st==='O')O++;else N++;
-    const cell=st&&STMAP[st]?`<span class="${STMAP[st][1]}">${STMAP[st][0]}</span>`:'<span style="color:#94a3b8">—</span>';
+    if(st==='P')P++;else if(st==='A')A++;else if(st==='L')L_++;else if(st==='T')T++;else if(st==='O')O++;else N++;
+    const cell=st&&STMAP[st]?`<span class="${STMAP[st][0]}">${STMAP[st][1]}</span>`:'<span style="color:#94a3b8">—</span>';
     return `<tr>
-      <td>${i+1}</td>
-      <td class="nm">${e.name}</td>
-      <td>${e.empNum||'—'}</td>
-      <td>${e.project}</td>
-      <td>${SL[e.shift||'-']||'—'}</td>
-      <td>${cell}</td>
+      <td>${i+1}</td><td class="nm">${e.name}</td><td>${e.empNum||'—'}</td>
+      <td>${e.project}</td><td>${SL[e.shift||'-']||'—'}</td><td>${cell}</td>
     </tr>`;
   }).join('');
-  // تنسيق التاريخ
-  let dlabel=fmtDateLong(date);
   document.getElementById('dailyAttPrint').innerHTML=`
-    <div class="da-card">
-      <div class="da-hdr">
-        <img src="logo.png" alt="الإنماء الذهبية"/>
-        <div class="da-title">تقرير التحضير اليومي<small>شركة الإنماء الذهبية للمقاولات العامة</small></div>
-        <div style="width:120px"></div>
-      </div>
-      <div class="da-meta">
-        <div>📅 التاريخ: <b>${dlabel}</b></div>
-        <div>🏗 المشروع: <b>${proj||'كل المشاريع'}</b></div>
-        <div>👥 العدد: <b>${list.length}</b></div>
+    <div class="da-card" dir="${isAr?'rtl':'ltr'}">
+      ${buildReportHeader(L('ar','daily'),L('en','daily'),lang)}
+      <div class="da-meta" dir="${isAr?'rtl':'ltr'}">
+        <div>📅 <b>${L(lang,'date')}:</b> ${fmtDateLong(date)}</div>
+        <div>🏗 <b>${L(lang,'project')}:</b> ${proj||L(lang,'allProj')}</div>
+        <div>👥 <b>${L(lang,'empCount')}:</b> ${list.length}</div>
       </div>
       <table>
-        <thead><tr><th>#</th><th>الاسم</th><th>رقم الموظف</th><th>المشروع</th><th>الشفت</th><th>الحالة</th></tr></thead>
-        <tbody>${rows||'<tr><td colspan="6">لا يوجد موظفون</td></tr>'}</tbody>
+        <thead><tr><th>#</th><th>${L(lang,'name')}</th><th>${L(lang,'num')}</th><th>${L(lang,'project')}</th><th>${L(lang,'shift')}</th><th>${L(lang,'status')}</th></tr></thead>
+        <tbody>${rows||`<tr><td colspan="6">—</td></tr>`}</tbody>
       </table>
-      <div class="da-sum">
-        <span class="da-P">✓ حاضر: ${P}</span>
-        <span class="da-A">✗ غائب: ${A}</span>
-        <span class="da-L">⊙ إجازة: ${L}</span>
-        <span class="da-T">⏱ تأخير: ${T}</span>
-        ${O?`<span class="da-O">🛌 راحة: ${O}</span>`:''}
-        ${N?`<span style="color:#94a3b8">○ لم يُسجّل: ${N}</span>`:''}
+      <div class="da-sum" dir="${isAr?'rtl':'ltr'}">
+        <span class="da-P">✓ ${L(lang,'present')}: ${P}</span>
+        <span class="da-A">✗ ${L(lang,'absent')}: ${A}</span>
+        <span class="da-L">⊙ ${L(lang,'leave')}: ${L_}</span>
+        <span class="da-T">⏱ ${L(lang,'late')}: ${T}</span>
+        ${O?`<span class="da-O">🛌 ${L(lang,'off')}: ${O}</span>`:''}
+        ${N?`<span style="color:#94a3b8">○ ${L(lang,'notMarked')}: ${N}</span>`:''}
       </div>
       <div class="da-foot">
-        <div class="da-sign">اسم المشرف / التوقيع</div>
-        <div class="da-sign">المدير / التوقيع</div>
+        <div class="da-sign">${L(lang,'supervisorSign')}</div>
+        <div class="da-sign">${L(lang,'managerSign')}</div>
       </div>
     </div>`;
   document.body.classList.add('printing-att');
@@ -3157,67 +3216,82 @@ function printDailyAtt(){
 function printEmpMonthlyAtt(empId){
   const e=employees.find(x=>x.id===empId);if(!e)return;
   const curMonth=localDateStr(new Date()).substr(0,7);
-  const month=prompt('اختر الشهر (مثال: 2026-06):',curMonth);
+  const month=prompt('اختر الشهر | Select Month (YYYY-MM):',curMonth);
   if(!month)return;
+  const lang=askPrintLang();const isAr=lang==='ar';
   const days=getMonthDates(month);
-  const STMAP={P:['حاضر','da-P'],A:['غائب','da-A'],L:['إجازة','da-L'],T:['تأخير','da-T'],O:['راحة','da-O']};
-  const DNAMES=['أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
+  const STMAP={P:[L(lang,'present'),'da-P'],A:[L(lang,'absent'),'da-A'],L:[L(lang,'leave'),'da-L'],T:[L(lang,'late'),'da-T'],O:[L(lang,'off'),'da-O']};
+  const DNAMES_AR=['أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
+  const DNAMES_EN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const DN=isAr?DNAMES_AR:DNAMES_EN;
   const dayData=days.map(d=>{
     const s=(attendance[d]||{})[empId]||'';
     const dow=new Date(d).getDay();
-    const cell=s&&STMAP[s]?`<span class="${STMAP[s][1]}">${STMAP[s][0]}</span>`:(dow===5?'<span style="color:#bbb">جمعة</span>':'—');
-    return{d,dn:DNAMES[dow],cell};
+    const cell=s&&STMAP[s]?`<span class="${STMAP[s][1]}">${STMAP[s][0]}</span>`:(dow===5?`<span style="color:#bbb">${isAr?'جمعة':'Fri'}</span>`:'—');
+    return{d,dn:DN[dow],cell};
   });
   const att=getAttCount(month,empId);
   const totalWork=att.P+att.A+att.T;
   const attPct=totalWork?Math.round((att.P+att.T)/totalWork*100):0;
   const covOT=getCoverageOT(empId,month);
-  // تقسيم لعمودين (1-16 يمين، 17-31 يسار)
   const half=Math.ceil(days.length/2);
   const mkRow=(r,i)=>`<td style="padding:2px 4px;font-size:.72rem;color:#555">${i+1}</td><td style="padding:2px 4px;font-size:.72rem">${r.d.substr(8)}</td><td style="padding:2px 4px;font-size:.72rem">${r.dn}</td><td style="padding:2px 5px;font-size:.75rem">${r.cell}</td>`;
   let tblRows='';
   for(let i=0;i<half;i++){
-    const left=dayData[i];
-    const right=dayData[i+half];
+    const left=dayData[i];const right=dayData[i+half];
     tblRows+=`<tr style="border-bottom:1px solid #e5e1d5">${mkRow(left,i)}<td style="width:8px;border-left:2px solid #d6cfb8"></td>${right?mkRow(right,i+half):'<td colspan="4"></td>'}</tr>`;
   }
   const mkSum=(n,lbl,bg,clr)=>`<div style="background:${bg};padding:6px 8px;border-radius:6px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact"><span style="font-size:1.1rem;font-weight:800;color:${clr}">${n}</span><br><span style="font-size:.62rem;font-weight:700;color:${clr}">${lbl}</span></div>`;
+  // رسم بياني (Bar chart مصغّر)
+  const bars=[
+    [att.P,'#15803d',L(lang,'present')],
+    [att.A,'#b91c1c',L(lang,'absent')],
+    [att.L,'#a16207',L(lang,'leave')],
+    [att.T,'#6d28d9',L(lang,'late')],
+    [att.O||0,'#0e7490',L(lang,'off')],
+  ];
+  const maxVal=Math.max(...bars.map(b=>b[0]),1);
+  const chartBars=bars.map(b=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+    <div style="font-size:.7rem;font-weight:700;color:${b[1]}">${b[0]}</div>
+    <div style="width:32px;height:${Math.round(b[0]/maxVal*70)+4}px;background:${b[1]};border-radius:4px 4px 0 0;-webkit-print-color-adjust:exact;print-color-adjust:exact"></div>
+    <div style="font-size:.62rem;color:#64748b;font-weight:600">${b[2]}</div>
+  </div>`).join('');
 
   document.getElementById('empAttPrint').innerHTML=`
-    <div class="da-card" style="font-size:.82rem;max-width:700px">
-      <div class="da-hdr" style="padding-bottom:10px;margin-bottom:10px">
-        <img src="logo.png" alt="الإنماء الذهبية" style="height:32px"/>
-        <div class="da-title" style="font-size:1.05rem">تقرير الحضور الشهري<small style="font-size:.7rem">شركة الإنماء الذهبية للمقاولات العامة</small></div>
-        <div style="width:80px"></div>
-      </div>
-      <div style="background:#f4f1e8;border-radius:8px;padding:10px 14px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 14px;font-size:.76rem;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-        <div>👤 <b>${e.name}</b></div>
+    <div class="da-card" style="font-size:.82rem;max-width:760px" dir="${isAr?'rtl':'ltr'}">
+      ${buildReportHeader(L('ar','individualMonth'),L('en','individualMonth'),lang)}
+      <div style="background:#f4f1e8;border-radius:8px;padding:10px 14px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 14px;font-size:.76rem;-webkit-print-color-adjust:exact;print-color-adjust:exact" dir="${isAr?'rtl':'ltr'}">
+        <div>👤 <b>${L(lang,'name')}:</b> ${e.name}</div>
         <div>🆔 ${e.empNum||'—'}</div>
-        <div>📅 <b>${month}</b></div>
+        <div>📅 <b>${L(lang,'month')}:</b> ${month}</div>
         <div>🏗 ${e.project}</div>
         <div>⏰ ${SL[e.shift||'-']||'—'}</div>
         <div>🏷 ${e.title||'—'}</div>
       </div>
       <table style="width:100%;border-collapse:collapse;border:1px solid #d6cfb8">
         <thead><tr style="background:#f4f1e8;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-          <th style="padding:3px;font-size:.65rem">#</th><th style="padding:3px;font-size:.65rem">تاريخ</th><th style="padding:3px;font-size:.65rem">يوم</th><th style="padding:3px;font-size:.65rem">الحالة</th>
+          <th style="padding:3px;font-size:.65rem">#</th><th style="padding:3px;font-size:.65rem">${L(lang,'date')}</th><th style="padding:3px;font-size:.65rem">${L(lang,'day')}</th><th style="padding:3px;font-size:.65rem">${L(lang,'status')}</th>
           <th style="width:8px;border-left:2px solid #d6cfb8"></th>
-          <th style="padding:3px;font-size:.65rem">#</th><th style="padding:3px;font-size:.65rem">تاريخ</th><th style="padding:3px;font-size:.65rem">يوم</th><th style="padding:3px;font-size:.65rem">الحالة</th>
+          <th style="padding:3px;font-size:.65rem">#</th><th style="padding:3px;font-size:.65rem">${L(lang,'date')}</th><th style="padding:3px;font-size:.65rem">${L(lang,'day')}</th><th style="padding:3px;font-size:.65rem">${L(lang,'status')}</th>
         </tr></thead>
         <tbody>${tblRows}</tbody>
       </table>
       <div style="margin-top:10px;display:grid;grid-template-columns:repeat(7,1fr);gap:6px">
-        ${mkSum(att.P,'حضور','#dcfce7','#15803d')}
-        ${mkSum(att.A,'غياب','#fee2e2','#b91c1c')}
-        ${mkSum(att.L,'إجازة','#fef9c3','#a16207')}
-        ${mkSum(att.T,'تأخير','#ede9fe','#6d28d9')}
-        ${mkSum(att.O||0,'راحة','#cffafe','#0e7490')}
-        ${mkSum(covOT+'h','أوفر','#fce7f3','#be185d')}
-        ${mkSum(attPct+'%','نسبة','#dbeafe','#1d4ed8')}
+        ${mkSum(att.P,L(lang,'present'),'#dcfce7','#15803d')}
+        ${mkSum(att.A,L(lang,'absent'),'#fee2e2','#b91c1c')}
+        ${mkSum(att.L,L(lang,'leave'),'#fef9c3','#a16207')}
+        ${mkSum(att.T,L(lang,'late'),'#ede9fe','#6d28d9')}
+        ${mkSum(att.O||0,L(lang,'off'),'#cffafe','#0e7490')}
+        ${mkSum(covOT+'h',L(lang,'overtime'),'#fce7f3','#be185d')}
+        ${mkSum(attPct+'%',L(lang,'attRate'),'#dbeafe','#1d4ed8')}
+      </div>
+      <div style="margin-top:14px;padding:12px;background:#fafafa;border:1px solid #e5e7eb;border-radius:8px">
+        <div style="font-size:.72rem;font-weight:700;color:#475569;margin-bottom:8px;text-align:center">📊 ${isAr?'الرسم البياني للحضور':'Attendance Chart'}</div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-around;height:110px;border-bottom:2px solid #cbd5e1;padding-bottom:4px">${chartBars}</div>
       </div>
       <div class="da-foot" style="margin-top:20px">
-        <div class="da-sign">المشرف / التوقيع</div>
-        <div class="da-sign">المدير / التوقيع</div>
+        <div class="da-sign">${L(lang,'supervisorSign')}</div>
+        <div class="da-sign">${L(lang,'managerSign')}</div>
       </div>
     </div>`;
   document.body.classList.add('printing-ematt');
@@ -3228,39 +3302,41 @@ function printEmpMonthlyAtt(empId){
 // تقرير الأوفر تايم الشامل — موظفين ↔ أيام ↔ شفت
 function printOvertimeReport(){
   const month=document.getElementById('payMonth').value;
-  if(!month){toast('اختر الشهر أولاً','warn');return;}
+  if(!month){toast('اختر الشهر أولاً | Select month first','warn');return;}
+  const lang=askPrintLang();const isAr=lang==='ar';
   const proj=document.getElementById('payProj').value;
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
 
-  // اجمع كل موظف عنده أوفر
   const data=[];
-  let grandHours=0,grandAmount=0;
+  let grandHours=0,grandAmount=0,grandCov=0,grandManual=0;
   list.forEach(e=>{
     const details=getCoverageOTDetails(e.id,month);
     if(!details.length)return;
     const hourlyRate=e.baseSalary?+(e.baseSalary/30/8).toFixed(2):0;
     const totalHours=details.reduce((s,d)=>s+d.hours,0);
     const totalAmount=+(totalHours*hourlyRate).toFixed(2);
-    grandHours+=totalHours;grandAmount+=totalAmount;
+    const covH=details.filter(d=>d.source!=='يدوي').reduce((s,d)=>s+d.hours,0);
+    const manH=details.filter(d=>d.source==='يدوي').reduce((s,d)=>s+d.hours,0);
+    grandHours+=totalHours;grandAmount+=totalAmount;grandCov+=covH;grandManual+=manH;
     data.push({emp:e,details,totalHours,hourlyRate,totalAmount});
   });
 
-  if(!data.length){toast('لا يوجد أوفر تايم في هذا الشهر','info');return;}
+  if(!data.length){toast(isAr?'لا يوجد أوفر تايم في هذا الشهر':'No overtime in this month','info');return;}
 
   const isMgr=currentUser&&currentUser.role==='manager';
-  // بناء صفوف الجدول
   const rows=data.map((rec,idx)=>{
     const pi=PROJS.indexOf(rec.emp.project);
     const projBadge=pi>=0?`<span class="badge ${BC[pi]||''}" style="-webkit-print-color-adjust:exact;print-color-adjust:exact">${rec.emp.project}</span>`:rec.emp.project;
-    // تفاصيل الأيام (مدمجة في خلية واحدة)
     const dayCells=rec.details.map(d=>{
-      const srcColor=d.source==='يدوي'?'#7c3aed':'#0891b2';
-      const srcIcon=d.source==='يدوي'?'⏱️':'🔄';
+      const isManual=d.source==='يدوي';
+      const srcColor=isManual?'#7c3aed':'#0891b2';
+      const srcIcon=isManual?'⏱️':'🔄';
+      const srcLbl=isManual?(isAr?'يدوي':'Manual'):(isAr?'تغطية':'Coverage');
       return `<div style="padding:3px 6px;border-bottom:1px dashed #e2e8f0;font-size:.72rem;display:flex;justify-content:space-between;gap:8px">
         <span style="font-weight:700">${d.date.substr(8)}/${d.date.substr(5,2)}</span>
         <span style="color:#64748b">${d.dayName}</span>
-        <span style="color:${srcColor};font-weight:600">${srcIcon} ${d.shift}</span>
+        <span style="color:${srcColor};font-weight:600">${srcIcon} ${isManual?srcLbl:d.shift}</span>
         <span style="color:#15803d;font-weight:700">${d.hours}h</span>
       </div>`;}).join('');
     return `<tr>
@@ -3269,54 +3345,69 @@ function printOvertimeReport(){
       <td style="text-align:center">${projBadge}</td>
       <td style="text-align:center;color:#64748b;font-size:.75rem">${SL[rec.emp.shift||'-']||'—'}</td>
       <td style="padding:0">${dayCells}</td>
-      <td style="text-align:center;font-weight:800;color:#0891b2;font-size:1.1rem">${rec.totalHours}<br><span style="font-size:.65rem;color:#64748b;font-weight:600">ساعة</span></td>
+      <td style="text-align:center;font-weight:800;color:#0891b2;font-size:1.1rem">${rec.totalHours}<br><span style="font-size:.65rem;color:#64748b;font-weight:600">${L(lang,'hours')}</span></td>
       ${isMgr?`<td style="text-align:center;color:#64748b;font-size:.78rem">${rec.hourlyRate}</td>
       <td style="text-align:center;font-weight:800;color:#15803d">${rec.totalAmount.toLocaleString()}</td>`:''}
     </tr>`;
   }).join('');
 
+  // رسم بياني: أعلى 10 موظفين بالساعات
+  const top=[...data].sort((a,b)=>b.totalHours-a.totalHours).slice(0,10);
+  const maxH=Math.max(...top.map(t=>t.totalHours),1);
+  const chartBars=top.map(t=>{
+    const w=Math.round(t.totalHours/maxH*100);
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:.74rem">
+      <span style="width:130px;text-align:${isAr?'right':'left'};font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.emp.name}</span>
+      <div style="flex:1;background:#f1f5f9;border-radius:4px;height:18px;position:relative;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+        <div style="width:${w}%;height:100%;background:linear-gradient(90deg,#0891b2,#06b6d4);border-radius:4px;-webkit-print-color-adjust:exact;print-color-adjust:exact"></div>
+      </div>
+      <span style="width:50px;font-weight:800;color:#0891b2;text-align:center">${t.totalHours}h</span>
+    </div>`;
+  }).join('');
+
   document.getElementById('otReportPrint').innerHTML=`
-    <div class="da-card" style="max-width:760px;font-size:.85rem">
-      <div class="da-hdr">
-        <img src="logo.png" alt="الإنماء الذهبية"/>
-        <div class="da-title">⏱️ تقرير الأوفر تايم<small style="font-size:.75rem">شركة الإنماء الذهبية للمقاولات العامة</small></div>
-        <div style="width:80px"></div>
+    <div class="da-card" style="max-width:780px;font-size:.85rem" dir="${isAr?'rtl':'ltr'}">
+      ${buildReportHeader(L('ar','overtimeReport'),L('en','overtimeReport'),lang)}
+      <div style="background:#f4f1e8;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px;font-size:.8rem;-webkit-print-color-adjust:exact;print-color-adjust:exact" dir="${isAr?'rtl':'ltr'}">
+        <div>📅 <b>${L(lang,'month')}:</b> ${month}</div>
+        <div>🏗 <b>${L(lang,'project')}:</b> ${proj||L(lang,'allProj')}</div>
+        <div>👥 <b>${L(lang,'empCount')}:</b> ${data.length}</div>
+        <div>🔄 <b>${L(lang,'coverage')}:</b> <span style="color:#0891b2">${grandCov}h</span></div>
+        <div>⏱️ <b>${L(lang,'manual')}:</b> <span style="color:#7c3aed">${grandManual}h</span></div>
+        <div>📊 <b>${L(lang,'totalHours')}:</b> <span style="color:#15803d;font-weight:800">${grandHours}h</span></div>
+        ${isMgr?`<div style="grid-column:1/-1">💰 <b>${L(lang,'totalSar')}:</b> <span style="color:#15803d;font-weight:800;font-size:.95rem">${grandAmount.toLocaleString()} ﷼</span></div>`:''}
       </div>
-      <div style="background:#f4f1e8;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px;font-size:.8rem;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-        <div>📅 <b>الشهر:</b> ${month}</div>
-        <div>🏗 <b>المشروع:</b> ${proj||'كل المشاريع'}</div>
-        <div>👥 <b>عدد الموظفين:</b> ${data.length}</div>
-        <div>⏱️ <b>إجمالي الساعات:</b> <span style="color:#0891b2">${grandHours} ساعة</span></div>
-        ${isMgr?`<div>💰 <b>إجمالي المبلغ:</b> <span style="color:#15803d">${grandAmount.toLocaleString()} ﷼</span></div>`:''}
-        <div>🔄 <b>المصدر:</b> التغطية المؤقتة</div>
-      </div>
-      <table style="width:100%;border-collapse:collapse">
+      <table style="width:100%;border-collapse:collapse;margin-bottom:14px">
         <thead style="-webkit-print-color-adjust:exact;print-color-adjust:exact">
           <tr style="background:#0891b2;color:#fff">
             <th style="padding:7px;font-size:.72rem">#</th>
-            <th style="padding:7px;font-size:.72rem">الموظف</th>
-            <th style="padding:7px;font-size:.72rem">المشروع</th>
-            <th style="padding:7px;font-size:.72rem">الشفت الأصلي</th>
-            <th style="padding:7px;font-size:.72rem">تفاصيل أيام الأوفر</th>
-            <th style="padding:7px;font-size:.72rem">المجموع</th>
-            ${isMgr?`<th style="padding:7px;font-size:.72rem">سعر الساعة</th>
-            <th style="padding:7px;font-size:.72rem">المبلغ ﷼</th>`:''}
+            <th style="padding:7px;font-size:.72rem">${L(lang,'employee')}</th>
+            <th style="padding:7px;font-size:.72rem">${L(lang,'project')}</th>
+            <th style="padding:7px;font-size:.72rem">${L(lang,'originalShift')}</th>
+            <th style="padding:7px;font-size:.72rem">${L(lang,'otDetails')}</th>
+            <th style="padding:7px;font-size:.72rem">${L(lang,'total')}</th>
+            ${isMgr?`<th style="padding:7px;font-size:.72rem">${L(lang,'pricePerHour')}</th>
+            <th style="padding:7px;font-size:.72rem">${L(lang,'amount')} ﷼</th>`:''}
           </tr>
         </thead>
         <tbody>${rows}</tbody>
         <tfoot style="-webkit-print-color-adjust:exact;print-color-adjust:exact">
           <tr style="background:#f4f1e8;font-weight:800">
-            <td colspan="${isMgr?5:5}" style="padding:8px;text-align:left">الإجمالي</td>
+            <td colspan="5" style="padding:8px;text-align:${isAr?'left':'right'}">${L(lang,'total')}</td>
             <td style="padding:8px;text-align:center;color:#0891b2;font-size:1.05rem">${grandHours}h</td>
             ${isMgr?`<td></td>
             <td style="padding:8px;text-align:center;color:#15803d;font-size:1.05rem">${grandAmount.toLocaleString()}</td>`:''}
           </tr>
         </tfoot>
       </table>
-      <div style="margin-top:10px;font-size:.7rem;color:#64748b;text-align:center">* الأوفر تايم: 🔄 تغطية مؤقتة (8h/يوم) + ⏱️ ساعات إضافية يدوية</div>
-      <div class="da-foot" style="margin-top:24px">
-        <div class="da-sign">المشرف / التوقيع</div>
-        <div class="da-sign">المدير / التوقيع</div>
+      <div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-bottom:10px">
+        <div style="font-size:.78rem;font-weight:700;color:#475569;margin-bottom:10px;text-align:center">📊 ${isAr?'أعلى 10 موظفين بالأوفر تايم':'Top 10 Employees by Overtime'}</div>
+        ${chartBars}
+      </div>
+      <div style="margin-top:10px;font-size:.7rem;color:#64748b;text-align:center">* ${isAr?'الأوفر تايم: 🔄 تغطية مؤقتة (8h/يوم) + ⏱️ ساعات إضافية يدوية':'Overtime: 🔄 Temporary coverage (8h/day) + ⏱️ Manual hours'}</div>
+      <div class="da-foot" style="margin-top:20px">
+        <div class="da-sign">${L(lang,'supervisorSign')}</div>
+        <div class="da-sign">${L(lang,'managerSign')}</div>
       </div>
     </div>`;
   document.body.classList.add('printing-ot');
@@ -3568,7 +3659,8 @@ function saveEvalForm(empId){
 
 function printEvaluations(){
   const month=document.getElementById('evalMonth').value;
-  if(!month){toast('اختر الشهر أولاً','warn');return;}
+  if(!month){toast('اختر الشهر أولاً | Select month first','warn');return;}
+  const lang=askPrintLang();const isAr=lang==='ar';
   const proj=document.getElementById('evalProj').value;
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
@@ -3579,51 +3671,65 @@ function printEvaluations(){
     if(!rec){
       return `<tr><td>${i+1}</td><td class="nm">${e.name}</td><td>${e.project}</td>
         <td colspan="6" style="color:#94a3b8">—</td>
-        <td style="color:#94a3b8">غير مقيّم</td></tr>`;
+        <td style="color:#94a3b8">${L(lang,'notRated')}</td></tr>`;
     }
     const sc=computeEvalScore(rec,month,e.id);const r=evalRating(sc.total);
     nEval++;sumScore+=sc.total;
     if(sc.total>=90)nEx++;else if(sc.total>=75)nVg++;else if(sc.total>=60)nG++;else nN++;
+    const rLbl=sc.total>=90?L(lang,'excellent'):sc.total>=75?L(lang,'veryGood'):sc.total>=60?L(lang,'good'):L(lang,'needsFollowup');
     return `<tr>
       <td>${i+1}</td><td class="nm">${e.name}</td><td>${e.project}</td>
       <td>${rec.quality||0}</td><td>${rec.productivity||0}</td><td>${rec.compliance||0}</td>
       <td>${rec.teamwork||0}</td><td>${rec.safety||0}</td><td>${sc.attPct}%</td>
       <td style="font-weight:800">${sc.total}</td>
-      <td style="font-weight:700">${r.label}</td>
+      <td style="font-weight:700">${rLbl}</td>
     </tr>`;
   }).join('');
   const avg=nEval?Math.round(sumScore/nEval):0;
+  // رسم بياني دائري بسيط (pie باستخدام conic-gradient)
+  const total=nEx+nVg+nG+nN||1;
+  const exP=(nEx/total)*100,vgP=(nVg/total)*100,gP=(nG/total)*100,nP=(nN/total)*100;
+  const pie=`conic-gradient(#15803d 0% ${exP}%, #1d4ed8 ${exP}% ${exP+vgP}%, #a16207 ${exP+vgP}% ${exP+vgP+gP}%, #b91c1c ${exP+vgP+gP}% 100%)`;
+
   document.getElementById('evalPrint').innerHTML=`
-    <div class="da-card">
-      <div class="da-hdr">
-        <img src="logo.png" alt="الإنماء الذهبية"/>
-        <div class="da-title">تقرير تقييم الموظفين<small>شركة الإنماء الذهبية للمقاولات العامة</small></div>
-        <div style="width:120px"></div>
-      </div>
-      <div class="da-meta">
-        <div>📅 الشهر: <b>${month}</b></div>
-        <div>🏗 المشروع: <b>${proj||'كل المشاريع'}</b></div>
-        <div>✅ المُقيَّمون: <b>${nEval} من ${list.length}</b></div>
-        <div>📊 متوسط النتيجة: <b>${avg}/100</b></div>
+    <div class="da-card" dir="${isAr?'rtl':'ltr'}">
+      ${buildReportHeader(L('ar','evaluation'),L('en','evaluation'),lang)}
+      <div class="da-meta" dir="${isAr?'rtl':'ltr'}">
+        <div>📅 <b>${L(lang,'month')}:</b> ${month}</div>
+        <div>🏗 <b>${L(lang,'project')}:</b> ${proj||L(lang,'allProj')}</div>
+        <div>✅ <b>${L(lang,'evaluated')}:</b> ${nEval} / ${list.length}</div>
+        <div>📊 <b>${L(lang,'avg')}:</b> ${avg}/100</div>
       </div>
       <table>
         <thead><tr>
-          <th>#</th><th>الاسم</th><th>المشروع</th>
-          <th>جودة</th><th>إنتاج</th><th>التزام</th><th>تعاون</th><th>سلامة</th><th>مواظبة</th>
-          <th>النتيجة</th><th>التقدير</th>
+          <th>#</th><th>${L(lang,'name')}</th><th>${L(lang,'project')}</th>
+          <th>${isAr?'جودة':'Qual'}</th><th>${isAr?'إنتاج':'Prod'}</th><th>${isAr?'التزام':'Comp'}</th>
+          <th>${isAr?'تعاون':'Team'}</th><th>${isAr?'سلامة':'Safe'}</th><th>${isAr?'مواظبة':'Att'}</th>
+          <th>${L(lang,'score')}</th><th>${L(lang,'rating')}</th>
         </tr></thead>
-        <tbody>${rows||'<tr><td colspan="11">لا يوجد موظفون</td></tr>'}</tbody>
+        <tbody>${rows||`<tr><td colspan="11">—</td></tr>`}</tbody>
       </table>
-      <div class="da-sum">
-        <span class="da-P">ممتاز: ${nEx}</span>
-        <span style="color:#1d4ed8">جيد جداً: ${nVg}</span>
-        <span class="da-L">جيد: ${nG}</span>
-        <span class="da-A">يحتاج متابعة: ${nN}</span>
+      <div style="margin-top:16px;display:grid;grid-template-columns:1fr 220px;gap:18px;align-items:center">
+        <div class="da-sum" style="margin-top:0">
+          <span class="da-P">${L(lang,'excellent')}: ${nEx}</span>
+          <span style="color:#1d4ed8;padding:6px 14px;border:1px solid #d6cfb8;border-radius:8px;font-weight:700">${L(lang,'veryGood')}: ${nVg}</span>
+          <span class="da-L">${L(lang,'good')}: ${nG}</span>
+          <span class="da-A">${L(lang,'needsFollowup')}: ${nN}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;justify-content:center">
+          <div style="width:90px;height:90px;border-radius:50%;background:${pie};-webkit-print-color-adjust:exact;print-color-adjust:exact;border:3px solid #fff;box-shadow:0 0 0 1px #d6cfb8"></div>
+          <div style="font-size:.65rem;color:#475569;line-height:1.6">
+            <div><span style="display:inline-block;width:10px;height:10px;background:#15803d;border-radius:2px;margin-${isAr?'left':'right'}:4px"></span>${L(lang,'excellent')}</div>
+            <div><span style="display:inline-block;width:10px;height:10px;background:#1d4ed8;border-radius:2px;margin-${isAr?'left':'right'}:4px"></span>${L(lang,'veryGood')}</div>
+            <div><span style="display:inline-block;width:10px;height:10px;background:#a16207;border-radius:2px;margin-${isAr?'left':'right'}:4px"></span>${L(lang,'good')}</div>
+            <div><span style="display:inline-block;width:10px;height:10px;background:#b91c1c;border-radius:2px;margin-${isAr?'left':'right'}:4px"></span>${L(lang,'needsFollowup')}</div>
+          </div>
+        </div>
       </div>
-      <div style="font-size:.72rem;color:#94a3b8;margin-top:10px">* المعايير من ٥: جودة العمل · الإنتاجية · الالتزام بالتعليمات · التعاون · السلامة المهنية. المواظبة تُحتسب من سجل الحضور.</div>
+      <div style="font-size:.72rem;color:#94a3b8;margin-top:10px;text-align:${isAr?'right':'left'}">* ${isAr?'المعايير من 5 — جودة العمل · الإنتاجية · الالتزام · التعاون · السلامة. المواظبة تُحتسب من الحضور.':'Criteria 1-5 — Quality, Productivity, Compliance, Teamwork, Safety. Attendance auto-calculated.'}</div>
       <div class="da-foot">
-        <div class="da-sign">المُقيِّم / التوقيع</div>
-        <div class="da-sign">المدير / التوقيع</div>
+        <div class="da-sign">${isAr?'المُقيِّم / التوقيع':'Evaluator / Signature'}</div>
+        <div class="da-sign">${L(lang,'managerSign')}</div>
       </div>
     </div>`;
   document.body.classList.add('printing-eval');

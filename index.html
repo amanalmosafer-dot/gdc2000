@@ -25,6 +25,51 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--txt);direction:rtl;transition:background .25s,color .25s;min-height:100vh;font-feature-settings:'kern' 1,'liga' 1}
+/* ── Calendar View ── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
+.cal-head{background:var(--hdr);color:#fff;padding:8px;text-align:center;font-weight:800;font-size:.82rem;border-radius:8px}
+.cal-cell{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:10px;min-height:90px;cursor:pointer;transition:transform .15s,box-shadow .15s;display:flex;flex-direction:column;gap:6px;position:relative}
+.cal-cell:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.cal-cell.cal-empty{background:transparent;border:1px dashed var(--border);min-height:90px;cursor:default}
+.cal-cell.cal-empty:hover{transform:none;box-shadow:none}
+.cal-cell.cal-fri{background:var(--surface2);opacity:.7;cursor:default}
+.cal-cell.cal-fri:hover{transform:none;box-shadow:none}
+.cal-cell.cal-today{border-color:var(--accent);border-width:2.5px;box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.cal-cell.cal-future{opacity:.5;cursor:default}
+.cal-cell .cal-day-num{font-size:1.05rem;font-weight:800;color:var(--txt);display:flex;justify-content:space-between;align-items:center}
+.cal-cell .cal-day-num .cal-name{font-size:.65rem;color:var(--txt2);font-weight:500}
+.cal-cell .cal-pct{font-size:1.05rem;font-weight:800;text-align:center;margin-top:2px}
+.cal-cell .cal-mini{display:flex;gap:3px;font-size:.6rem;font-weight:700}
+.cal-cell .cal-mini span{padding:1px 5px;border-radius:3px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cal-cell.cal-high{background:linear-gradient(135deg,#dcfce7,#bbf7d0)}
+.cal-cell.cal-mid{background:linear-gradient(135deg,#fef9c3,#fde68a)}
+.cal-cell.cal-low{background:linear-gradient(135deg,#fee2e2,#fecaca)}
+.dark .cal-cell.cal-high{background:linear-gradient(135deg,#052e16,#14532d);color:#86efac}
+.dark .cal-cell.cal-mid{background:linear-gradient(135deg,#422006,#78350f);color:#fde68a}
+.dark .cal-cell.cal-low{background:linear-gradient(135deg,#450a0a,#7f1d1d);color:#fca5a5}
+
+/* ── Heatmap ── */
+.hm-wrap{margin-top:14px;overflow-x:auto;background:var(--surface);border-radius:12px;padding:14px;border:1px solid var(--border)}
+.hm-table{border-collapse:separate;border-spacing:2px;min-width:max-content}
+.hm-table th,.hm-table td{padding:0;text-align:center;font-size:.62rem;font-weight:700}
+.hm-table .hm-name{text-align:right;padding:0 8px;font-size:.78rem;font-weight:600;background:var(--surface2);position:sticky;right:0;z-index:2;min-width:130px;border-radius:5px}
+.hm-table .hm-day{width:24px;height:24px;border-radius:4px;cursor:pointer;-webkit-print-color-adjust:exact;print-color-adjust:exact;transition:transform .15s}
+.hm-table .hm-day:hover{transform:scale(1.4);z-index:5;position:relative;box-shadow:0 0 0 2px var(--accent)}
+.hm-table .hm-day-head{padding:4px 0;font-size:.62rem;font-weight:700;color:var(--txt2);min-width:24px}
+.hm-table .hm-day-head.hm-friday{color:#94a3b8}
+.hm-color-P{background:#16a34a;color:#fff}
+.hm-color-A{background:#dc2626;color:#fff}
+.hm-color-L{background:#d97706;color:#fff}
+.hm-color-T{background:#7c3aed;color:#fff}
+.hm-color-O{background:#0891b2;color:#fff}
+.hm-color-empty{background:#f1f5f9;color:#cbd5e1}
+.hm-color-fri{background:#e2e8f0;color:#94a3b8}
+.dark .hm-color-empty{background:#1e293b;color:#475569}
+.dark .hm-color-fri{background:#0f172a;color:#475569}
+.hm-legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:14px;font-size:.78rem}
+.hm-legend-item{display:flex;align-items:center;gap:5px;font-weight:600;color:var(--txt2)}
+.hm-legend-box{width:16px;height:16px;border-radius:3px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
 /* ── Quick-fill bar ── */
 .qfb{border:none;color:#fff;padding:7px 13px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:700;transition:transform .12s,box-shadow .12s;white-space:nowrap}
 .qfb:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.25)}
@@ -670,6 +715,8 @@ td{padding:9px 12px;vertical-align:middle}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js" defer></script>
 <!-- بيانات التطوير المحلي (يُحمّل فقط عند فتح الملف محلياً؛ غير موجود على الموقع) -->
 <script src="dev-seed.js" onerror="window.DEV_SEED=null"></script>
 </head>
@@ -997,6 +1044,8 @@ td{padding:9px 12px;vertical-align:middle}
   <!-- Sub-tabs -->
   <div class="rep-subtabs no-print">
     <button class="rep-stab active" onclick="switchRepTab('live',this)">📊 لوحة حية</button>
+    <button class="rep-stab" onclick="switchRepTab('calendar',this)">📅 تقويم</button>
+    <button class="rep-stab" onclick="switchRepTab('heatmap',this)">🔥 خريطة حرارية</button>
     <button class="rep-stab" onclick="switchRepTab('weekly',this)">📋 أسبوعي</button>
     <button class="rep-stab" onclick="switchRepTab('monthly',this)">📅 شهري</button>
     <button class="rep-stab" onclick="switchRepTab('compare',this)">⚖️ مقارنة</button>
@@ -1009,6 +1058,34 @@ td{padding:9px 12px;vertical-align:middle}
       <button class="btn btn-info no-print" onclick="printAdvReport('live')">🖨️ طباعة</button>
     </div>
     <div id="repLiveContent"></div>
+  </div>
+
+  <!-- CALENDAR VIEW -->
+  <div id="rep-calendar" class="rep-subpage" style="display:none">
+    <div class="rep-toolbar no-print">
+      <label style="font-weight:700">الشهر:</label>
+      <input type="month" id="calMonth" onchange="renderCalendarView()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface);color:var(--txt);font-size:.87rem"/>
+      <select id="calProj" onchange="renderCalendarView()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface);color:var(--txt);font-size:.87rem">
+        <option value="">كل المشاريع</option>
+      </select>
+      <div class="spacer"></div>
+      <button class="btn btn-info no-print" onclick="printCalendarView()">🖨️ طباعة</button>
+    </div>
+    <div id="calendarContent"></div>
+  </div>
+
+  <!-- HEATMAP -->
+  <div id="rep-heatmap" class="rep-subpage" style="display:none">
+    <div class="rep-toolbar no-print">
+      <label style="font-weight:700">الشهر:</label>
+      <input type="month" id="hmMonth" onchange="renderHeatmap()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface);color:var(--txt);font-size:.87rem"/>
+      <select id="hmProj" onchange="renderHeatmap()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface);color:var(--txt);font-size:.87rem">
+        <option value="">كل المشاريع</option>
+      </select>
+      <div class="spacer"></div>
+      <button class="btn btn-info no-print" onclick="printHeatmap()">🖨️ طباعة</button>
+    </div>
+    <div id="heatmapContent"></div>
   </div>
 
   <!-- WEEKLY REPORT -->
@@ -4546,25 +4623,177 @@ function savePayroll(){
   if(b){b.textContent=t('btnSavedFeedback');setTimeout(()=>b.textContent=t('btnSavePay'),1500)}
 }
 
-function exportPayCSV(){
-  const month=document.getElementById('payMonth').value||'payroll';
+function exportPayCSV(){exportPayrollExcel();}
+
+// 📊 Excel احترافي للرواتب — مع شعار وألوان ورسوم
+async function exportPayrollExcel(){
+  if(typeof ExcelJS==='undefined'){toast('جاري تحميل مكتبة Excel، انتظر ثانية وأعد المحاولة','warn');return;}
+  const month=document.getElementById('payMonth').value||localDateStr(new Date()).substr(0,7);
   const proj=document.getElementById('payProj').value;
   const list=employees.filter(e=>!proj||e.project===proj);
   const data=payroll[month]||{};
-  const rows=[['الاسم','المشروع','الراتب الأساسي','أيام الحضور','أيام الغياب','أيام الإجازة','خصم الغياب','ساعات أوفر','سعر الساعة','إجمالي الأوفر','مكافآت','خصومات إضافية','الصافي','ملاحظات']];
-  list.forEach(e=>{
+  toast('⏳ جاري إنشاء ملف Excel احترافي...','info');
+
+  const wb=new ExcelJS.Workbook();
+  wb.creator='Golden Development';wb.created=new Date();
+  // ── Sheet 1: ملخص الرواتب ──
+  const ws=wb.addWorksheet('الرواتب',{views:[{rightToLeft:true,state:'frozen',xSplit:0,ySplit:6}]});
+  // الشعار
+  try{
+    const logoData=await fetch('logo.png').then(r=>r.blob()).then(b=>new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(b);}));
+    const logoId=wb.addImage({base64:logoData,extension:'png'});
+    ws.addImage(logoId,{tl:{col:0.2,row:0.2},ext:{width:140,height:50}});
+  }catch(e){console.warn('logo:',e);}
+  // الترويسة
+  ws.mergeCells('A1:N1');
+  const titleRow=ws.getCell('A1');titleRow.value='شركة الإنماء الذهبية للمقاولات العامة';
+  titleRow.font={name:'Calibri',size:14,bold:true,color:{argb:'FF0F2444'}};
+  titleRow.alignment={horizontal:'center',vertical:'middle'};
+  ws.getRow(1).height=30;
+  ws.mergeCells('A2:N2');
+  ws.getCell('A2').value='كشف الرواتب الشهرية — '+month;
+  ws.getCell('A2').font={name:'Calibri',size:12,bold:true,color:{argb:'FF8D8253'}};
+  ws.getCell('A2').alignment={horizontal:'center'};
+  ws.mergeCells('A3:N3');
+  ws.getCell('A3').value='المشروع: '+(proj||'كل المشاريع')+'  ·  عدد الموظفين: '+list.length+'  ·  تاريخ الإصدار: '+fmtDate(new Date());
+  ws.getCell('A3').font={name:'Calibri',size:10,color:{argb:'FF64748B'}};
+  ws.getCell('A3').alignment={horizontal:'center'};
+  ws.getRow(4).height=8;
+  // عناوين الأعمدة
+  const headers=['#','الاسم','المشروع','الراتب الأساسي','أيام الحضور','أيام الغياب','أيام الإجازة','خصم الغياب','ساعات أوفر','سعر الساعة','إجمالي الأوفر','مكافآت','خصومات إضافية','الصافي'];
+  const hr=ws.getRow(6);
+  headers.forEach((h,i)=>{
+    const c=hr.getCell(i+1);c.value=h;
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF0F2444'}};
+    c.font={name:'Calibri',size:11,bold:true,color:{argb:'FFFFFFFF'}};
+    c.alignment={horizontal:'center',vertical:'middle'};
+    c.border={top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}};
+  });
+  hr.height=32;
+  // البيانات
+  let totalBase=0,totalAbs=0,totalOT=0,totalBonus=0,totalNet=0;
+  list.forEach((e,i)=>{
     const d=data[e.id]||{};
     const dailyRate=e.baseSalary?+(e.baseSalary/30).toFixed(2):0;
     const hourlyRate=e.baseSalary?+(e.baseSalary/30/8).toFixed(2):0;
-    const att=month?getAttCount(month,e.id):{P:0,A:0,L:0,T:0};
-    const absDeduct=+(att.A*dailyRate).toFixed(2);
-    const covOT=month?getCoverageOT(e.id,month):0;
-    const totalOTHours=covOT;
-    const otTotal=+(totalOTHours*hourlyRate).toFixed(2);
-    const net=(e.baseSalary||0)-absDeduct+otTotal+(d.bonus||0)-(d.extraDeductions||0);
-    rows.push([e.name,e.project,e.baseSalary||0,att.P+att.T,att.A,att.L,absDeduct,totalOTHours,hourlyRate,otTotal,d.bonus||0,d.extraDeductions||0,net,d.notes||'']);
+    const att=getAttCount(month,e.id);
+    const absD=+(att.A*dailyRate).toFixed(2);
+    const otH=getCoverageOT(e.id,month);
+    const otT=+(otH*hourlyRate).toFixed(2);
+    const net=(e.baseSalary||0)-absD+otT+(d.bonus||0)-(d.extraDeductions||0);
+    totalBase+=e.baseSalary||0;totalAbs+=absD;totalOT+=otT;totalBonus+=(d.bonus||0);totalNet+=net;
+    const r=ws.addRow([i+1,e.name,e.project,e.baseSalary||0,att.P+att.T,att.A,att.L,absD,otH,hourlyRate,otT,d.bonus||0,d.extraDeductions||0,Math.round(net)]);
+    // تنسيق
+    r.eachCell((c,col)=>{
+      c.font={name:'Calibri',size:10};
+      c.alignment={horizontal:col===2?'right':'center',vertical:'middle'};
+      c.border={top:{style:'hair',color:{argb:'FFE2E8F0'}},bottom:{style:'hair',color:{argb:'FFE2E8F0'}},left:{style:'hair',color:{argb:'FFE2E8F0'}},right:{style:'hair',color:{argb:'FFE2E8F0'}}};
+      if(col===4||col===8||col===10||col===11||col===12||col===13||col===14)c.numFmt='#,##0.00';
+    });
+    // تلوين الصف الزوجي
+    if(i%2===1)r.eachCell(c=>c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF8FAFC'}});
+    // تلوين الصافي
+    r.getCell(14).font={name:'Calibri',size:11,bold:true,color:{argb:net<0?'FFDC2626':'FF15803D'}};
+    r.getCell(6).font={name:'Calibri',size:10,color:{argb:'FFDC2626'}};
+    r.getCell(11).font={name:'Calibri',size:10,color:{argb:'FF15803D'}};
+    r.height=22;
   });
-  dlCSV(rows,`payroll-${month}.csv`);
+  // صف الإجمالي
+  const totalRow=ws.addRow(['','الإجمالي','',totalBase,'','','',totalAbs,'','',totalOT,totalBonus,'',Math.round(totalNet)]);
+  totalRow.eachCell((c,col)=>{
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF4F1E8'}};
+    c.font={name:'Calibri',size:12,bold:true,color:{argb:'FF0F2444'}};
+    c.alignment={horizontal:col===2?'right':'center',vertical:'middle'};
+    c.border={top:{style:'medium'},bottom:{style:'medium'}};
+    if([4,8,11,12,14].includes(col))c.numFmt='#,##0.00';
+  });
+  totalRow.height=30;
+  // عرض الأعمدة
+  const widths=[5,28,18,15,12,12,12,14,12,12,15,12,15,15];
+  widths.forEach((w,i)=>{ws.getColumn(i+1).width=w;});
+
+  // ── Sheet 2: ملخص بصري ──
+  const ws2=wb.addWorksheet('ملخص بصري',{views:[{rightToLeft:true}]});
+  ws2.mergeCells('A1:F1');
+  ws2.getCell('A1').value='ملخص بصري — '+month;
+  ws2.getCell('A1').font={size:16,bold:true,color:{argb:'FF0F2444'}};
+  ws2.getCell('A1').alignment={horizontal:'center'};
+  ws2.getRow(1).height=35;
+
+  // مؤشرات سريعة
+  const kpis=[
+    ['👥 عدد الموظفين',list.length,'FF2563EB'],
+    ['💰 إجمالي الرواتب الأساسية',totalBase,'FF16A34A'],
+    ['❌ إجمالي خصم الغياب',totalAbs,'FFDC2626'],
+    ['⏱️ إجمالي الأوفر تايم',totalOT,'FF7C3AED'],
+    ['🎁 إجمالي المكافآت',totalBonus,'FFD97706'],
+    ['💸 إجمالي الصافي',Math.round(totalNet),'FF0F2444'],
+  ];
+  kpis.forEach((k,i)=>{
+    const row=3+Math.floor(i/3)*4;
+    const col=1+(i%3)*2;
+    ws2.mergeCells(row,col,row,col+1);
+    ws2.getCell(row,col).value=k[0];
+    ws2.getCell(row,col).font={size:11,bold:true,color:{argb:'FF64748B'}};
+    ws2.getCell(row,col).alignment={horizontal:'center'};
+    ws2.mergeCells(row+1,col,row+2,col+1);
+    const vc=ws2.getCell(row+1,col);
+    vc.value=k[1];vc.numFmt='#,##0.00';
+    vc.font={size:18,bold:true,color:{argb:k[2]}};
+    vc.alignment={horizontal:'center',vertical:'middle'};
+    vc.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF8FAFC'}};
+    vc.border={top:{style:'medium',color:{argb:k[2]}},bottom:{style:'thin',color:{argb:'FFE2E8F0'}},left:{style:'thin',color:{argb:'FFE2E8F0'}},right:{style:'thin',color:{argb:'FFE2E8F0'}}};
+  });
+  [25,25,25,25,25,25].forEach((w,i)=>ws2.getColumn(i+1).width=w);
+
+  // ── Sheet 3: حسب المشروع ──
+  const ws3=wb.addWorksheet('حسب المشروع',{views:[{rightToLeft:true}]});
+  ws3.mergeCells('A1:F1');
+  ws3.getCell('A1').value='تحليل الرواتب حسب المشروع — '+month;
+  ws3.getCell('A1').font={size:14,bold:true,color:{argb:'FF0F2444'}};
+  ws3.getCell('A1').alignment={horizontal:'center'};
+  ws3.getRow(1).height=30;
+  const ph=ws3.getRow(3);
+  ['المشروع','عدد الموظفين','إجمالي الراتب','إجمالي الأوفر','الصافي','نسبة الحضور'].forEach((h,i)=>{
+    const c=ph.getCell(i+1);c.value=h;
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF0F2444'}};
+    c.font={size:11,bold:true,color:{argb:'FFFFFFFF'}};
+    c.alignment={horizontal:'center'};
+  });
+  ph.height=28;
+  PROJS.forEach(p=>{
+    const pList=list.filter(e=>e.project===p);if(!pList.length)return;
+    let pBase=0,pOT=0,pNet=0,pP=0,pT=0,pA=0;
+    pList.forEach(e=>{
+      const dailyRate=e.baseSalary?+(e.baseSalary/30).toFixed(2):0;
+      const hourlyRate=e.baseSalary?+(e.baseSalary/30/8).toFixed(2):0;
+      const att=getAttCount(month,e.id);
+      const absD=+(att.A*dailyRate).toFixed(2);
+      const otH=getCoverageOT(e.id,month);const otT=+(otH*hourlyRate).toFixed(2);
+      const d=data[e.id]||{};
+      pBase+=e.baseSalary||0;pOT+=otT;pP+=att.P;pT+=att.T;pA+=att.A;
+      pNet+=(e.baseSalary||0)-absD+otT+(d.bonus||0)-(d.extraDeductions||0);
+    });
+    const pct=(pP+pT+pA)?Math.round((pP+pT)/(pP+pT+pA)*100):0;
+    const r=ws3.addRow([p,pList.length,pBase,pOT,Math.round(pNet),pct+'%']);
+    r.eachCell((c,col)=>{
+      c.alignment={horizontal:col===1?'right':'center'};
+      c.font={size:11};
+      if([3,4,5].includes(col))c.numFmt='#,##0.00';
+      c.border={top:{style:'hair'},bottom:{style:'hair'},left:{style:'hair'},right:{style:'hair'}};
+    });
+    r.height=24;
+  });
+  [22,15,18,18,18,15].forEach((w,i)=>ws3.getColumn(i+1).width=w);
+
+  // ── حفظ وتنزيل ──
+  const buf=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  if(typeof saveAs!=='undefined')saveAs(blob,`payroll-${month}.xlsx`);
+  else{
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`payroll-${month}.xlsx`;a.click();URL.revokeObjectURL(url);
+  }
+  toast('✅ تم تصدير ملف Excel احترافي بـ3 أوراق','ok');
 }
 
 // ── ATTENDANCE ───────────────────────────────────────────────
@@ -4791,13 +5020,211 @@ function attChip(p){
 }
 
 // ── SUB-TAB SWITCHER ──────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// CALENDAR VIEW + HEATMAP
+// ═══════════════════════════════════════════════════════════
+function renderCalendarView(){
+  const monthEl=document.getElementById('calMonth');
+  if(monthEl&&!monthEl.value)monthEl.value=localDateStr(new Date()).substr(0,7);
+  const month=monthEl?monthEl.value:'';
+  const proj=document.getElementById('calProj').value;
+  const myProj=getMyProject();
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
+  const days=getMonthDates(month);
+  const todayStr=localDateStr(new Date());
+  const DNAMES=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const DNAMES_SHORT=['أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
+
+  // أيام الأسبوع الترتيب: سبت السبت (6), ثم الأحد (0), إلخ → نخلي السبت أول الأسبوع
+  // ترتيب JS: 0=أحد, 6=سبت
+  // الأسبوع السعودي: سبت(6) → جمعة(5)
+  const SAUDI_ORDER=[6,0,1,2,3,4,5]; // sat,sun,mon,tue,wed,thu,fri
+  const headers=SAUDI_ORDER.map(i=>`<div class="cal-head">${DNAMES[i]}</div>`).join('');
+
+  // كم خلية فاضية في البداية؟ (قبل أول السبت)
+  const firstDay=new Date(days[0]).getDay(); // 0-6
+  const offset=SAUDI_ORDER.indexOf(firstDay); // مكان أول يوم في صف السبت→الجمعة
+  const emptyStart=Array.from({length:offset},()=>`<div class="cal-cell cal-empty"></div>`).join('');
+
+  // بناء الخلايا
+  const cells=days.map(d=>{
+    const dt=new Date(d);
+    const dow=dt.getDay();
+    const dn=DNAMES_SHORT[dow];
+    const isFri=dow===5;
+    const isToday=d===todayStr;
+    const isFuture=d>todayStr;
+
+    if(isFri)return `<div class="cal-cell cal-fri">
+      <div class="cal-day-num">${dt.getDate()}<span class="cal-name">${dn}</span></div>
+      <div style="text-align:center;color:#94a3b8;font-size:.78rem;margin-top:auto">🌙 إجازة</div>
+    </div>`;
+
+    // عدّ الحالات لهذا اليوم
+    const day=attendance[d]||{};
+    let p=0,a=0,l=0,t=0,o=0,m=0;
+    list.forEach(e=>{const s=day[e.id];if(s==='P'){p++;m++;}else if(s==='A'){a++;m++;}else if(s==='L'){l++;m++;}else if(s==='T'){t++;m++;}else if(s==='O'){o++;m++;}});
+    const total=list.length;
+    const workCount=p+a+t;
+    const pct=workCount?Math.round((p+t)/workCount*100):0;
+    const isRecorded=m>0;
+    const cls=!isRecorded?'':pct>=90?'cal-high':pct>=70?'cal-mid':'cal-low';
+    const futureCls=isFuture?'cal-future':'';
+    const todayCls=isToday?'cal-today':'';
+
+    return `<div class="cal-cell ${cls} ${todayCls} ${futureCls}" onclick="showCalDayDetail('${d}')" title="${dt.toLocaleDateString('ar-SA-u-nu-latn-ca-gregory',{year:'numeric',month:'long',day:'numeric',weekday:'long'})}">
+      <div class="cal-day-num">${dt.getDate()}<span class="cal-name">${dn}${isToday?' • اليوم':''}</span></div>
+      ${isRecorded?`
+        <div class="cal-pct" style="color:${pct>=90?'#15803d':pct>=70?'#a16207':'#b91c1c'}">${pct}%</div>
+        <div class="cal-mini" style="margin-top:auto;justify-content:center">
+          <span style="background:#dcfce7;color:#15803d">✓${p}</span>
+          ${a>0?`<span style="background:#fee2e2;color:#b91c1c">✗${a}</span>`:''}
+          ${l>0?`<span style="background:#fef9c3;color:#a16207">🌴${l}</span>`:''}
+        </div>
+      `:isFuture?'<div style="text-align:center;color:#94a3b8;font-size:.75rem;margin-top:auto">—</div>':'<div style="text-align:center;color:#cbd5e1;font-size:.75rem;margin-top:auto">لم يُسجّل</div>'}
+    </div>`;
+  }).join('');
+
+  // ملخص علوي
+  let totalP=0,totalA=0,totalL=0,totalT=0,totalDays=0;
+  days.forEach(d=>{
+    if(new Date(d).getDay()===5||d>todayStr)return;
+    const day=attendance[d]||{};let dayMarked=0;
+    list.forEach(e=>{const s=day[e.id];if(s==='P'){totalP++;dayMarked++;}else if(s==='A'){totalA++;dayMarked++;}else if(s==='L'){totalL++;dayMarked++;}else if(s==='T'){totalT++;dayMarked++;}});
+    if(dayMarked>0)totalDays++;
+  });
+  const monthPct=(totalP+totalT+totalA)?Math.round((totalP+totalT)/(totalP+totalT+totalA)*100):0;
+
+  document.getElementById('calendarContent').innerHTML=`
+    <div class="rep-section">
+      <div class="rep-section-title">📅 تقويم ${month} — ${proj||'كل المشاريع'} (${list.length} موظف)</div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:14px">
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📅</div><div class="kpi-val">${totalDays}</div><div class="kpi-lbl">يوم مسجّل</div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${totalP}</div><div class="kpi-lbl">حضور</div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${totalA}</div><div class="kpi-lbl">غياب</div></div>
+        <div class="kpi-card kpi-amber"><div class="kpi-ico">🌴</div><div class="kpi-val" style="color:#d97706">${totalL}</div><div class="kpi-lbl">إجازة</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${monthPct}%</div><div class="kpi-lbl">معدل الحضور</div></div>
+      </div>
+      <div class="cal-grid">${headers}${emptyStart}${cells}</div>
+      <div style="margin-top:14px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font-size:.78rem;color:var(--txt2)">
+        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;background:#bbf7d0;border-radius:4px"></span>حضور عالي (≥90%)</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;background:#fde68a;border-radius:4px"></span>متوسط (70-89%)</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;background:#fecaca;border-radius:4px"></span>منخفض (<70%)</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;background:var(--surface2);border-radius:4px"></span>الجمعة (إجازة)</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;border:2px solid var(--accent);border-radius:4px"></span>اليوم</div>
+      </div>
+    </div>`;
+}
+
+function showCalDayDetail(date){
+  // اذهب لتبويب الحضور مع هذا التاريخ
+  document.getElementById('attDate').value=date;
+  switchTab('attendance',document.getElementById('tab-btn-attendance'));
+  renderAtt();
+}
+
+function renderHeatmap(){
+  const monthEl=document.getElementById('hmMonth');
+  if(monthEl&&!monthEl.value)monthEl.value=localDateStr(new Date()).substr(0,7);
+  const month=monthEl?monthEl.value:'';
+  const proj=document.getElementById('hmProj').value;
+  const myProj=getMyProject();
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
+  const days=getMonthDates(month);
+
+  // رأس الأيام
+  const dayHead=days.map(d=>{
+    const dow=new Date(d).getDay();
+    const isFri=dow===5;
+    return `<th class="hm-day-head ${isFri?'hm-friday':''}" title="${d}">${d.substr(8)}</th>`;
+  }).join('');
+
+  // صفوف الموظفين
+  const rows=list.map(e=>{
+    const cells=days.map(d=>{
+      const dow=new Date(d).getDay();
+      const isFri=dow===5;
+      if(isFri)return `<td class="hm-day hm-color-fri" title="${d} — جمعة">−</td>`;
+      const s=(attendance[d]||{})[e.id]||'';
+      const cls=s?`hm-color-${s}`:'hm-color-empty';
+      const lbl=s==='P'?'✓':s==='A'?'✗':s==='L'?'إ':s==='T'?'⏱':s==='O'?'🛌':'';
+      const tip=s==='P'?'حاضر':s==='A'?'غائب':s==='L'?'إجازة':s==='T'?'متأخر':s==='O'?'راحة':'لم يُسجّل';
+      return `<td class="hm-day ${cls}" title="${e.name} — ${d} — ${tip}">${lbl}</td>`;
+    }).join('');
+    // ملخص الموظف
+    const summary=getAttCount(month,e.id);
+    const workSum=summary.P+summary.A+summary.T;
+    const pct=workSum?Math.round((summary.P+summary.T)/workSum*100):0;
+    return `<tr>
+      <td class="hm-name">${e.name}<div style="font-size:.65rem;color:var(--txt2);margin-top:2px">${e.project}</div></td>
+      ${cells}
+      <td class="hm-name" style="background:${pct>=90?'#dcfce7':pct>=70?'#fef9c3':'#fee2e2'};color:${pct>=90?'#15803d':pct>=70?'#a16207':'#b91c1c'};-webkit-print-color-adjust:exact;print-color-adjust:exact;font-weight:800;font-size:.85rem">${pct}%</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('heatmapContent').innerHTML=`
+    <div class="rep-section">
+      <div class="rep-section-title">🔥 الخريطة الحرارية للحضور — ${month} (${list.length} موظف × ${days.length} يوم)</div>
+      <div class="hm-wrap">
+        <table class="hm-table">
+          <thead><tr>
+            <th class="hm-name" style="background:var(--hdr);color:#fff">الموظف</th>
+            ${dayHead}
+            <th class="hm-name" style="background:var(--hdr);color:#fff;min-width:60px">المعدل</th>
+          </tr></thead>
+          <tbody>${rows||'<tr><td colspan="32" style="text-align:center;padding:20px;color:var(--txt2)">لا توجد بيانات</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="hm-legend">
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-P"></span>حاضر</div>
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-A"></span>غائب</div>
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-L"></span>إجازة</div>
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-T"></span>تأخير</div>
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-O"></span>راحة</div>
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-empty"></span>لم يُسجّل</div>
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-fri"></span>جمعة</div>
+      </div>
+    </div>`;
+}
+
+async function printCalendarView(){
+  const lang=await askPrintLang();if(!lang)return;
+  printAdvReportCustom('calendar','calendarContent',lang,
+    L('ar','daily')==='التحضير اليومي'?'تقويم الحضور الشهري':'Monthly Attendance Calendar',
+    'Monthly Attendance Calendar');
+}
+async function printHeatmap(){
+  const lang=await askPrintLang();if(!lang)return;
+  printAdvReportCustom('heatmap','heatmapContent',lang,'الخريطة الحرارية للحضور','Attendance Heatmap');
+}
+function printAdvReportCustom(type,srcId,lang,titleAr,titleEn){
+  const isAr=lang==='ar';
+  const srcEl=document.getElementById(srcId);
+  if(!srcEl||!srcEl.innerHTML.trim()){toast(isAr?'حدّث التقرير أولاً':'Refresh first','warn');return;}
+  const cloneHTML=srcEl.innerHTML.replace(/<button[^>]*>[\s\S]*?<\/button>/g,'').replace(/no-print/g,'');
+  document.getElementById('advReportPrint').innerHTML=`
+    <div class="da-card" style="max-width:1100px" dir="${isAr?'rtl':'ltr'}">
+      ${buildReportHeader(titleAr,titleEn,lang)}
+      <div class="adv-print-body" style="margin-top:14px">${cloneHTML}</div>
+      <div class="da-foot" style="margin-top:24px">
+        <div class="da-sign">${L(lang,'supervisorSign')}</div>
+        <div class="da-sign">${L(lang,'managerSign')}</div>
+      </div>
+    </div>`;
+  document.body.classList.add('printing-adv');
+  window.print();
+  document.body.classList.remove('printing-adv');
+}
+
 function switchRepTab(id,btn){
-  ['live','weekly','monthly','compare'].forEach(x=>{
+  ['live','calendar','heatmap','weekly','monthly','compare'].forEach(x=>{
     const el=document.getElementById('rep-'+x);if(el)el.style.display=x===id?'':'none';
   });
   document.querySelectorAll('.rep-stab').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
   if(id==='live')renderLiveDashboard();
+  else if(id==='calendar')renderCalendarView();
+  else if(id==='heatmap')renderHeatmap();
 }
 
 // ── MAIN ENTRY (called by switchTab) ─────────────────────────
@@ -5260,10 +5687,10 @@ function dlCSV(rows,name){
 
 // ── INIT ─────────────────────────────────────────────────────
 function initSelects(){
-  const saved={};['fltProj','payProj','attProj','attSumProj','evalProj'].forEach(id=>{const el=document.getElementById(id);if(el)saved[id]=el.value});
+  const saved={};['fltProj','payProj','attProj','attSumProj','evalProj','calProj','hmProj'].forEach(id=>{const el=document.getElementById(id);if(el)saved[id]=el.value});
   const opts=`<option value="">${t('allProjects')}</option>`+PROJS.map(p=>`<option value="${p}">${p}</option>`).join('');
   const myProj=getMyProject(); // array or null
-  ['fltProj','payProj','attProj','attSumProj','evalProj'].forEach(id=>{
+  ['fltProj','payProj','attProj','attSumProj','evalProj','calProj','hmProj'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
     if(myProj){
       // supervisor: show only their assigned projects
@@ -5295,6 +5722,8 @@ document.getElementById('attDate').value=today;
 document.getElementById('payMonth').value=thisMonth;
 document.getElementById('attSumMonth').value=thisMonth;
 {const em=document.getElementById('evalMonth');if(em)em.value=thisMonth;}
+{const cm=document.getElementById('calMonth');if(cm)cm.value=thisMonth;}
+{const hm=document.getElementById('hmMonth');if(hm)hm.value=thisMonth;}
 
 // ── IQAMA ALERT BANNER ───────────────────────────────────────
 function showIqBanner(){

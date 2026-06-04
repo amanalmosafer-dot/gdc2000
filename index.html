@@ -620,6 +620,8 @@ td{padding:9px 12px;vertical-align:middle}
 .toast.ok{border-right-color:#16a34a}.toast.err{border-right-color:#dc2626}.toast.info{border-right-color:#2563eb}.toast.warn{border-right-color:#d97706}
 @keyframes toastIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes toastOut{to{opacity:0;transform:translateY(20px) scale(.96)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
 /* ── EVALUATION ── */
 .ev-crit{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
 .ev-crit-lbl{font-weight:700;font-size:.88rem}
@@ -2281,11 +2283,42 @@ function fmtDateTime(d){try{return new Date(d).toLocaleString('ar-SA-u-nu-latn-c
 // ⚠️ دالة آمنة للحصول على تاريخ محلي بصيغة YYYY-MM-DD (بدون toISOString الذي يعطي UTC)
 function localDateStr(d){const dd=new Date(d);return dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');}
 
-// ── طباعة: اختيار اللغة وبناء الترويسة الموحّدة ───────────────
+// ── طباعة: اختيار اللغة عبر Modal احترافي ─────────────────────
+// يرجّع Promise<'ar'|'en'|null>
 function askPrintLang(){
-  // يرجّع 'ar' أو 'en' أو null (إلغاء)
-  const c=confirm('اضغط OK للطباعة بالعربية | Click OK for Arabic\nاضغط Cancel للطباعة بالإنجليزية | Click Cancel for English');
-  return c?'ar':'en';
+  return new Promise(resolve=>{
+    const div=document.createElement('div');
+    div.id='langPickerOverlay';
+    div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);padding:20px;animation:fadeIn .2s ease';
+    div.innerHTML=`
+      <div style="background:var(--surface);border-radius:18px;padding:28px 26px;width:440px;max-width:96vw;box-shadow:0 20px 60px rgba(0,0,0,.5);direction:rtl;animation:popIn .25s cubic-bezier(.34,1.56,.64,1)" onclick="event.stopPropagation()">
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="font-size:2.2rem;margin-bottom:6px">🖨️</div>
+          <div style="font-size:1.15rem;font-weight:800;color:var(--txt);margin-bottom:4px">اختر لغة الطباعة</div>
+          <div style="font-size:.85rem;color:var(--txt2)">Select Print Language</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+          <button onclick="window._langPickResolve('ar')" style="padding:18px 14px;background:linear-gradient(135deg,#8d8253,#6f673f);color:#fff;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-weight:700;transition:transform .15s;display:flex;flex-direction:column;align-items:center;gap:8px" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+            <span style="font-size:2rem">🇸🇦</span>
+            <span style="font-size:1.05rem;font-weight:800">العربية</span>
+            <span style="font-size:.72rem;opacity:.85">Arabic</span>
+          </button>
+          <button onclick="window._langPickResolve('en')" style="padding:18px 14px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-weight:700;transition:transform .15s;display:flex;flex-direction:column;align-items:center;gap:8px" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+            <span style="font-size:2rem">🇬🇧</span>
+            <span style="font-size:1.05rem;font-weight:800">English</span>
+            <span style="font-size:.72rem;opacity:.85">إنجليزية</span>
+          </button>
+        </div>
+        <button onclick="window._langPickResolve(null)" style="width:100%;padding:10px;background:transparent;color:var(--txt2);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:inherit;font-size:.86rem;font-weight:600">✕ إلغاء | Cancel</button>
+      </div>`;
+    div.onclick=()=>window._langPickResolve(null);
+    document.body.appendChild(div);
+    window._langPickResolve=function(val){
+      const ov=document.getElementById('langPickerOverlay');if(ov)ov.remove();
+      delete window._langPickResolve;
+      resolve(val);
+    };
+  });
 }
 
 // ترويسة موحّدة احترافية لكل التقارير
@@ -3382,10 +3415,10 @@ function printEmp(idx){
   document.body.classList.remove('printing-emp');
 }
 
-function printDailyAtt(){
+async function printDailyAtt(){
   const date=document.getElementById('attDate').value;
   if(!date){toast(t('errSelectDate'),'err');return}
-  const lang=askPrintLang();const isAr=lang==='ar';
+  const lang=await askPrintLang();if(!lang)return;const isAr=lang==='ar';
   const proj=document.getElementById('attProj').value;
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
@@ -3431,12 +3464,12 @@ function printDailyAtt(){
   document.body.classList.remove('printing-att');
 }
 
-function printEmpMonthlyAtt(empId){
+async function printEmpMonthlyAtt(empId){
   const e=employees.find(x=>x.id===empId);if(!e)return;
   const curMonth=localDateStr(new Date()).substr(0,7);
   const month=prompt('اختر الشهر | Select Month (YYYY-MM):',curMonth);
   if(!month)return;
-  const lang=askPrintLang();const isAr=lang==='ar';
+  const lang=await askPrintLang();if(!lang)return;const isAr=lang==='ar';
   const days=getMonthDates(month);
   const STMAP={P:[L(lang,'present'),'da-P'],A:[L(lang,'absent'),'da-A'],L:[L(lang,'leave'),'da-L'],T:[L(lang,'late'),'da-T'],O:[L(lang,'off'),'da-O']};
   const DNAMES_AR=['أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
@@ -3518,10 +3551,10 @@ function printEmpMonthlyAtt(empId){
 }
 
 // تقرير الأوفر تايم الشامل — موظفين ↔ أيام ↔ شفت
-function printOvertimeReport(){
+async function printOvertimeReport(){
   const month=document.getElementById('payMonth').value;
   if(!month){toast('اختر الشهر أولاً | Select month first','warn');return;}
-  const lang=askPrintLang();const isAr=lang==='ar';
+  const lang=await askPrintLang();if(!lang)return;const isAr=lang==='ar';
   const proj=document.getElementById('payProj').value;
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
@@ -3635,8 +3668,8 @@ function printOvertimeReport(){
 
 // ── طباعة احترافية للتقارير المتقدمة (live/weekly/monthly/compare) ──
 // تستخدم محتوى التقرير الحالي + ترويسة موحّدة + مؤشرات
-function printAdvReport(type){
-  const lang=askPrintLang();const isAr=lang==='ar';
+async function printAdvReport(type){
+  const lang=await askPrintLang();if(!lang)return;const isAr=lang==='ar';
   const titles={
     live:[' لوحة المؤشرات الحية ','Live KPI Dashboard'],
     weekly:['التقرير الأسبوعي','Weekly Report'],
@@ -3968,10 +4001,10 @@ function saveEvalForm(empId){
   renderEvaluations();
 }
 
-function printEvaluations(){
+async function printEvaluations(){
   const month=document.getElementById('evalMonth').value;
   if(!month){toast('اختر الشهر أولاً | Select month first','warn');return;}
-  const lang=askPrintLang();const isAr=lang==='ar';
+  const lang=await askPrintLang();if(!lang)return;const isAr=lang==='ar';
   const proj=document.getElementById('evalProj').value;
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});

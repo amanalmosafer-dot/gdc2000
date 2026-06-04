@@ -4948,18 +4948,214 @@ function renderAttSum(){
   });
 }
 
-function exportAttCSV(){
-  const month=document.getElementById('attSumMonth').value||'att';
+function exportAttCSV(){exportAttendanceExcel();}
+
+// ── Excel احترافي للحضور ──
+async function exportAttendanceExcel(){
+  if(typeof ExcelJS==='undefined'){toast('انتظر ثانية وأعد المحاولة','warn');return;}
+  const month=document.getElementById('attSumMonth').value||localDateStr(new Date()).substr(0,7);
   const proj=document.getElementById('attSumProj').value;
-  const list=employees.filter(e=>!proj||e.project===proj);
-  const days=Object.keys(attendance).filter(d=>d.startsWith(month)).sort();
-  const rows=[['الاسم','المشروع',...days,'حاضر','غائب','إجازة','متأخر']];
-  list.forEach(e=>{
-    let P=0,A=0,L=0,T=0;
-    const dayCells=days.map(d=>{const s=(attendance[d]||{})[e.id]||'';if(s==='P')P++;else if(s==='A')A++;else if(s==='L')L++;else if(s==='T')T++;return s});
-    rows.push([e.name,e.project,...dayCells,P,A,L,T]);
+  const myProj=getMyProject();
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
+  const days=getMonthDates(month);
+  toast('⏳ جاري إنشاء ملف Excel...','info');
+
+  const wb=new ExcelJS.Workbook();
+  wb.creator='Golden Development';wb.created=new Date();
+
+  // ── Sheet 1: ملخص الحضور الشهري ──
+  const ws=wb.addWorksheet('ملخص الحضور',{views:[{rightToLeft:true,state:'frozen',xSplit:2,ySplit:6}]});
+  // الشعار
+  try{
+    const logoData=await fetch('logo.png').then(r=>r.blob()).then(b=>new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(b);}));
+    const logoId=wb.addImage({base64:logoData,extension:'png'});
+    ws.addImage(logoId,{tl:{col:0.2,row:0.2},ext:{width:140,height:50}});
+  }catch(e){}
+  const totalCols=2+days.length+5; // الاسم + المشروع + الأيام + 5 ملخصات
+  const lastColLetter=ws.getColumn(totalCols).letter;
+  // الترويسة
+  ws.mergeCells(`A1:${lastColLetter}1`);
+  ws.getCell('A1').value='شركة الإنماء الذهبية للمقاولات العامة';
+  ws.getCell('A1').font={size:14,bold:true,color:{argb:'FF0F2444'}};
+  ws.getCell('A1').alignment={horizontal:'center',vertical:'middle'};
+  ws.getRow(1).height=30;
+  ws.mergeCells(`A2:${lastColLetter}2`);
+  ws.getCell('A2').value='سجل الحضور الشهري — '+month;
+  ws.getCell('A2').font={size:12,bold:true,color:{argb:'FF8D8253'}};
+  ws.getCell('A2').alignment={horizontal:'center'};
+  ws.mergeCells(`A3:${lastColLetter}3`);
+  ws.getCell('A3').value='المشروع: '+(proj||'كل المشاريع')+'  ·  عدد الموظفين: '+list.length+'  ·  عدد الأيام: '+days.length+'  ·  تاريخ الإصدار: '+fmtDate(new Date());
+  ws.getCell('A3').font={size:10,color:{argb:'FF64748B'}};
+  ws.getCell('A3').alignment={horizontal:'center'};
+  ws.getRow(4).height=8;
+
+  // صف رؤوس الأيام
+  const DNAMES_SHORT=['أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
+  const dayNamesRow=ws.getRow(5);
+  dayNamesRow.getCell(1).value='';
+  dayNamesRow.getCell(2).value='';
+  days.forEach((d,i)=>{
+    const dow=new Date(d).getDay();
+    const c=dayNamesRow.getCell(3+i);
+    c.value=DNAMES_SHORT[dow];
+    c.font={size:8,color:{argb:dow===5?'FF94A3B8':'FF64748B'},italic:true};
+    c.alignment={horizontal:'center'};
+    if(dow===5)c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF8FAFC'}};
   });
-  dlCSV(rows,`attendance-${month}.csv`);
+  dayNamesRow.height=14;
+
+  // عناوين رئيسية
+  const headerRow=ws.getRow(6);
+  const headers=['الاسم','المشروع',...days.map(d=>d.substr(8)),'حاضر ✓','غائب ✗','إجازة 🌴','متأخر ⏱','راحة 🛌'];
+  headers.forEach((h,i)=>{
+    const c=headerRow.getCell(i+1);c.value=h;
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF0F2444'}};
+    c.font={size:11,bold:true,color:{argb:'FFFFFFFF'}};
+    c.alignment={horizontal:'center',vertical:'middle'};
+    c.border={top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}};
+  });
+  headerRow.height=30;
+
+  // البيانات
+  const STATUS_COLORS={
+    P:{bg:'FFDCFCE7',fg:'FF15803D'},
+    A:{bg:'FFFEE2E2',fg:'FFB91C1C'},
+    L:{bg:'FFFEF9C3',fg:'FFA16207'},
+    T:{bg:'FFEDE9FE',fg:'FF6D28D9'},
+    O:{bg:'FFCFFAFE',fg:'FF0E7490'},
+  };
+  let totalP=0,totalA=0,totalL=0,totalT=0,totalO=0;
+  list.forEach((e,i)=>{
+    let P=0,A=0,L=0,T=0,O=0;
+    const dayValues=days.map(d=>{
+      const s=(attendance[d]||{})[e.id]||'';
+      if(s==='P')P++;else if(s==='A')A++;else if(s==='L')L++;else if(s==='T')T++;else if(s==='O')O++;
+      return s||'';
+    });
+    totalP+=P;totalA+=A;totalL+=L;totalT+=T;totalO+=O;
+    const r=ws.addRow([e.name,e.project,...dayValues,P,A,L,T,O]);
+    r.eachCell((c,col)=>{
+      c.alignment={horizontal:col<=2?(col===1?'right':'right'):'center',vertical:'middle'};
+      c.font={size:10};
+      c.border={top:{style:'hair',color:{argb:'FFE2E8F0'}},bottom:{style:'hair',color:{argb:'FFE2E8F0'}},left:{style:'hair',color:{argb:'FFE2E8F0'}},right:{style:'hair',color:{argb:'FFE2E8F0'}}};
+      // تلوين خلايا الحضور
+      if(col>=3&&col<=2+days.length){
+        const status=c.value;
+        if(status&&STATUS_COLORS[status]){
+          c.fill={type:'pattern',pattern:'solid',fgColor:{argb:STATUS_COLORS[status].bg}};
+          c.font={size:10,bold:true,color:{argb:STATUS_COLORS[status].fg}};
+        }
+        // الجمعة بخلفية رمادية
+        const dow=new Date(days[col-3]).getDay();
+        if(dow===5&&!status){
+          c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF1F5F9'}};
+          c.value='—';c.font={size:9,color:{argb:'FF94A3B8'}};
+        }
+      }
+      // ملخصات
+      if(col>2+days.length){
+        c.font={size:10,bold:true};
+        const statusKey=['P','A','L','T','O'][col-3-days.length];
+        if(statusKey&&STATUS_COLORS[statusKey]&&c.value>0){
+          c.fill={type:'pattern',pattern:'solid',fgColor:{argb:STATUS_COLORS[statusKey].bg}};
+          c.font={size:10,bold:true,color:{argb:STATUS_COLORS[statusKey].fg}};
+        }
+      }
+    });
+    if(i%2===1){
+      for(let col=1;col<=2;col++){
+        if(!r.getCell(col).fill)r.getCell(col).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF8FAFC'}};
+      }
+    }
+    r.height=20;
+  });
+
+  // صف الإجمالي
+  const totalRow=ws.addRow(['','الإجمالي',...days.map(_=>''),totalP,totalA,totalL,totalT,totalO]);
+  totalRow.eachCell((c,col)=>{
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF4F1E8'}};
+    c.font={size:11,bold:true,color:{argb:'FF0F2444'}};
+    c.alignment={horizontal:'center',vertical:'middle'};
+    c.border={top:{style:'medium'},bottom:{style:'medium'}};
+  });
+  totalRow.height=28;
+
+  // عرض الأعمدة
+  ws.getColumn(1).width=24;
+  ws.getColumn(2).width=18;
+  for(let i=0;i<days.length;i++)ws.getColumn(3+i).width=5;
+  for(let i=0;i<5;i++)ws.getColumn(3+days.length+i).width=10;
+
+  // ── Sheet 2: ملخص الأرقام ──
+  const ws2=wb.addWorksheet('الملخص',{views:[{rightToLeft:true}]});
+  ws2.mergeCells('A1:E1');
+  ws2.getCell('A1').value='ملخص الحضور — '+month;
+  ws2.getCell('A1').font={size:16,bold:true,color:{argb:'FF0F2444'}};
+  ws2.getCell('A1').alignment={horizontal:'center'};
+  ws2.getRow(1).height=32;
+
+  const kpis=[
+    ['✅ حاضر',totalP,'FF15803D'],
+    ['❌ غائب',totalA,'FFB91C1C'],
+    ['🌴 إجازة',totalL,'FFA16207'],
+    ['⏱️ متأخر',totalT,'FF6D28D9'],
+    ['🛌 راحة',totalO,'FF0E7490'],
+  ];
+  kpis.forEach((k,i)=>{
+    const col=i+1;
+    ws2.getCell(3,col).value=k[0];
+    ws2.getCell(3,col).font={size:11,bold:true,color:{argb:'FF64748B'}};
+    ws2.getCell(3,col).alignment={horizontal:'center'};
+    const vc=ws2.getCell(4,col);
+    vc.value=k[1];
+    vc.font={size:22,bold:true,color:{argb:k[2]}};
+    vc.alignment={horizontal:'center',vertical:'middle'};
+    vc.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF8FAFC'}};
+    vc.border={top:{style:'medium',color:{argb:k[2]}},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}};
+    ws2.getRow(4).height=50;
+    ws2.getColumn(col).width=15;
+  });
+  // نسبة الحضور
+  const workTotal=totalP+totalA+totalT;
+  const attRate=workTotal?Math.round((totalP+totalT)/workTotal*100):0;
+  ws2.mergeCells('A6:E6');
+  ws2.getCell('A6').value=`📊 نسبة الحضور الإجمالية: ${attRate}%`;
+  ws2.getCell('A6').font={size:14,bold:true,color:{argb:attRate>=90?'FF15803D':attRate>=70?'FFA16207':'FFB91C1C'}};
+  ws2.getCell('A6').alignment={horizontal:'center'};
+  ws2.getRow(6).height=30;
+
+  // حسب المشروع
+  ws2.mergeCells('A8:E8');
+  ws2.getCell('A8').value='تحليل حسب المشروع';
+  ws2.getCell('A8').font={size:12,bold:true,color:{argb:'FF0F2444'}};
+  ws2.getCell('A8').alignment={horizontal:'center'};
+  const projHeaders=['المشروع','حاضر','غائب','إجازة','نسبة الحضور'];
+  const projHr=ws2.getRow(9);
+  projHeaders.forEach((h,i)=>{
+    const c=projHr.getCell(i+1);c.value=h;
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF0F2444'}};
+    c.font={size:11,bold:true,color:{argb:'FFFFFFFF'}};
+    c.alignment={horizontal:'center'};
+  });
+  projHr.height=26;
+  PROJS.forEach(p=>{
+    const pList=list.filter(e=>e.project===p);if(!pList.length)return;
+    let pP=0,pA=0,pL=0,pT=0;
+    pList.forEach(e=>{
+      const c=getAttCount(month,e.id);pP+=c.P;pA+=c.A;pL+=c.L;pT+=c.T;
+    });
+    const ppct=(pP+pA+pT)?Math.round((pP+pT)/(pP+pA+pT)*100):0;
+    const r=ws2.addRow([p,pP,pA,pL,ppct+'%']);
+    r.eachCell((c,col)=>{c.alignment={horizontal:col===1?'right':'center'};c.font={size:11};});
+    r.height=22;
+  });
+
+  // ── حفظ ──
+  const buf=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  if(typeof saveAs!=='undefined')saveAs(blob,`attendance-${month}.xlsx`);
+  else{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`attendance-${month}.xlsx`;a.click();URL.revokeObjectURL(url);}
+  toast('✅ تم تصدير ملف Excel احترافي','ok');
 }
 
 // ── REPORTS ──────────────────────────────────────────────────

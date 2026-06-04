@@ -25,6 +25,19 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--txt);direction:rtl;transition:background .25s,color .25s;min-height:100vh;font-feature-settings:'kern' 1,'liga' 1}
+/* ── CHARTS (SVG) ── */
+.chart-wrap{background:var(--surface);border-radius:14px;padding:18px;border:1px solid var(--border);box-shadow:var(--sh)}
+.chart-title{font-size:.95rem;font-weight:800;margin-bottom:14px;color:var(--txt);display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.chart-svg{width:100%;height:auto;display:block;overflow:visible}
+.chart-legend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:14px;font-size:.78rem}
+.chart-legend-item{display:flex;align-items:center;gap:6px;color:var(--txt2);font-weight:600}
+.chart-legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+/* Tooltip للأعمدة */
+.bar-tip{position:absolute;background:#0f172a;color:#fff;padding:4px 9px;border-radius:6px;font-size:.74rem;font-weight:600;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;z-index:50;transform:translate(-50%,-130%)}
+/* Gauge */
+.gauge-container{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gauge-val{font-size:1.6rem;font-weight:800;line-height:1;margin-top:-30px;text-align:center}
+.gauge-lbl{font-size:.78rem;color:var(--txt2);margin-top:4px;font-weight:600}
 /* ── HEADER ── */
 header{background:var(--grad);color:#fff;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;min-height:60px;box-shadow:0 4px 20px rgba(0,0,0,.25);position:sticky;top:0;z-index:100}
 .hdr-brand{display:flex;align-items:center;gap:10px}
@@ -1025,6 +1038,7 @@ td{padding:9px 12px;vertical-align:middle}
     <div id="evalSum" style="font-size:.83rem;color:var(--txt2)"></div>
     <button class="btn btn-info no-print" onclick="printEvaluations()">🖨️ طباعة التقييمات</button>
   </div>
+  <div id="evalCharts" style="margin-bottom:16px"></div>
   <div class="tbl-wrap">
     <div class="tbl-hdr"><h2 id="evalTitle">تقييم الموظفين</h2></div>
     <div style="overflow-x:auto">
@@ -2584,6 +2598,179 @@ function switchTab(name,btn){
 }
 
 // ── DASHBOARD ────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// CHART BUILDERS (SVG — no external libraries)
+// ═══════════════════════════════════════════════════════════
+const CHART_COLORS=['#2563eb','#7c3aed','#0891b2','#d97706','#16a34a','#dc2626','#db2777','#0e7490','#a16207','#6d28d9'];
+
+// Pie chart — data: [{label, value, color}]
+function buildPieChart(data,size){
+  size=size||220;
+  const cx=size/2,cy=size/2,r=size/2-10;
+  const total=data.reduce((s,d)=>s+d.value,0)||1;
+  let angle=-Math.PI/2; // ابدأ من الأعلى
+  const slices=data.map((d,i)=>{
+    const pct=d.value/total;if(d.value===0)return '';
+    const ang=pct*Math.PI*2;
+    const x1=cx+r*Math.cos(angle), y1=cy+r*Math.sin(angle);
+    angle+=ang;
+    const x2=cx+r*Math.cos(angle), y2=cy+r*Math.sin(angle);
+    const large=ang>Math.PI?1:0;
+    const path=`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`;
+    // نسبة في وسط القطعة
+    const labelAng=angle-ang/2;
+    const lr=r*0.65;
+    const lx=cx+lr*Math.cos(labelAng), ly=cy+lr*Math.sin(labelAng);
+    const color=d.color||CHART_COLORS[i%CHART_COLORS.length];
+    return `<path d="${path}" fill="${color}" stroke="#fff" stroke-width="2"/>
+      ${pct>0.06?`<text x="${lx}" y="${ly}" fill="#fff" font-size="13" font-weight="800" text-anchor="middle" dominant-baseline="middle">${Math.round(pct*100)}%</text>`:''}`;
+  }).join('');
+  const legend=data.filter(d=>d.value>0).map((d,i)=>{
+    const color=d.color||CHART_COLORS[i%CHART_COLORS.length];
+    return `<div class="chart-legend-item"><span class="chart-legend-dot" style="background:${color}"></span>${d.label} <span style="color:var(--txt);font-weight:700">(${d.value})</span></div>`;
+  }).join('');
+  return `<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">
+    <svg class="chart-svg" viewBox="0 0 ${size} ${size}" style="max-width:${size}px;width:100%">${slices}</svg>
+    <div style="display:flex;flex-direction:column;gap:8px">${legend}</div>
+  </div>`;
+}
+
+// Donut chart — مثل pie لكن بفتحة في الوسط مع نص مركزي
+function buildDonutChart(data,size,centerText,centerLabel){
+  size=size||220;
+  const cx=size/2,cy=size/2,r=size/2-10,innerR=r*0.6;
+  const total=data.reduce((s,d)=>s+d.value,0)||1;
+  let angle=-Math.PI/2;
+  const slices=data.map((d,i)=>{
+    const pct=d.value/total;if(d.value===0)return '';
+    const ang=pct*Math.PI*2;
+    const x1=cx+r*Math.cos(angle), y1=cy+r*Math.sin(angle);
+    const ix1=cx+innerR*Math.cos(angle), iy1=cy+innerR*Math.sin(angle);
+    angle+=ang;
+    const x2=cx+r*Math.cos(angle), y2=cy+r*Math.sin(angle);
+    const ix2=cx+innerR*Math.cos(angle), iy2=cy+innerR*Math.sin(angle);
+    const large=ang>Math.PI?1:0;
+    const path=`M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} L ${ix2} ${iy2} A ${innerR} ${innerR} 0 ${large} 0 ${ix1} ${iy1} Z`;
+    const color=d.color||CHART_COLORS[i%CHART_COLORS.length];
+    return `<path d="${path}" fill="${color}" stroke="#fff" stroke-width="2"/>`;
+  }).join('');
+  const legend=data.filter(d=>d.value>0).map((d,i)=>{
+    const color=d.color||CHART_COLORS[i%CHART_COLORS.length];
+    return `<div class="chart-legend-item"><span class="chart-legend-dot" style="background:${color}"></span>${d.label} <span style="color:var(--txt);font-weight:700">(${d.value})</span></div>`;
+  }).join('');
+  return `<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">
+    <div style="position:relative;width:${size}px;max-width:100%">
+      <svg class="chart-svg" viewBox="0 0 ${size} ${size}">${slices}</svg>
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+        <div style="font-size:1.6rem;font-weight:800;color:var(--txt);line-height:1">${centerText||''}</div>
+        <div style="font-size:.72rem;color:var(--txt2);font-weight:600;margin-top:2px">${centerLabel||''}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">${legend}</div>
+  </div>`;
+}
+
+// Vertical bar chart — data: [{label, value, color}]
+function buildBarChart(data,height){
+  height=height||220;
+  const maxV=Math.max(...data.map(d=>d.value),1);
+  const w=100/data.length;
+  const bars=data.map((d,i)=>{
+    const barH=(d.value/maxV)*(height-50);
+    const color=d.color||CHART_COLORS[i%CHART_COLORS.length];
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0">
+      <div style="font-size:.78rem;font-weight:800;color:${color}">${d.value}</div>
+      <div style="width:80%;max-width:50px;height:${barH}px;background:linear-gradient(180deg,${color},${color}cc);border-radius:6px 6px 2px 2px;min-height:4px;transition:height .6s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 6px ${color}33"></div>
+      <div style="font-size:.72rem;color:var(--txt2);font-weight:600;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%">${d.label}</div>
+    </div>`;
+  }).join('');
+  return `<div style="display:flex;align-items:flex-end;gap:8px;height:${height}px;padding:10px 4px;border-bottom:2px solid var(--border)">${bars}</div>`;
+}
+
+// Line chart — data: [{label, value}], stroke color
+function buildLineChart(data,color,height,unit){
+  height=height||200;
+  if(!data.length)return '<div style="text-align:center;padding:30px;color:var(--txt2)">لا توجد بيانات</div>';
+  color=color||'#2563eb';
+  unit=unit||'';
+  const w=800,h=height-40,pad={l:40,r:20,t:20,b:30};
+  const maxV=Math.max(...data.map(d=>d.value),1);
+  const stepX=(w-pad.l-pad.r)/(data.length-1||1);
+  const points=data.map((d,i)=>{
+    const x=pad.l+i*stepX;
+    const y=pad.t+(h-pad.t-pad.b)-(d.value/maxV)*(h-pad.t-pad.b);
+    return {x,y,...d};
+  });
+  const path=points.map((p,i)=>(i===0?'M':'L')+p.x+' '+p.y).join(' ');
+  const area=path+` L ${points[points.length-1].x} ${h-pad.b} L ${pad.l} ${h-pad.b} Z`;
+  // Y axis labels (4 خطوط)
+  const ySteps=4;
+  const yLines=Array.from({length:ySteps+1},(_,i)=>{
+    const val=maxV*(1-i/ySteps);
+    const y=pad.t+(h-pad.t-pad.b)*(i/ySteps);
+    return `<line x1="${pad.l}" y1="${y}" x2="${w-pad.r}" y2="${y}" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+      <text x="${pad.l-6}" y="${y+3}" font-size="10" fill="#94a3b8" text-anchor="end">${Math.round(val)}</text>`;
+  }).join('');
+  // X axis labels (يعرض كل نقطة n مع تقسيم ذكي)
+  const skip=Math.max(1,Math.ceil(data.length/10));
+  const xLabels=points.map((p,i)=>i%skip===0?`<text x="${p.x}" y="${h-pad.b+14}" font-size="9" fill="#64748b" text-anchor="middle">${p.label}</text>`:'').join('');
+  const dots=points.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="${color}" stroke="#fff" stroke-width="2"><title>${p.label}: ${p.value}${unit}</title></circle>`).join('');
+  return `<svg class="chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">
+    <defs><linearGradient id="grad-${color.replace('#','')}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${color}" stop-opacity=".35"/>
+      <stop offset="1" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    ${yLines}
+    <path d="${area}" fill="url(#grad-${color.replace('#','')})"/>
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+    ${xLabels}
+  </svg>`;
+}
+
+// Gauge (نصف دائرة) — value 0-100
+function buildGauge(value,maxVal,label,color){
+  value=Math.min(Math.max(value,0),maxVal||100);
+  maxVal=maxVal||100;
+  color=color||(value>=80?'#16a34a':value>=60?'#d97706':'#dc2626');
+  const pct=value/maxVal;
+  const ang=Math.PI*pct; // 0 → π
+  const r=85;const cx=110,cy=110;
+  const startX=cx-r, startY=cy;
+  const endX=cx-r*Math.cos(ang), endY=cy-r*Math.sin(ang);
+  const large=ang>Math.PI/2?0:0;
+  // قوس الخلفية (نصف دائرة كاملة)
+  return `<div class="gauge-container">
+    <svg class="chart-svg" viewBox="0 0 220 130" style="max-width:220px;width:100%">
+      <path d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="none" stroke="#e2e8f0" stroke-width="18" stroke-linecap="round"/>
+      <path d="M ${startX} ${startY} A ${r} ${r} 0 ${large} 1 ${endX} ${endY}" fill="none" stroke="${color}" stroke-width="18" stroke-linecap="round" style="transition:all .8s"/>
+      <text x="${cx}" y="${cy-15}" font-size="32" font-weight="800" fill="${color}" text-anchor="middle">${Math.round(value)}${maxVal===100?'%':''}</text>
+    </svg>
+    ${label?`<div class="gauge-lbl">${label}</div>`:''}
+  </div>`;
+}
+
+// Stacked bar (أفقي) — segments: [{label, value, color}]
+function buildStackedBar(segments,height,labelInside){
+  height=height||40;
+  const total=segments.reduce((s,d)=>s+d.value,0)||1;
+  const bars=segments.map((s,i)=>{
+    if(s.value===0)return '';
+    const w=(s.value/total)*100;
+    const color=s.color||CHART_COLORS[i%CHART_COLORS.length];
+    return `<div style="width:${w}%;background:${color};display:flex;align-items:center;justify-content:center;font-size:.78rem;color:#fff;font-weight:700;min-width:0;overflow:hidden">${labelInside&&w>8?s.value:''}</div>`;
+  }).join('');
+  const legend=segments.filter(s=>s.value>0).map((s,i)=>{
+    const color=s.color||CHART_COLORS[i%CHART_COLORS.length];
+    const pct=Math.round(s.value/total*100);
+    return `<div class="chart-legend-item"><span class="chart-legend-dot" style="background:${color}"></span>${s.label}: <b style="color:var(--txt)">${s.value}</b> <span style="color:var(--txt2)">(${pct}%)</span></div>`;
+  }).join('');
+  return `<div>
+    <div style="display:flex;height:${height}px;border-radius:10px;overflow:hidden;border:1px solid var(--border)">${bars}</div>
+    <div class="chart-legend">${legend}</div>
+  </div>`;
+}
+
 function renderDashboard(){
   const total=employees.length;
   const males=employees.filter(e=>e.gender==='M').length;
@@ -2655,19 +2842,11 @@ function renderDashboard(){
     salSection.style.display='none';
   }
 
-  // Project distribution bars
+  // Project distribution — Pie chart
   const barsEl=document.getElementById('dashProjBars');
   const barColors=['#2563eb','#7c3aed','#0891b2','#d97706'];
-  let barsHtml=``;
-  PROJS.forEach((p,i)=>{
-    const c=employees.filter(e=>e.project===p).length;
-    const pct=total?Math.round(c/total*100):0;
-    barsHtml+=`<div class="proj-bar-item">
-      <div class="proj-bar-label"><span>${p}</span><span style="font-weight:700">${c} ${t('dEmpWord')} (${pct}%)</span></div>
-      <div class="proj-bar-track"><div class="proj-bar-fill" style="width:${pct}%;background:${barColors[i]}"></div></div>
-    </div>`;
-  });
-  barsEl.innerHTML=barsHtml;
+  const pieData=PROJS.map((p,i)=>({label:p,value:employees.filter(e=>e.project===p).length,color:barColors[i]}));
+  barsEl.innerHTML=buildPieChart(pieData,200);
 
   // ③ Iqama alerts — 3-level summary + compact table
   const alerts = iqamaAlerts();
@@ -3563,6 +3742,44 @@ function renderEvaluations(){
   });
   const sumEl=document.getElementById('evalSum');if(sumEl)sumEl.textContent=`${done} مقيّم من ${list.length}`;
   const ttl=document.getElementById('evalTitle');if(ttl)ttl.textContent='تقييم الموظفين — '+(month||'');
+
+  // الرسوم البيانية للتقييم
+  const chartsEl=document.getElementById('evalCharts');
+  if(chartsEl&&done>0){
+    let nEx=0,nVg=0,nG=0,nN=0,sumScore=0;
+    let totQ=0,totP=0,totC=0,totT=0,totS=0;
+    list.forEach(e=>{
+      const rec=monthData[e.id];if(!rec)return;
+      const sc=computeEvalScore(rec,month,e.id);sumScore+=sc.total;
+      if(sc.total>=90)nEx++;else if(sc.total>=75)nVg++;else if(sc.total>=60)nG++;else nN++;
+      totQ+=rec.quality||0;totP+=rec.productivity||0;totC+=rec.compliance||0;totT+=rec.teamwork||0;totS+=rec.safety||0;
+    });
+    const avgQ=+(totQ/done).toFixed(1),avgP=+(totP/done).toFixed(1),avgC=+(totC/done).toFixed(1),avgT=+(totT/done).toFixed(1),avgS=+(totS/done).toFixed(1);
+    const avgScore=Math.round(sumScore/done);
+    chartsEl.innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="chart-wrap">
+          <div class="chart-title">🥧 توزيع التقديرات</div>
+          ${buildPieChart([
+            {label:'ممتاز (90+)',value:nEx,color:'#16a34a'},
+            {label:'جيد جداً (75-89)',value:nVg,color:'#1d4ed8'},
+            {label:'جيد (60-74)',value:nG,color:'#d97706'},
+            {label:'يحتاج متابعة',value:nN,color:'#dc2626'},
+          ],190)}
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">📊 متوسط المعايير (من 5)</div>
+          ${buildBarChart([
+            {label:'جودة',value:avgQ,color:'#2563eb'},
+            {label:'إنتاجية',value:avgP,color:'#7c3aed'},
+            {label:'التزام',value:avgC,color:'#0891b2'},
+            {label:'تعاون',value:avgT,color:'#d97706'},
+            {label:'سلامة',value:avgS,color:'#16a34a'},
+          ],180)}
+          <div style="text-align:center;margin-top:10px;font-size:.85rem;color:var(--txt2)">متوسط النتيجة الإجمالية: <b style="color:#0f2444;font-size:1.1rem">${avgScore}/100</b></div>
+        </div>
+      </div>`;
+  } else if(chartsEl){chartsEl.innerHTML='';}
 }
 // ── التغطية المؤقتة للشفتات ───────────────────────────────────
 function openCoverageModal(empId){
@@ -4271,15 +4488,53 @@ function renderLiveDashboard(){
   const iqCount=iqamaAlerts().length;
   const notMarked=list.filter(e=>!todayAtt[e.id]);
 
+  // بيانات الرسوم البيانية
+  // 1) Gauge: نسبة الحضور اليوم
+  const todayPct=tMarked?Math.round((tP+tT)/tMarked*100):0;
+  // 2) Donut: مصادر الأوفر تايم (تغطية vs يدوي)
+  let covOTTotal=0,manOTTotal=0;
+  list.forEach(e=>{
+    const monthDays=getMonthDates(thisMonth);
+    monthDays.forEach(d=>{
+      const cov=getActiveCoverage(e.id,d);
+      const st=(attendance[d]||{})[e.id]||'';
+      if(cov&&(st==='P'||st==='T'))covOTTotal+=8;
+    });
+    (overtimes||[]).forEach(o=>{if(o.empId===e.id&&o.date&&o.date.startsWith(thisMonth))manOTTotal+=(o.hours||0);});
+  });
+  // 3) Line: حضور آخر 14 يوم
+  const last14=[];const totalLast=tMarked||1;
+  for(let i=13;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=localDateStr(d);
+    const dayAtt=attendance[ds]||{};
+    let p=0,marked=0;
+    list.forEach(e=>{const s=dayAtt[e.id];if(s){marked++;if(s==='P'||s==='T')p++;}});
+    last14.push({label:ds.substr(5),value:marked?Math.round(p/marked*100):0});
+  }
+  // 4) Stacked bar: ملخص الشهر
+  const monthSegments=[
+    {label:'حضور',value:mP,color:'#16a34a'},
+    {label:'تأخير',value:mT,color:'#7c3aed'},
+    {label:'غياب',value:mA,color:'#dc2626'},
+    {label:'إجازة',value:mL,color:'#d97706'},
+  ];
+
   document.getElementById('repLiveContent').innerHTML=`
     <div class="rep-section">
       <div class="rep-section-title">📍 اليوم — ${todayStr}</div>
-      <div class="kpi-grid">
-        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${tP}</div><div class="kpi-lbl">حضور</div></div>
-        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${tA}</div><div class="kpi-lbl">غياب</div></div>
-        <div class="kpi-card kpi-amber"><div class="kpi-ico">🌙</div><div class="kpi-val" style="color:#d97706">${tL}</div><div class="kpi-lbl">إجازة</div></div>
-        <div class="kpi-card kpi-purple"><div class="kpi-ico">⏱️</div><div class="kpi-val" style="color:#7c3aed">${tT}</div><div class="kpi-lbl">تأخير</div></div>
-        <div class="kpi-card kpi-blue"><div class="kpi-ico">📊</div><div class="kpi-val">${tMarked?pct(tP+tT,tMarked):0}%</div><div class="kpi-lbl">نسبة الحضور اليوم</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center">
+        <div>
+          <div class="kpi-grid" style="grid-template-columns:1fr 1fr">
+            <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${tP}</div><div class="kpi-lbl">حضور</div></div>
+            <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${tA}</div><div class="kpi-lbl">غياب</div></div>
+            <div class="kpi-card kpi-amber"><div class="kpi-ico">🌙</div><div class="kpi-val" style="color:#d97706">${tL}</div><div class="kpi-lbl">إجازة</div></div>
+            <div class="kpi-card kpi-purple"><div class="kpi-ico">⏱️</div><div class="kpi-val" style="color:#7c3aed">${tT}</div><div class="kpi-lbl">تأخير</div></div>
+          </div>
+        </div>
+        <div class="chart-wrap" style="background:transparent;border:none;box-shadow:none;padding:0">
+          ${buildGauge(todayPct,100,'نسبة الحضور اليوم')}
+        </div>
       </div>
     </div>
 
@@ -4303,6 +4558,35 @@ function renderLiveDashboard(){
         <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${pct(mP+mT,total*(recDates.length||1))}%</div><div class="kpi-lbl">معدل الحضور</div></div>
         ${iqCount?`<div class="kpi-card kpi-amber"><div class="kpi-ico">🔔</div><div class="kpi-val" style="color:#d97706">${iqCount}</div><div class="kpi-lbl">تنبيهات إقامة</div></div>`:''}
       </div>
+    </div>
+
+    <div class="rep-section">
+      <div class="rep-section-title">📈 معدل الحضور — آخر 14 يوم</div>
+      ${buildLineChart(last14,'#2563eb',240,'%')}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div class="rep-section" style="margin-bottom:0">
+        <div class="rep-section-title">🥧 توزيع حالات الحضور (هذا الشهر)</div>
+        ${buildDonutChart([
+          {label:'حضور',value:mP,color:'#16a34a'},
+          {label:'غياب',value:mA,color:'#dc2626'},
+          {label:'إجازة',value:mL,color:'#d97706'},
+          {label:'تأخير',value:mT,color:'#7c3aed'},
+        ],200,(mP+mT+mA+mL),'إجمالي')}
+      </div>
+      <div class="rep-section" style="margin-bottom:0">
+        <div class="rep-section-title">🍩 مصادر الأوفر تايم</div>
+        ${(covOTTotal+manOTTotal)>0?buildDonutChart([
+          {label:'تغطية مؤقتة',value:covOTTotal,color:'#0891b2'},
+          {label:'يدوي',value:manOTTotal,color:'#7c3aed'},
+        ],200,covOTTotal+manOTTotal,'ساعة'):'<p style="color:var(--txt2);text-align:center;padding:30px">لا يوجد أوفر تايم هذا الشهر</p>'}
+      </div>
+    </div>
+
+    <div class="rep-section">
+      <div class="rep-section-title">📊 ملخص الشهر — Stacked View</div>
+      ${buildStackedBar(monthSegments,40,true)}
     </div>
 
     <div class="rep-section">

@@ -233,7 +233,7 @@ td{padding:9px 12px;vertical-align:middle}
   .hdr-brand h1 span{display:none}
 }
 /* ── PRINT CARD (single employee) ── */
-#empPrintCard,#dailyAttPrint,#evalPrint,#empAttPrint,#otReportPrint{display:none}
+#empPrintCard,#dailyAttPrint,#evalPrint,#empAttPrint,#otReportPrint,#advReportPrint{display:none}
 .da-card{max-width:820px;margin:0 auto;background:#fff;font-family:'Tajawal','Segoe UI',Arial,sans-serif;direction:rtl;color:#0f172a}
 .da-hdr{position:relative;padding:14px 0 16px;margin-bottom:18px;border-bottom:3px double #8d8253}
 .da-hdr-row{display:grid;grid-template-columns:140px 1fr 140px;align-items:center;gap:14px}
@@ -256,6 +256,32 @@ td{padding:9px 12px;vertical-align:middle}
 .da-foot{display:flex;justify-content:space-between;margin-top:40px;font-size:.85rem}
 .da-sign{border-top:1px solid #94a3b8;padding-top:6px;min-width:200px;text-align:center;color:#64748b}
 .da-card{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+/* تنسيق محتوى التقارير المتقدمة عند الطباعة */
+#advReportPrint .adv-print-body .rep-section{background:#fff;border:1px solid #d6cfb8;border-radius:10px;padding:14px;margin-bottom:12px;box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#advReportPrint .adv-print-body .rep-section-title{font-size:.95rem;font-weight:800;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #8d8253;color:#0f2444}
+#advReportPrint .adv-print-body .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+#advReportPrint .adv-print-body .kpi-card{background:#fafafa!important;border:1.5px solid;border-radius:10px;padding:12px 10px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#advReportPrint .adv-print-body .kpi-card.kpi-blue{border-color:#2563eb}
+#advReportPrint .adv-print-body .kpi-card.kpi-green{border-color:#16a34a}
+#advReportPrint .adv-print-body .kpi-card.kpi-red{border-color:#dc2626}
+#advReportPrint .adv-print-body .kpi-card.kpi-amber{border-color:#d97706}
+#advReportPrint .adv-print-body .kpi-card.kpi-purple{border-color:#7c3aed}
+#advReportPrint .adv-print-body .kpi-ico{font-size:1.3rem;margin-bottom:4px}
+#advReportPrint .adv-print-body .kpi-val{font-size:1.4rem;font-weight:800;line-height:1.1}
+#advReportPrint .adv-print-body .kpi-lbl{font-size:.68rem;color:#64748b;font-weight:600;margin-top:4px}
+#advReportPrint .adv-print-body .rep-tbl{width:100%;border-collapse:collapse;font-size:.78rem}
+#advReportPrint .adv-print-body .rep-tbl thead th{background:#0f2444!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:7px 6px;font-weight:700;text-align:center;font-size:.72rem;border:1px solid #1e3a5f}
+#advReportPrint .adv-print-body .rep-tbl tbody td{padding:6px;border:1px solid #e2e8f0;text-align:center}
+#advReportPrint .adv-print-body .badge{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#advReportPrint .adv-print-body .bar-chart{padding:10px 0}
+#advReportPrint .adv-print-body .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:.78rem}
+#advReportPrint .adv-print-body .bar-lbl{width:120px;font-weight:700}
+#advReportPrint .adv-print-body .bar-track{flex:1;background:#f1f5f9!important;height:18px;border-radius:4px;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#advReportPrint .adv-print-body .bar-fill{height:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#advReportPrint .adv-print-body .bar-val{width:50px;text-align:center;font-weight:800}
+#advReportPrint .adv-print-body .chip-ok{background:#dcfce7!important;color:#15803d;padding:3px 9px;border-radius:20px;font-weight:700;font-size:.75rem;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#advReportPrint .adv-print-body .chip-warn{background:#fef3c7!important;color:#a16207;padding:3px 9px;border-radius:20px;font-weight:700;font-size:.75rem;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#advReportPrint .adv-print-body .chip-bad{background:#fee2e2!important;color:#b91c1c;padding:3px 9px;border-radius:20px;font-weight:700;font-size:.75rem;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 #empPrintCard .pc-card{max-width:680px;margin:0 auto;background:#fff;font-family:'Segoe UI',Tahoma,Arial,sans-serif;direction:rtl;color:#0f172a}
 #empPrintCard .pc-hdr{padding:26px 30px;display:flex;align-items:center;gap:20px;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 #empPrintCard .pc-av{width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.2);border:3px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;flex-shrink:0;overflow:hidden}
@@ -306,30 +332,36 @@ td{padding:9px 12px;vertical-align:middle}
   body.printing-ot #otReportPrint *{display:revert!important}
   body.printing-ot{background:#fff!important;margin:0!important;padding:0!important}
 
+  /* ══ طباعة التقارير المتقدمة ══ */
+  body.printing-adv *{display:none!important}
+  body.printing-adv #advReportPrint,
+  body.printing-adv #advReportPrint *{display:revert!important}
+  body.printing-adv{background:#fff!important;margin:0!important;padding:0!important}
+
   /* ══ الطباعة العادية (قائمة الموظفين، التقارير...) ══ */
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-ematt) header,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-ematt) #iqAlertBar,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .tabs,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .toolbar,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .proj-grid,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .hdr-actions,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .actions,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .no-print,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #toastWrap,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #devBanner,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #loginOverlay,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #modalBg,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #dailyAttPrint,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #evalPrint,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) #empPrintCard{display:none!important}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot){background:#fff;color:#000}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .tab-content{display:none!important}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .tab-content.active{display:block!important}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .container{max-width:100%;margin:0;padding:0}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .tbl-wrap{box-shadow:none;border-radius:0;border:none}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) table{font-size:.79rem}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) thead th{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot) .print-title{display:block!important;text-align:center;font-size:1.2rem;font-weight:700;padding:10px}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-ematt) header,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-ematt) #iqAlertBar,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .tabs,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .toolbar,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .proj-grid,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .hdr-actions,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .actions,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .no-print,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #toastWrap,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #devBanner,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #loginOverlay,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #modalBg,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #dailyAttPrint,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #evalPrint,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #empPrintCard{display:none!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv){background:#fff;color:#000}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .tab-content{display:none!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .tab-content.active{display:block!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .container{max-width:100%;margin:0;padding:0}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .tbl-wrap{box-shadow:none;border-radius:0;border:none}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) table{font-size:.79rem}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) thead th{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .print-title{display:block!important;text-align:center;font-size:1.2rem;font-weight:700;padding:10px}
   .badge,.sbadge,.bbadge,.iq-ok,.iq-warn,.iq-bad{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .da-P,.da-A,.da-L,.da-T,.da-O{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .da-hdr{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -929,6 +961,10 @@ td{padding:9px 12px;vertical-align:middle}
 
   <!-- LIVE DASHBOARD -->
   <div id="rep-live" class="rep-subpage">
+    <div class="rep-toolbar no-print" style="margin-bottom:12px">
+      <div class="spacer"></div>
+      <button class="btn btn-info no-print" onclick="printAdvReport('live')">🖨️ طباعة</button>
+    </div>
     <div id="repLiveContent"></div>
   </div>
 
@@ -941,7 +977,7 @@ td{padding:9px 12px;vertical-align:middle}
         <option value="">كل المشاريع</option>
       </select>
       <button class="btn btn-primary" onclick="renderWeeklyReport()">🔄 تحديث</button>
-      <button class="btn btn-info no-print" onclick="window.print()">🖨️ طباعة</button>
+      <button class="btn btn-info no-print" onclick="printAdvReport('weekly')">🖨️ طباعة</button>
     </div>
     <div id="repWeeklyContent"></div>
   </div>
@@ -955,7 +991,7 @@ td{padding:9px 12px;vertical-align:middle}
         <option value="">كل المشاريع</option>
       </select>
       <button class="btn btn-primary" onclick="renderMonthlyReport()">🔄 تحديث</button>
-      <button class="btn btn-info no-print" onclick="window.print()">🖨️ طباعة</button>
+      <button class="btn btn-info no-print" onclick="printAdvReport('monthly')">🖨️ طباعة</button>
     </div>
     <div id="repMonthlyContent"></div>
   </div>
@@ -971,7 +1007,7 @@ td{padding:9px 12px;vertical-align:middle}
         <option value="">كل المشاريع</option>
       </select>
       <button class="btn btn-primary" onclick="renderCompareReport()">🔄 مقارنة</button>
-      <button class="btn btn-info no-print" onclick="window.print()">🖨️ طباعة</button>
+      <button class="btn btn-info no-print" onclick="printAdvReport('compare')">🖨️ طباعة</button>
     </div>
     <div id="repCompareContent"></div>
   </div>
@@ -1017,6 +1053,9 @@ td{padding:9px 12px;vertical-align:middle}
 
 <!-- OVERTIME REPORT PRINT -->
 <div id="otReportPrint"></div>
+
+<!-- ADVANCED REPORTS PRINT (weekly/monthly/compare/live) -->
+<div id="advReportPrint"></div>
 
 <!-- TOAST NOTIFICATIONS -->
 <div id="toastWrap"></div>
@@ -3413,6 +3452,61 @@ function printOvertimeReport(){
   document.body.classList.add('printing-ot');
   window.print();
   document.body.classList.remove('printing-ot');
+}
+
+// ── طباعة احترافية للتقارير المتقدمة (live/weekly/monthly/compare) ──
+// تستخدم محتوى التقرير الحالي + ترويسة موحّدة + مؤشرات
+function printAdvReport(type){
+  const lang=askPrintLang();const isAr=lang==='ar';
+  const titles={
+    live:[' لوحة المؤشرات الحية ','Live KPI Dashboard'],
+    weekly:['التقرير الأسبوعي','Weekly Report'],
+    monthly:['التقرير الشهري','Monthly Report'],
+    compare:['تقرير المقارنة','Comparison Report'],
+  };
+  const srcIds={live:'repLiveContent',weekly:'repWeeklyContent',monthly:'repMonthlyContent',compare:'repCompareContent'};
+  const srcEl=document.getElementById(srcIds[type]);
+  if(!srcEl||!srcEl.innerHTML.trim()){toast(isAr?'حدّث التقرير أولاً':'Refresh report first','warn');return;}
+  const t=titles[type];
+  // معلومات الفترة
+  let metaInfo='';
+  if(type==='live'){
+    metaInfo=`<div>📅 <b>${L(lang,'date')}:</b> ${fmtDateLong(new Date())}</div>`;
+  }else if(type==='weekly'){
+    const w=document.getElementById('repWeekPick').value;
+    const p=document.getElementById('repWeekProj').value;
+    metaInfo=`<div>📆 <b>${isAr?'الأسبوع':'Week'}:</b> ${w||'—'}</div><div>🏗 <b>${L(lang,'project')}:</b> ${p||L(lang,'allProj')}</div>`;
+  }else if(type==='monthly'){
+    const m=document.getElementById('repMonthPick').value;
+    const p=document.getElementById('repMonthProj').value;
+    metaInfo=`<div>📅 <b>${L(lang,'month')}:</b> ${m||'—'}</div><div>🏗 <b>${L(lang,'project')}:</b> ${p||L(lang,'allProj')}</div>`;
+  }else if(type==='compare'){
+    const m1=document.getElementById('repCmp1').value;
+    const m2=document.getElementById('repCmp2').value;
+    const p=document.getElementById('repCmpProj').value;
+    metaInfo=`<div>📅 <b>${isAr?'شهر 1':'Month 1'}:</b> ${m1||'—'}</div><div>📅 <b>${isAr?'شهر 2':'Month 2'}:</b> ${m2||'—'}</div><div>🏗 <b>${L(lang,'project')}:</b> ${p||L(lang,'allProj')}</div>`;
+  }
+
+  // ننسخ HTML من التبويب الحي ونزيل الأزرار
+  const cloneHTML=srcEl.innerHTML
+    .replace(/<button[^>]*>[\s\S]*?<\/button>/g,'')
+    .replace(/no-print/g,'');
+
+  document.getElementById('advReportPrint').innerHTML=`
+    <div class="da-card" style="max-width:900px" dir="${isAr?'rtl':'ltr'}">
+      ${buildReportHeader(t[0],t[1],lang)}
+      <div class="da-meta" dir="${isAr?'rtl':'ltr'}" style="background:#f4f1e8;border-radius:8px;padding:12px 16px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+        ${metaInfo}
+      </div>
+      <div class="adv-print-body" style="margin-top:14px">${cloneHTML}</div>
+      <div class="da-foot" style="margin-top:24px">
+        <div class="da-sign">${L(lang,'supervisorSign')}</div>
+        <div class="da-sign">${L(lang,'managerSign')}</div>
+      </div>
+    </div>`;
+  document.body.classList.add('printing-adv');
+  window.print();
+  document.body.classList.remove('printing-adv');
 }
 
 // ── EVALUATION SYSTEM ─────────────────────────────────────────

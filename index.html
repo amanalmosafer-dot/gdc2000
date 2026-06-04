@@ -25,6 +25,9 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--txt);direction:rtl;transition:background .25s,color .25s;min-height:100vh;font-feature-settings:'kern' 1,'liga' 1}
+/* ── Quick-fill bar ── */
+.qfb{border:none;color:#fff;padding:7px 13px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:700;transition:transform .12s,box-shadow .12s;white-space:nowrap}
+.qfb:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.25)}
 /* ── CHARTS (SVG) ── */
 .chart-wrap{background:var(--surface);border-radius:14px;padding:18px;border:1px solid var(--border);box-shadow:var(--sh)}
 .chart-title{font-size:.95rem;font-weight:800;margin-bottom:14px;color:var(--txt);display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--border)}
@@ -246,7 +249,7 @@ td{padding:9px 12px;vertical-align:middle}
   .hdr-brand h1 span{display:none}
 }
 /* ── PRINT CARD (single employee) ── */
-#empPrintCard,#dailyAttPrint,#evalPrint,#empAttPrint,#otReportPrint,#advReportPrint{display:none}
+#empPrintCard,#dailyAttPrint,#evalPrint,#empAttPrint,#otReportPrint,#advReportPrint,#empFullPrint{display:none}
 .da-card{max-width:820px;margin:0 auto;background:#fff;font-family:'Tajawal','Segoe UI',Arial,sans-serif;direction:rtl;color:#0f172a}
 .da-hdr{position:relative;padding:14px 0 16px;margin-bottom:18px;border-bottom:3px double #8d8253}
 .da-hdr-row{display:grid;grid-template-columns:140px 1fr 140px;align-items:center;gap:14px}
@@ -351,30 +354,36 @@ td{padding:9px 12px;vertical-align:middle}
   body.printing-adv #advReportPrint *{display:revert!important}
   body.printing-adv{background:#fff!important;margin:0!important;padding:0!important}
 
+  /* ══ طباعة الملف الشامل للموظف ══ */
+  body.printing-full *{display:none!important}
+  body.printing-full #empFullPrint,
+  body.printing-full #empFullPrint *{display:revert!important}
+  body.printing-full{background:#fff!important;margin:0!important;padding:0!important}
+
   /* ══ الطباعة العادية (قائمة الموظفين، التقارير...) ══ */
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-ematt) header,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-ematt) #iqAlertBar,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .tabs,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .toolbar,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .proj-grid,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .hdr-actions,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .actions,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .no-print,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #toastWrap,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #devBanner,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #loginOverlay,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #modalBg,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #dailyAttPrint,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #evalPrint,
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) #empPrintCard{display:none!important}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv){background:#fff;color:#000}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .tab-content{display:none!important}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .tab-content.active{display:block!important}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .container{max-width:100%;margin:0;padding:0}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .tbl-wrap{box-shadow:none;border-radius:0;border:none}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) table{font-size:.79rem}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) thead th{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv) .print-title{display:block!important;text-align:center;font-size:1.2rem;font-weight:700;padding:10px}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full):not(.printing-ematt) header,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full):not(.printing-ematt) #iqAlertBar,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) .tabs,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) .toolbar,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) .proj-grid,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) .hdr-actions,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) .actions,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) .no-print,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) #toastWrap,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) #devBanner,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) #loginOverlay,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) #modalBg,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) #dailyAttPrint,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) #evalPrint,
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) #empPrintCard{display:none!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full){background:#fff;color:#000}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) .tab-content{display:none!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) .tab-content.active{display:block!important}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) .container{max-width:100%;margin:0;padding:0}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) .tbl-wrap{box-shadow:none;border-radius:0;border:none}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) table{font-size:.79rem}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) thead th{background:#f1f5f9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body:not(.printing-emp):not(.printing-att):not(.printing-eval):not(.printing-ematt):not(.printing-ot):not(.printing-adv):not(.printing-full) .print-title{display:block!important;text-align:center;font-size:1.2rem;font-weight:700;padding:10px}
   .badge,.sbadge,.bbadge,.iq-ok,.iq-warn,.iq-bad{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .da-P,.da-A,.da-L,.da-T,.da-O{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .da-hdr{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -922,7 +931,26 @@ td{padding:9px 12px;vertical-align:middle}
     <div class="spacer"></div>
     <div id="attSum" style="font-size:.83rem;display:flex;gap:12px;color:var(--txt2)"></div>
     <button class="btn btn-info no-print" onclick="printDailyAtt()">🖨️ طباعة تحضير اليوم</button>
-    <button class="btn btn-success no-print" onclick="markAllP()">✓ تحضير الكل</button>
+  </div>
+  <!-- ⚡ شريط التحضير الجماعي الذكي -->
+  <div class="quickfill-bar no-print" style="background:linear-gradient(135deg,#0f2444,#1e3a5f);color:#fff;padding:14px 18px;border-radius:14px;margin-bottom:14px;box-shadow:var(--sh)">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="font-weight:800;font-size:.95rem">⚡ تحضير سريع</div>
+      <select id="qfShift" style="padding:7px 12px;border-radius:8px;border:none;font-family:inherit;font-size:.83rem;background:rgba(255,255,255,.18);color:#fff;font-weight:600">
+        <option value="" style="color:#000">كل الشفتات</option>
+      </select>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        <button class="qfb" style="background:#16a34a" onclick="bulkSet('P')">✅ حاضر</button>
+        <button class="qfb" style="background:#dc2626" onclick="bulkSet('A')">❌ غائب</button>
+        <button class="qfb" style="background:#d97706" onclick="bulkSet('L')">🌴 إجازة</button>
+        <button class="qfb" style="background:#7c3aed" onclick="bulkSet('T')">⏱️ تأخير</button>
+        <button class="qfb" style="background:#0891b2" onclick="bulkSet('O')">🛌 راحة</button>
+      </div>
+      <div style="border-right:2px solid rgba(255,255,255,.25);height:30px;margin:0 4px"></div>
+      <button class="qfb" style="background:#6366f1" onclick="copyAttFrom('yesterday')" title="نسخ تحضير أمس">📋 نسخ من أمس</button>
+      <button class="qfb" style="background:#a16207" onclick="copyAttFromDate()" title="اختيار تاريخ">🔄 نسخ من تاريخ...</button>
+      <button class="qfb" style="background:#7f1d1d" onclick="clearAttDay()" title="مسح كل تحضير اليوم">🗑️ مسح</button>
+    </div>
   </div>
   <div class="tbl-wrap">
     <div class="tbl-hdr"><h2 id="attTitle">سجل الحضور</h2></div>
@@ -1072,6 +1100,9 @@ td{padding:9px 12px;vertical-align:middle}
 
 <!-- ADVANCED REPORTS PRINT (weekly/monthly/compare/live) -->
 <div id="advReportPrint"></div>
+
+<!-- COMPREHENSIVE EMPLOYEE PROFILE PRINT -->
+<div id="empFullPrint"></div>
 
 <!-- TOAST NOTIFICATIONS -->
 <div id="toastWrap"></div>
@@ -3154,6 +3185,7 @@ function mkRow(e,n,pi){
       ${can('employees_delete')?`<button class="btn btn-danger btn-sm" onclick="delEmp(${idx})" title="حذف">🗑️</button>`:''}
       ${can('employees_view')?`<button class="btn btn-info btn-sm" onclick="printEmp(${idx})" title="${t('printEmpCardTitle')}">🖨️</button>`:''}
       ${can('attendance')?`<button class="btn btn-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff" onclick="printEmpMonthlyAtt('${e.id}')" title="تقرير حضور شهري">📋</button>`:''}
+      ${can('employees_view')?`<button class="btn btn-sm" style="background:linear-gradient(135deg,#0f2444,#1e3a5f);color:#fff" onclick="printEmpFullProfile('${e.id}')" title="تقرير شامل عن الموظف">📊</button>`:''}
       ${can('evaluation')?`<button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border)" onclick="quickEval('${e.id}')" title="تقييم">⭐</button>`:''}
     </div></td>`;
 
@@ -3548,6 +3580,247 @@ async function printEmpMonthlyAtt(empId){
   document.body.classList.add('printing-ematt');
   window.print();
   document.body.classList.remove('printing-ematt');
+}
+
+// ── التقرير الشامل عن الموظف (كل شيء في صفحة) ──────────────
+async function printEmpFullProfile(empId){
+  const e=employees.find(x=>x.id===empId);if(!e){toast('الموظف غير موجود','err');return;}
+  const curMonth=localDateStr(new Date()).substr(0,7);
+  const month=prompt('اختر شهر التقرير | Month (YYYY-MM):',curMonth);
+  if(!month)return;
+  const lang=await askPrintLang();if(!lang)return;const isAr=lang==='ar';
+  const isMgr=currentUser&&currentUser.role==='manager';
+
+  // بيانات الحضور للشهر
+  const att=getAttCount(month,empId);
+  const totalWork=att.P+att.A+att.T;
+  const attPct=totalWork?Math.round((att.P+att.T)/totalWork*100):0;
+  const covOT=getCoverageOT(empId,month);
+  const otDetails=getCoverageOTDetails(empId,month);
+
+  // التقييم
+  const evalRec=(evaluations[month]||{})[empId];
+  let evalSection='';
+  if(evalRec){
+    const sc=computeEvalScore(evalRec,month,empId);const r=evalRating(sc.total);
+    evalSection=`
+      <div style="background:#f4f1e8;border-radius:8px;padding:10px;margin-top:8px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div style="font-weight:700;font-size:.85rem">⭐ ${isAr?'النتيجة':'Score'}: <span style="font-size:1.2rem;color:${sc.total>=90?'#15803d':sc.total>=75?'#1d4ed8':sc.total>=60?'#a16207':'#b91c1c'}">${sc.total}/100</span></div>
+          <div style="font-size:.85rem;font-weight:700">${r.stars} ${r.label}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px;font-size:.7rem">
+          <div style="text-align:center"><b>${isAr?'جودة':'Quality'}</b><br>${evalRec.quality||0}/5</div>
+          <div style="text-align:center"><b>${isAr?'إنتاج':'Prod'}</b><br>${evalRec.productivity||0}/5</div>
+          <div style="text-align:center"><b>${isAr?'التزام':'Comp'}</b><br>${evalRec.compliance||0}/5</div>
+          <div style="text-align:center"><b>${isAr?'تعاون':'Team'}</b><br>${evalRec.teamwork||0}/5</div>
+          <div style="text-align:center"><b>${isAr?'سلامة':'Safety'}</b><br>${evalRec.safety||0}/5</div>
+        </div>
+      </div>`;
+  } else {
+    evalSection=`<div style="text-align:center;padding:14px;color:#94a3b8;font-size:.85rem">${isAr?'لا يوجد تقييم لهذا الشهر':'No evaluation for this month'}</div>`;
+  }
+
+  // التغطية النشطة
+  const activeCov=coverages.find(c=>c.empId===empId&&c.toDate>=localDateStr(new Date()));
+  const covsThisMonth=coverages.filter(c=>c.empId===empId&&((c.fromDate.startsWith(month))||(c.toDate.startsWith(month))));
+
+  // الراتب (للمدير فقط)
+  let salarySection='';
+  if(isMgr&&e.baseSalary){
+    const pay=(payroll[month]||{})[empId]||{};
+    const dailyRate=+(e.baseSalary/30).toFixed(2);
+    const hourlyRate=+(e.baseSalary/30/8).toFixed(2);
+    const absD=+(att.A*dailyRate).toFixed(2);
+    const otAmt=+(covOT*hourlyRate).toFixed(2);
+    const net=Math.round(e.baseSalary-absD+otAmt+(pay.bonus||0)-(pay.extraDeductions||0));
+    salarySection=`
+      <div class="section">
+        <div class="sec-title">💰 ${isAr?'الراتب الشهري':'Monthly Payroll'}</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:.78rem">
+          <div style="background:#dbeafe;padding:8px;border-radius:6px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact"><b>${isAr?'الأساسي':'Basic'}</b><br><span style="font-size:.95rem;font-weight:800;color:#1d4ed8">${e.baseSalary.toLocaleString()}</span></div>
+          <div style="background:#fee2e2;padding:8px;border-radius:6px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact"><b>${isAr?'خصم غياب':'Absence'}</b><br><span style="font-size:.95rem;font-weight:800;color:#b91c1c">−${absD.toLocaleString()}</span></div>
+          <div style="background:#dcfce7;padding:8px;border-radius:6px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact"><b>${isAr?'أوفر تايم':'Overtime'}</b><br><span style="font-size:.95rem;font-weight:800;color:#15803d">+${otAmt.toLocaleString()}</span></div>
+          <div style="background:#0f2444;color:#fff;padding:8px;border-radius:6px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact"><b>${isAr?'الصافي':'Net'}</b><br><span style="font-size:1.05rem;font-weight:800">${net.toLocaleString()} ﷼</span></div>
+        </div>
+      </div>`;
+  }
+
+  // عرض المعلومات الشخصية
+  const avContent=e.photo?`<img src="${e.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`:(e.name?e.name[0].toUpperCase():'?');
+  const pi=PROJS.indexOf(e.project);
+  const projColors=[['#0f2444','#1d4ed8'],['#4c1d95','#7c3aed'],['#0c4a6e','#0891b2'],['#78350f','#d97706']];
+  const [g1,g2]=projColors[pi>=0?pi:0];
+  const st=e.status||'نشط';
+  const stColor=st==='نشط'?'#15803d':st==='إجازة'?'#a16207':'#b91c1c';
+  const stLabel=isAr?st:(st==='نشط'?'Active':st==='إجازة'?'On Leave':'Terminated');
+
+  // الفحص الطبي
+  const medOK=e.medExamExpiry?(new Date(e.medExamExpiry)-new Date())/86400000:null;
+  const medColor=medOK===null?'#94a3b8':medOK<0?'#dc2626':medOK<30?'#d97706':'#15803d';
+  const medStatus=medOK===null?(isAr?'غير مسجّل':'Not set'):medOK<0?(isAr?'منتهي':'Expired'):medOK<30?(isAr?`ينتهي خلال ${Math.round(medOK)} يوم`:`Expires in ${Math.round(medOK)} days`):(isAr?'ساري':'Valid');
+
+  // الإقامة
+  const iqOK=e.iqamaExpiry?((h2g(e.iqamaExpiry)||new Date(e.iqamaExpiry))-new Date())/86400000:null;
+  const iqColor=iqOK===null?'#94a3b8':iqOK<0?'#dc2626':iqOK<90?'#d97706':'#15803d';
+  const iqStatus=iqOK===null?(isAr?'غير مسجّل':'Not set'):iqOK<0?(isAr?'منتهية':'Expired'):iqOK<90?(isAr?`تنتهي خلال ${Math.round(iqOK)} يوم`:`Expires in ${Math.round(iqOK)} days`):(isAr?'سارية':'Valid');
+
+  // Bar chart بسيط للحضور
+  const bars=[
+    [att.P,'#15803d',isAr?'حضور':'Present'],
+    [att.A,'#b91c1c',isAr?'غياب':'Absent'],
+    [att.L,'#a16207',isAr?'إجازة':'Leave'],
+    [att.T,'#6d28d9',isAr?'تأخير':'Late'],
+    [att.O||0,'#0e7490',isAr?'راحة':'Off'],
+  ];
+  const maxVal=Math.max(...bars.map(b=>b[0]),1);
+  const chartBars=bars.map(b=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+    <div style="font-size:.72rem;font-weight:700;color:${b[1]}">${b[0]}</div>
+    <div style="width:30px;height:${Math.round(b[0]/maxVal*55)+4}px;background:${b[1]};border-radius:4px 4px 0 0;-webkit-print-color-adjust:exact;print-color-adjust:exact"></div>
+    <div style="font-size:.62rem;color:#64748b;font-weight:600">${b[2]}</div>
+  </div>`).join('');
+
+  // أيام الأوفر تايم (تفصيل)
+  const otRows=otDetails.length?otDetails.map(d=>{
+    const isManual=d.source==='يدوي';
+    return `<tr>
+      <td style="padding:3px 5px;font-size:.7rem">${d.date.substr(8)}/${d.date.substr(5,2)}</td>
+      <td style="padding:3px 5px;font-size:.7rem">${d.dayName}</td>
+      <td style="padding:3px 5px;font-size:.7rem;color:${isManual?'#7c3aed':'#0891b2'}">${isManual?'⏱️':'🔄'} ${d.shift}</td>
+      <td style="padding:3px 5px;font-size:.7rem;text-align:center;font-weight:700">${d.hours}h</td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="4" style="text-align:center;padding:8px;color:#94a3b8;font-size:.75rem">${isAr?'لا يوجد':'None'}</td></tr>`;
+
+  // التغطيات
+  const covRows=covsThisMonth.length?covsThisMonth.map(c=>`<tr>
+    <td style="padding:3px 5px;font-size:.7rem">${c.fromDate} → ${c.toDate}</td>
+    <td style="padding:3px 5px;font-size:.7rem">${SL[c.coverShift]||c.coverShift}</td>
+    <td style="padding:3px 5px;font-size:.7rem;color:#64748b">${c.reason||'—'}</td>
+  </tr>`).join(''):`<tr><td colspan="3" style="text-align:center;padding:8px;color:#94a3b8;font-size:.75rem">${isAr?'لا يوجد':'None'}</td></tr>`;
+
+  document.getElementById('empFullPrint').innerHTML=`
+    <style>
+      #empFullPrint .ef{max-width:780px;margin:0 auto;background:#fff;font-family:'Tajawal','Segoe UI',Arial,sans-serif;color:#0f172a;padding:0}
+      #empFullPrint .section{background:#fafafa;border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      #empFullPrint .sec-title{font-size:.85rem;font-weight:800;color:#0f2444;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #8d8253;display:flex;align-items:center;gap:6px}
+      #empFullPrint .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 14px;font-size:.76rem}
+      #empFullPrint .info-grid .it{padding:5px 0;border-bottom:1px dashed #e5e7eb}
+      #empFullPrint .info-grid .it b{color:#64748b;font-size:.7rem;display:block;margin-bottom:2px}
+      #empFullPrint .stat-mini{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+      #empFullPrint .stat-mini > div{padding:8px 6px;border-radius:6px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      #empFullPrint .stat-mini .v{font-size:1.1rem;font-weight:800;line-height:1}
+      #empFullPrint .stat-mini .l{font-size:.62rem;font-weight:600;margin-top:3px}
+      #empFullPrint table{width:100%;border-collapse:collapse}
+      #empFullPrint table thead th{background:#f4f1e8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:5px;font-size:.72rem;font-weight:700;text-align:right;border-bottom:1px solid #d6cfb8}
+      #empFullPrint table tbody tr{border-bottom:1px dashed #e5e7eb}
+    </style>
+    <div class="ef" dir="${isAr?'rtl':'ltr'}">
+      ${buildReportHeader(isAr?'التقرير الشامل عن الموظف':'Comprehensive Employee Report',isAr?'Comprehensive Employee Report':'التقرير الشامل عن الموظف',lang)}
+
+      <!-- بطاقة الموظف العلوية -->
+      <div style="background:linear-gradient(135deg,${g1},${g2});color:#fff;padding:14px 18px;border-radius:12px;margin-bottom:10px;display:flex;align-items:center;gap:14px;-webkit-print-color-adjust:exact;print-color-adjust:exact" dir="${isAr?'rtl':'ltr'}">
+        <div style="width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;flex-shrink:0;overflow:hidden">${avContent}</div>
+        <div style="flex:1">
+          <div style="font-size:1.25rem;font-weight:800;margin-bottom:3px">${e.name}</div>
+          <div style="font-size:.82rem;opacity:.9;margin-bottom:5px">${e.title||(isAr?'موظف':'Employee')} · ${e.project} ${e.empNum?`· #${e.empNum}`:''}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span style="padding:2px 8px;border-radius:20px;font-size:.7rem;background:${stColor};-webkit-print-color-adjust:exact;print-color-adjust:exact">● ${stLabel}</span>
+            ${e.shift&&e.shift!=='-'?`<span style="padding:2px 8px;border-radius:20px;font-size:.7rem;background:rgba(255,255,255,.2)">${SL[e.shift]}</span>`:''}
+            ${activeCov?`<span style="padding:2px 8px;border-radius:20px;font-size:.7rem;background:#0891b2;-webkit-print-color-adjust:exact;print-color-adjust:exact">🔄 ${isAr?'تغطية نشطة':'Active Coverage'}</span>`:''}
+          </div>
+        </div>
+        <div style="text-align:left">
+          <div style="font-size:.65rem;opacity:.8">${isAr?'الشهر':'Month'}</div>
+          <div style="font-size:1.05rem;font-weight:800">${month}</div>
+        </div>
+      </div>
+
+      <!-- المعلومات الشخصية -->
+      <div class="section">
+        <div class="sec-title">📋 ${isAr?'المعلومات الشخصية':'Personal Information'}</div>
+        <div class="info-grid">
+          <div class="it"><b>${isAr?'رقم الموظف':'Employee #'}</b>${e.empNum||'—'}</div>
+          <div class="it"><b>${isAr?'الجنس':'Gender'}</b>${e.gender==='M'?(isAr?'ذكر':'Male'):e.gender==='F'?(isAr?'أنثى':'Female'):'—'}</div>
+          <div class="it"><b>${isAr?'الجنسية':'Nationality'}</b>${e.nationality||'—'}</div>
+          <div class="it"><b>${isAr?'رقم الجواز':'Passport'}</b>${e.passportNum||'—'}</div>
+          <div class="it"><b>${isAr?'رقم الإقامة':'Iqama #'}</b>${e.iqamaNum||'—'}</div>
+          <div class="it"><b>${isAr?'انتهاء الإقامة':'Iqama Expiry'}</b><span style="color:${iqColor};font-weight:700">${e.iqamaExpiry||'—'} ${iqStatus?`(${iqStatus})`:''}</span></div>
+          <div class="it"><b>${isAr?'الكفيل':'Sponsor'}</b><span style="font-size:.7rem">${e.sponsor||'—'}</span></div>
+          <div class="it"><b>${isAr?'الجوال':'Phone'}</b><span dir="ltr">${e.phone||'—'}</span></div>
+          <div class="it"><b>${isAr?'بداية العمل':'Start Date'}</b>${e.startDate||'—'}</div>
+          <div class="it"><b>${isAr?'الفرع':'Branch'}</b>${e.branch||'—'}</div>
+          <div class="it"><b>${isAr?'المسمى':'Title'}</b>${e.title||'—'}</div>
+          <div class="it"><b>${isAr?'المشروع':'Project'}</b>${e.project}</div>
+        </div>
+      </div>
+
+      <!-- الفحص الطبي والتطعيمات -->
+      <div class="section">
+        <div class="sec-title">🏥 ${isAr?'الفحص الطبي والتطعيمات':'Medical & Vaccinations'}</div>
+        <div class="info-grid">
+          <div class="it"><b>${isAr?'تاريخ الفحص':'Exam Date'}</b>${e.medExamDate||'—'}</div>
+          <div class="it"><b>${isAr?'انتهاء الفحص':'Exam Expiry'}</b><span style="color:${medColor};font-weight:700">${e.medExamExpiry||'—'} ${medStatus?`(${medStatus})`:''}</span></div>
+          <div class="it"><b>💉 MMR</b>${e.vaccMMR?`<span style="color:#15803d">✓ ${e.vaccMMR}</span>`:'<span style="color:#dc2626">✗</span>'}</div>
+          <div class="it"><b>💉 Influenza</b>${e.vaccInfluenza?`<span style="color:#15803d">✓ ${e.vaccInfluenza}</span>`:'<span style="color:#dc2626">✗</span>'}</div>
+          <div class="it" style="grid-column:span 2"><b>💉 Hep B</b>
+            <span style="color:${e.vaccHepB1?'#15803d':'#dc2626'}">${e.vaccHepB1?'✓':'✗'} ${isAr?'الأولى':'1st'}</span> ·
+            <span style="color:${e.vaccHepB2?'#15803d':'#dc2626'}">${e.vaccHepB2?'✓':'✗'} ${isAr?'الثانية':'2nd'}</span> ·
+            <span style="color:${e.vaccHepB3?'#15803d':'#dc2626'}">${e.vaccHepB3?'✓':'✗'} ${isAr?'الثالثة':'3rd'}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- الحضور + الرسم البياني -->
+      <div class="section">
+        <div class="sec-title">📅 ${isAr?'الحضور ('+month+')':'Attendance ('+month+')'}</div>
+        <div style="display:grid;grid-template-columns:1fr 200px;gap:14px;align-items:center">
+          <div class="stat-mini">
+            <div style="background:#dcfce7"><div class="v" style="color:#15803d">${att.P}</div><div class="l" style="color:#15803d">${isAr?'حضور':'Present'}</div></div>
+            <div style="background:#fee2e2"><div class="v" style="color:#b91c1c">${att.A}</div><div class="l" style="color:#b91c1c">${isAr?'غياب':'Absent'}</div></div>
+            <div style="background:#fef9c3"><div class="v" style="color:#a16207">${att.L}</div><div class="l" style="color:#a16207">${isAr?'إجازة':'Leave'}</div></div>
+            <div style="background:#ede9fe"><div class="v" style="color:#6d28d9">${att.T}</div><div class="l" style="color:#6d28d9">${isAr?'تأخير':'Late'}</div></div>
+            <div style="background:#cffafe"><div class="v" style="color:#0e7490">${att.O||0}</div><div class="l" style="color:#0e7490">${isAr?'راحة':'Off'}</div></div>
+            <div style="background:#dbeafe"><div class="v" style="color:#1d4ed8">${attPct}%</div><div class="l" style="color:#1d4ed8">${isAr?'النسبة':'Rate'}</div></div>
+          </div>
+          <div style="display:flex;align-items:flex-end;justify-content:space-around;height:90px;border-bottom:1.5px solid #cbd5e1;padding-bottom:4px">${chartBars}</div>
+        </div>
+      </div>
+
+      <!-- الأوفر تايم -->
+      <div class="section">
+        <div class="sec-title">⏱️ ${isAr?'الأوفر تايم ('+covOT+' ساعة)':'Overtime ('+covOT+' hours)'}</div>
+        <table>
+          <thead><tr><th>${isAr?'التاريخ':'Date'}</th><th>${isAr?'اليوم':'Day'}</th><th>${isAr?'المصدر / الشفت':'Source / Shift'}</th><th style="text-align:center">${isAr?'الساعات':'Hours'}</th></tr></thead>
+          <tbody>${otRows}</tbody>
+        </table>
+      </div>
+
+      <!-- التغطيات -->
+      ${covsThisMonth.length?`<div class="section">
+        <div class="sec-title">🔄 ${isAr?'التغطيات المؤقتة':'Temporary Coverages'}</div>
+        <table>
+          <thead><tr><th>${isAr?'الفترة':'Period'}</th><th>${isAr?'الشفت':'Shift'}</th><th>${isAr?'السبب':'Reason'}</th></tr></thead>
+          <tbody>${covRows}</tbody>
+        </table>
+      </div>`:''}
+
+      <!-- التقييم -->
+      <div class="section">
+        <div class="sec-title">⭐ ${isAr?'تقييم الأداء ('+month+')':'Performance Evaluation ('+month+')'}</div>
+        ${evalSection}
+      </div>
+
+      ${salarySection}
+
+      <!-- التواقيع -->
+      <div style="display:flex;justify-content:space-between;margin-top:25px;padding-top:15px;border-top:1px solid #d6cfb8;font-size:.78rem">
+        <div style="text-align:center;padding-top:25px;border-top:1px solid #94a3b8;min-width:180px;color:#64748b">${L(lang,'supervisorSign')}</div>
+        <div style="text-align:center;padding-top:25px;border-top:1px solid #94a3b8;min-width:180px;color:#64748b">${L(lang,'managerSign')}</div>
+      </div>
+    </div>`;
+  document.body.classList.add('printing-full');
+  window.print();
+  document.body.classList.remove('printing-full');
 }
 
 // تقرير الأوفر تايم الشامل — موظفين ↔ أيام ↔ شفت
@@ -4336,14 +4609,88 @@ function setAtt(date,empId,status,btn){
   saveAtt();renderAtt();
 }
 
-function markAllP(){
+function markAllP(){bulkSet('P');}
+
+// ⚡ التحضير الجماعي الذكي
+function bulkSet(status){
   const date=document.getElementById('attDate').value;
-  if(!date){toast(t('errSelectDate'),'err');return}
+  if(!date){toast(t('errSelectDate'),'err');return;}
   const proj=document.getElementById('attProj').value;
+  const shift=document.getElementById('qfShift')?document.getElementById('qfShift').value:'';
   if(!attendance[date])attendance[date]={};
   const myProj=getMyProject();
-  employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj}).forEach(e=>attendance[date][e.id]='P');
+  const list=employees.filter(e=>{
+    if(myProj&&!myProj.includes(e.project))return false;
+    if(proj&&e.project!==proj)return false;
+    if(shift&&(e.shift||'-')!==shift)return false;
+    return true;
+  });
+  if(!list.length){toast('لا يوجد موظفون مطابقون','warn');return;}
+  list.forEach(e=>attendance[date][e.id]=status);
   saveAtt();renderAtt();
+  const labels={P:'حاضرين',A:'غائبين',L:'إجازة',T:'متأخرين',O:'راحة'};
+  toast(`✅ تم تحضير ${list.length} موظف كـ"${labels[status]}"`,'ok');
+}
+
+function copyAttFrom(when){
+  const date=document.getElementById('attDate').value;
+  if(!date){toast(t('errSelectDate'),'err');return;}
+  let srcDate;
+  if(when==='yesterday'){
+    const d=new Date(date);d.setDate(d.getDate()-1);
+    srcDate=localDateStr(d);
+  } else srcDate=when;
+  const src=attendance[srcDate];
+  if(!src||!Object.keys(src).length){toast(`لا يوجد تحضير في ${srcDate}`,'warn');return;}
+  const proj=document.getElementById('attProj').value;
+  const shift=document.getElementById('qfShift')?document.getElementById('qfShift').value:'';
+  const myProj=getMyProject();
+  if(!attendance[date])attendance[date]={};
+  let n=0;
+  employees.forEach(e=>{
+    if(myProj&&!myProj.includes(e.project))return;
+    if(proj&&e.project!==proj)return;
+    if(shift&&(e.shift||'-')!==shift)return;
+    if(src[e.id]){attendance[date][e.id]=src[e.id];n++;}
+  });
+  if(!n){toast('لم يُنسخ أي شيء (تأكد من المرشحات)','warn');return;}
+  saveAtt();renderAtt();
+  toast(`📋 تم نسخ ${n} تحضير من ${srcDate}`,'ok');
+}
+
+function copyAttFromDate(){
+  const date=document.getElementById('attDate').value;
+  if(!date){toast(t('errSelectDate'),'err');return;}
+  const src=prompt('اختر تاريخ المصدر (YYYY-MM-DD):',localDateStr(new Date()));
+  if(!src)return;
+  copyAttFrom(src);
+}
+
+function clearAttDay(){
+  const date=document.getElementById('attDate').value;
+  if(!date){toast(t('errSelectDate'),'err');return;}
+  if(!confirm(`مسح كل تحضير يوم ${date}؟ لا يمكن التراجع.`))return;
+  const proj=document.getElementById('attProj').value;
+  const shift=document.getElementById('qfShift')?document.getElementById('qfShift').value:'';
+  const myProj=getMyProject();
+  if(!attendance[date])return;
+  let n=0;
+  employees.forEach(e=>{
+    if(myProj&&!myProj.includes(e.project))return;
+    if(proj&&e.project!==proj)return;
+    if(shift&&(e.shift||'-')!==shift)return;
+    if(attendance[date][e.id]){delete attendance[date][e.id];n++;}
+  });
+  saveAtt();renderAtt();
+  toast(`🗑️ تم مسح ${n} تحضير`,'ok');
+}
+
+// تعبئة dropdown الشفت في شريط التحضير السريع
+function populateQfShift(){
+  const sel=document.getElementById('qfShift');if(!sel)return;
+  sel.innerHTML='<option value="" style="color:#000">كل الشفتات</option>'+
+    Object.entries(SL).filter(([k])=>k!=='-').map(([k,v])=>`<option value="${k}" style="color:#000">${v}</option>`).join('')+
+    '<option value="-" style="color:#000">بدون شفت</option>';
 }
 
 function renderAttSum(){
@@ -4935,6 +5282,8 @@ function initSelects(){
   // show/hide supervisor project banner in employees tab
   const banner=document.getElementById('projLockBanner');
   if(banner)banner.classList.toggle('show',!!myProj);
+  // تعبئة dropdown الشفت في شريط التحضير الجماعي
+  populateQfShift();
 }
 
 document.getElementById('modalBg').addEventListener('click',function(e){if(e.target===this)closeModal()});

@@ -70,6 +70,17 @@ body{font-family:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;background:var(--b
 .hm-legend-item{display:flex;align-items:center;gap:5px;font-weight:600;color:var(--txt2)}
 .hm-legend-box{width:16px;height:16px;border-radius:3px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 
+/* ── أزرار فلترة الحضور (قابلة للضغط) ── */
+.att-filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:14px;background:var(--surface);border-radius:14px;border:1px solid var(--border);box-shadow:var(--sh)}
+.att-filter-btn{flex:1;min-width:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 8px;background:var(--surface2);color:var(--c,#64748b);border:2px solid transparent;border-radius:10px;cursor:pointer;font-family:inherit;transition:all .18s;position:relative;overflow:hidden}
+.att-filter-btn::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--c);opacity:.6;transition:height .18s}
+.att-filter-btn:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.1);border-color:var(--c)}
+.att-filter-btn:hover::before{height:5px;opacity:1}
+.att-filter-btn.active{background:var(--c);color:#fff;border-color:var(--c);box-shadow:0 6px 18px color-mix(in srgb,var(--c) 40%,transparent)}
+.att-filter-btn.active::before{display:none}
+.att-filter-btn.active span{color:#fff!important}
+.att-filter-btn.att-clear{background:transparent;border:1.5px dashed var(--border);color:var(--txt2);max-width:80px;flex:0 1 80px}
+.att-filter-btn.att-clear:hover{background:var(--surface2);border-color:var(--danger);color:var(--danger)}
 /* ── Quick-fill bar ── */
 .qfb{border:none;color:#fff;padding:7px 13px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:700;transition:transform .12s,box-shadow .12s;white-space:nowrap}
 .qfb:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.25)}
@@ -976,9 +987,10 @@ td{padding:9px 12px;vertical-align:middle}
     <input type="date" id="attDate" onchange="renderAtt()"/>
     <select id="attProj" onchange="renderAtt()"><option value="">كل المشاريع</option></select>
     <div class="spacer"></div>
-    <div id="attSum" style="font-size:.83rem;display:flex;gap:12px;color:var(--txt2)"></div>
     <button class="btn btn-info no-print" onclick="printDailyAtt()">🖨️ طباعة تحضير اليوم</button>
   </div>
+  <!-- 📊 أزرار الفلترة بالحالة (قابلة للضغط) -->
+  <div id="attSum" class="att-filter-bar no-print"></div>
   <!-- ⚡ شريط التحضير الجماعي الذكي -->
   <div class="quickfill-bar no-print" style="background:linear-gradient(135deg,#0f2444,#1e3a5f);color:#fff;padding:14px 18px;border-radius:14px;margin-bottom:14px;box-shadow:var(--sh)">
     <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -4797,18 +4809,24 @@ async function exportPayrollExcel(){
 }
 
 // ── ATTENDANCE ───────────────────────────────────────────────
+let attFilter=''; // فلتر الحالة المختار: P/A/L/T/O/N (لم يُسجَّل) أو فارغ = الكل
 function renderAtt(){
   const date=document.getElementById('attDate').value;
   const proj=document.getElementById('attProj').value;
-  document.getElementById('attTitle').textContent=t('attTitle')+' — '+(date||t('attSelectDate'));
+  document.getElementById('attTitle').textContent=t('attTitle')+' — '+(date||t('attSelectDate'))+(attFilter?` · مُصفّى: ${attFilter==='P'?'حاضرون':attFilter==='A'?'غائبون':attFilter==='L'?'في إجازة':attFilter==='T'?'متأخرون':attFilter==='O'?'في راحة':'لم يُسجّلوا'}`:'');
   const myProj=getMyProject();
-  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj});
+  const allList=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj});
   const day=date?(attendance[date]||{}):{};
+  // العدّات (دائماً من القائمة الكاملة قبل الفلترة)
+  let P=0,A=0,L=0,T=0,O=0,N=0;
+  allList.forEach(e=>{const st=day[e.id]||'';if(st==='P')P++;else if(st==='A')A++;else if(st==='L')L++;else if(st==='T')T++;else if(st==='O')O++;else N++;});
+  // تطبيق الفلتر
+  const list=attFilter?allList.filter(e=>{const st=day[e.id]||'';return attFilter==='N'?!st:st===attFilter;}):allList;
   const tbody=document.getElementById('attBody');tbody.innerHTML='';
-  let P=0,A=0,L=0,T=0,O=0;
-  list.forEach((e,i)=>{
+  if(!list.length){
+    tbody.innerHTML=`<tr class="erow"><td colspan="5" style="text-align:center;padding:40px;color:var(--txt2)">لا يوجد موظفون مطابقون لهذا الفلتر</td></tr>`;
+  } else list.forEach((e,i)=>{
     const st=day[e.id]||'';
-    if(st==='P')P++;else if(st==='A')A++;else if(st==='L')L++;else if(st==='T')T++;else if(st==='O')O++;
     const pi=PROJS.indexOf(e.project);
     const cov=date?getActiveCoverage(e.id,date):null;
     const shiftDisplay=cov
@@ -4825,8 +4843,25 @@ function renderAtt(){
       </div></td>`;
     tbody.appendChild(tr);
   });
+  // أزرار الفلترة الجميلة
+  const mkBtn=(k,n,color,emoji,label)=>`<button class="att-filter-btn ${attFilter===k?'active':''}" data-status="${k}" style="--c:${color}" onclick="toggleAttFilter('${k}')" title="اضغط للفلترة">
+    <span style="font-size:1.1rem">${emoji}</span>
+    <span style="font-weight:800;font-size:1.05rem">${n}</span>
+    <span style="font-size:.7rem;opacity:.85">${label}</span>
+  </button>`;
   document.getElementById('attSum').innerHTML=
-    `<span style="color:#16a34a">✓ ${P}</span><span style="color:#dc2626">✗ ${A}</span><span style="color:#d97706">⊙ ${L}</span><span style="color:#7c3aed">⏱ ${T}</span><span style="color:#0891b2">🛌 ${O}</span>`;
+    mkBtn('P',P,'#16a34a','✅','حاضر')+
+    mkBtn('A',A,'#dc2626','❌','غائب')+
+    mkBtn('L',L,'#d97706','🌴','إجازة')+
+    mkBtn('T',T,'#7c3aed','⏱️','متأخر')+
+    mkBtn('O',O,'#0891b2','🛌','راحة')+
+    (N>0?mkBtn('N',N,'#94a3b8','○','لم يُسجّل'):'')+
+    (attFilter?`<button class="att-filter-btn att-clear" onclick="toggleAttFilter('')" title="إلغاء الفلتر"><span style="font-size:1.1rem">✕</span><span style="font-size:.75rem;font-weight:700">إلغاء</span></button>`:'');
+}
+
+function toggleAttFilter(status){
+  attFilter=attFilter===status?'':status;
+  renderAtt();
 }
 
 function setAtt(date,empId,status,btn){

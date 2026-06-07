@@ -2043,7 +2043,8 @@ function applyPermissions(){
   // tabs
   const show=id=>{ const el=document.getElementById(id); if(el)el.style.display=''; };
   const hide=id=>{ const el=document.getElementById(id); if(el)el.style.display='none'; };
-  can('dashboard')?show('tab-btn-dashboard'):hide('tab-btn-dashboard');
+  // لوحة التحكم: ظاهرة دائماً للجميع (الصفحة الرئيسية)
+  show('tab-btn-dashboard');
   can('employees_view')?show('tab-btn-employees'):hide('tab-btn-employees');
   can('payroll')?show('tab-btn-payroll'):hide('tab-btn-payroll');
   can('attendance')?show('tab-btn-attendance'):hide('tab-btn-attendance');
@@ -2051,6 +2052,9 @@ function applyPermissions(){
   can('evaluation')?show('tab-btn-evaluation'):hide('tab-btn-evaluation');
   // header buttons
   can('employees_add')?show('btnAdd'):hide('btnAdd');
+  // الوضع التنفيذي: للمدير فقط
+  const execBtn=document.getElementById('btnExec');
+  if(execBtn)execBtn.style.display=(currentUser&&currentUser.role==='manager')?'':'none';
   const backupEl=document.getElementById('btnBackup');if(backupEl)backupEl.style.display=can('backup')?'':'none';
   const restoreEl=document.getElementById('btnRestoreLabel');if(restoreEl)restoreEl.style.display=can('backup')?'':'none';
   // user chip & logout
@@ -2075,6 +2079,11 @@ function showApp(){
   applyPermissions();
   initSelects();
   applyLang();
+  // ابدأ دائماً من لوحة التحكم
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  const dashTab=document.getElementById('tab-dashboard');if(dashTab)dashTab.classList.add('active');
+  const dashBtn=document.getElementById('tab-btn-dashboard');if(dashBtn)dashBtn.classList.add('active');
   // Start on dashboard: hide nav tabs, show home nav grid
   const nav = document.getElementById('mainNav');
   if(nav){nav.classList.remove('visible');}
@@ -3677,13 +3686,16 @@ function buildExecPage5(){
 }
 
 function renderDashboard(){
-  const total=employees.length;
-  const males=employees.filter(e=>e.gender==='M').length;
-  const females=employees.filter(e=>e.gender==='F').length;
-  const active=employees.filter(e=>(e.status||'نشط')==='نشط').length;
-  const onLeave=employees.filter(e=>e.status==='إجازة').length;
-  const terminated=employees.filter(e=>e.status==='منتهية خدمته').length;
-  const totalSal=employees.reduce((s,e)=>s+(e.baseSalary||0),0);
+  // فلترة حسب صلاحيات المشرف (يشوف موظفي مشاريعه فقط)
+  const myProj=getMyProject();
+  const scopedEmps=myProj?employees.filter(e=>myProj.includes(e.project)):employees;
+  const total=scopedEmps.length;
+  const males=scopedEmps.filter(e=>e.gender==='M').length;
+  const females=scopedEmps.filter(e=>e.gender==='F').length;
+  const active=scopedEmps.filter(e=>(e.status||'نشط')==='نشط').length;
+  const onLeave=scopedEmps.filter(e=>e.status==='إجازة').length;
+  const terminated=scopedEmps.filter(e=>e.status==='منتهية خدمته').length;
+  const totalSal=scopedEmps.reduce((s,e)=>s+(e.baseSalary||0),0);
 
   // ① New Stats Row (5 cards — salary removed from here)
   const malePct  = total ? Math.round(males/total*100) : 0;
@@ -3750,7 +3762,8 @@ function renderDashboard(){
   // Project distribution — Pie chart
   const barsEl=document.getElementById('dashProjBars');
   const barColors=['#2563eb','#7c3aed','#0891b2','#d97706'];
-  const pieData=PROJS.map((p,i)=>({label:p,value:employees.filter(e=>e.project===p).length,color:barColors[i]}));
+  const projShown=myProj||PROJS;
+  const pieData=projShown.map((p,i)=>({label:p,value:scopedEmps.filter(e=>e.project===p).length,color:barColors[i%barColors.length]}));
   barsEl.innerHTML=buildPieChart(pieData,200);
 
   // ③ Iqama alerts — 3-level summary + compact table
@@ -3824,7 +3837,7 @@ function renderDashboard(){
   const todayKey=localDateStr(new Date());
   const todayAtt=attendance[todayKey]||{};
   let P=0,A=0,L=0,T=0;
-  employees.forEach(e=>{const s=todayAtt[e.id];if(s==='P')P++;else if(s==='A')A++;else if(s==='L')L++;else if(s==='T')T++});
+  scopedEmps.forEach(e=>{const s=todayAtt[e.id];if(s==='P')P++;else if(s==='A')A++;else if(s==='L')L++;else if(s==='T')T++});
   document.getElementById('dashAttSum').innerHTML=`
     <div class="att-today-card att-p"><div class="att-today-num">${P}</div><div class="att-today-lbl">✅ ${t('dPresentToday')}</div></div>
     <div class="att-today-card att-a"><div class="att-today-num">${A}</div><div class="att-today-lbl">❌ ${t('dAbsentLbl')}</div></div>

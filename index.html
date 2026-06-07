@@ -70,6 +70,115 @@ body{font-family:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;background:var(--b
 .hm-legend-item{display:flex;align-items:center;gap:5px;font-weight:600;color:var(--txt2)}
 .hm-legend-box{width:16px;height:16px;border-radius:3px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 
+/* ══════════════════════════════════════════ */
+/*  🎤 EXECUTIVE DASHBOARD (Power BI Style)    */
+/* ══════════════════════════════════════════ */
+#execMode{display:none;position:fixed;inset:0;z-index:99998;background:#0a0e1a;overflow:hidden;font-family:'Tajawal','Segoe UI',sans-serif;color:#e2e8f0;direction:rtl}
+#execMode.open{display:flex;flex-direction:column;animation:execFadeIn .4s ease}
+@keyframes execFadeIn{from{opacity:0}to{opacity:1}}
+
+.exec-bg{position:absolute;inset:0;background:
+  radial-gradient(ellipse at 20% 20%,rgba(141,130,83,.08),transparent 50%),
+  radial-gradient(ellipse at 80% 80%,rgba(37,99,235,.08),transparent 50%),
+  linear-gradient(135deg,#0a0e1a 0%,#0f1626 50%,#0a0e1a 100%);
+  pointer-events:none}
+.exec-glow{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;opacity:.18;animation:execFloat 18s ease-in-out infinite}
+.exec-glow-1{width:500px;height:500px;background:#8d8253;top:-100px;right:-100px}
+.exec-glow-2{width:400px;height:400px;background:#06b6d4;bottom:-50px;left:-100px;animation-delay:-6s}
+.exec-glow-3{width:350px;height:350px;background:#f59e0b;top:40%;left:30%;animation-delay:-12s;opacity:.1}
+@keyframes execFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-30px) scale(1.05)}66%{transform:translate(-20px,20px) scale(.95)}}
+
+/* HEADER */
+.exec-header{position:relative;z-index:10;display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;padding:14px 24px;background:rgba(15,22,38,.6);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
+.exec-brand{display:flex;align-items:center;gap:14px}
+.exec-brand img{height:42px;background:#fff;padding:5px 10px;border-radius:8px}
+.exec-title{font-size:1.3rem;font-weight:800;color:#fff;letter-spacing:-.02em;line-height:1}
+.exec-subtitle{font-size:.74rem;color:#8d8253;font-weight:600;margin-top:3px}
+.exec-nav{display:flex;gap:6px;justify-content:center}
+.exec-page-btn{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);color:#94a3b8;padding:9px 16px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:600;transition:all .2s}
+.exec-page-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+.exec-page-btn.active{background:linear-gradient(135deg,#8d8253,#6f673f);color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(141,130,83,.4)}
+.exec-status{display:flex;align-items:center;gap:10px}
+.exec-live{display:flex;align-items:center;gap:6px;padding:5px 11px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;font-size:.72rem;font-weight:800;border-radius:20px;letter-spacing:.05em}
+.exec-pulse{width:7px;height:7px;border-radius:50%;background:#ef4444;animation:execPulse 1.5s ease-in-out infinite}
+@keyframes execPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(239,68,68,.7)}50%{opacity:.6;box-shadow:0 0 0 8px rgba(239,68,68,0)}}
+.exec-time{font-size:.82rem;color:#cbd5e1;font-weight:600;font-feature-settings:'tnum' 1;font-family:'Calibri',sans-serif}
+.exec-btn{width:36px;height:36px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#cbd5e1;border-radius:9px;cursor:pointer;font-size:1rem;transition:all .15s}
+.exec-btn:hover{background:rgba(255,255,255,.12);color:#fff;transform:translateY(-1px)}
+.exec-close:hover{background:rgba(239,68,68,.2);color:#fca5a5;border-color:rgba(239,68,68,.4)}
+
+/* BODY */
+.exec-body{flex:1;position:relative;z-index:5;overflow:hidden}
+.exec-page{display:none;height:100%;padding:24px;overflow-y:auto;animation:execSlide .5s cubic-bezier(.34,1.56,.64,1)}
+.exec-page.active{display:block}
+@keyframes execSlide{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+
+/* GRID & TILES */
+.exec-grid{display:grid;gap:16px}
+.exec-tile{background:rgba(255,255,255,.03);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s}
+.exec-tile:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.12)}
+.exec-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent,#8d8253),transparent);opacity:.6}
+
+/* KPI CARD (Power BI Style) */
+.exec-kpi{position:relative;overflow:hidden}
+.exec-kpi-label{font-size:.7rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.exec-kpi-value{font-size:2.6rem;font-weight:800;color:#fff;line-height:1;letter-spacing:-.04em;font-feature-settings:'tnum' 1}
+.exec-kpi-unit{font-size:.85rem;color:#94a3b8;margin-right:4px;font-weight:600}
+.exec-kpi-delta{display:inline-flex;align-items:center;gap:3px;font-size:.78rem;font-weight:700;margin-top:8px;padding:3px 9px;border-radius:20px}
+.exec-kpi-delta.up{background:rgba(34,197,94,.15);color:#4ade80}
+.exec-kpi-delta.down{background:rgba(239,68,68,.15);color:#f87171}
+.exec-kpi-delta.neu{background:rgba(148,163,184,.15);color:#94a3b8}
+.exec-kpi-icon{position:absolute;top:14px;left:14px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:1.2rem;background:rgba(255,255,255,.05)}
+.exec-tile.t-blue{--accent:#3b82f6}.exec-tile.t-blue .exec-kpi-icon{background:rgba(59,130,246,.15);color:#60a5fa}
+.exec-tile.t-green{--accent:#22c55e}.exec-tile.t-green .exec-kpi-icon{background:rgba(34,197,94,.15);color:#4ade80}
+.exec-tile.t-amber{--accent:#f59e0b}.exec-tile.t-amber .exec-kpi-icon{background:rgba(245,158,11,.15);color:#fbbf24}
+.exec-tile.t-red{--accent:#ef4444}.exec-tile.t-red .exec-kpi-icon{background:rgba(239,68,68,.15);color:#f87171}
+.exec-tile.t-purple{--accent:#a855f7}.exec-tile.t-purple .exec-kpi-icon{background:rgba(168,85,247,.15);color:#c084fc}
+.exec-tile.t-cyan{--accent:#06b6d4}.exec-tile.t-cyan .exec-kpi-icon{background:rgba(6,182,212,.15);color:#22d3ee}
+.exec-tile.t-gold{--accent:#8d8253}.exec-tile.t-gold .exec-kpi-icon{background:rgba(141,130,83,.18);color:#d4c585}
+
+.exec-tile-title{font-size:.85rem;font-weight:800;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.exec-tile-title-ico{font-size:1.1rem;color:var(--accent)}
+
+/* FOOTER */
+.exec-footer{position:relative;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:10px 24px;background:rgba(15,22,38,.6);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.06);font-size:.74rem;color:#64748b}
+.exec-dots{display:flex;gap:8px}
+.exec-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);cursor:pointer;transition:all .2s}
+.exec-dot:hover{background:rgba(255,255,255,.3)}
+.exec-dot.active{width:24px;border-radius:4px;background:#8d8253}
+.exec-hint{font-size:.7rem;color:#475569}
+
+/* RING gauge (donut style for KPI) */
+.exec-ring{position:relative;width:140px;height:140px;margin:0 auto}
+.exec-ring svg{transform:rotate(-90deg)}
+.exec-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.exec-ring-val{font-size:1.8rem;font-weight:800;color:#fff;line-height:1}
+.exec-ring-lbl{font-size:.68rem;color:#94a3b8;font-weight:600;margin-top:3px}
+
+/* Mini bar (horizontal) */
+.exec-mbar{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:.78rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.exec-mbar:last-child{border-bottom:none}
+.exec-mbar-name{flex:0 0 110px;color:#cbd5e1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.exec-mbar-track{flex:1;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;position:relative}
+.exec-mbar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--c,#8d8253),var(--c2,#d4c585));position:relative;animation:execGrow .8s cubic-bezier(.34,1.56,.64,1)}
+@keyframes execGrow{from{width:0!important}}
+.exec-mbar-val{flex:0 0 50px;text-align:left;color:#fff;font-weight:700;font-feature-settings:'tnum' 1}
+
+/* Table (Power BI style) */
+.exec-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.exec-table thead th{background:rgba(255,255,255,.04);color:#94a3b8;font-weight:700;text-align:right;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.08);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em}
+.exec-table tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s}
+.exec-table tbody tr:hover{background:rgba(255,255,255,.03)}
+.exec-table tbody td{padding:10px 12px;color:#cbd5e1}
+.exec-table .exec-cell-bold{color:#fff;font-weight:700}
+
+/* Responsive */
+@media(max-width:1100px){
+  .exec-header{grid-template-columns:auto 1fr;gap:14px}
+  .exec-nav{grid-column:1/-1;flex-wrap:wrap;justify-content:flex-start;margin-top:8px}
+  .exec-status{display:none}
+}
+
 /* ── أزرار فلترة الحضور (قابلة للضغط) ── */
 .att-filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:14px;background:var(--surface);border-radius:14px;border:1px solid var(--border);box-shadow:var(--sh)}
 .att-filter-btn{flex:1;min-width:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 8px;background:var(--surface2);color:var(--c,#64748b);border:2px solid transparent;border-radius:10px;cursor:pointer;font-family:inherit;transition:all .18s;position:relative;overflow:hidden}
@@ -776,6 +885,7 @@ td{padding:9px 12px;vertical-align:middle}
         </div>
       </div>
     </div>
+    <button class="btn no-print" id="btnExec" onclick="openExecMode()" style="background:linear-gradient(135deg,#8d8253,#6f673f);color:#fff;font-weight:700" title="Executive Dashboard">🎤 وضع التنفيذي</button>
     <button class="btn btn-success" onclick="openAdd()" id="btnAdd">+ إضافة موظف</button>
     <button class="btn btn-purple no-print" id="btnUsersMgmt" onclick="openUsersModal()" style="display:none">👥 مستخدمون</button>
     <div class="user-chip no-print" id="userChip"></div>
@@ -1192,6 +1302,61 @@ td{padding:9px 12px;vertical-align:middle}
 
 <!-- COMPREHENSIVE EMPLOYEE PROFILE PRINT -->
 <div id="empFullPrint"></div>
+
+<!-- ╔═════════════════════════════════════════════════════╗ -->
+<!-- ║   🎤 EXECUTIVE DASHBOARD (Power BI Style)         ║ -->
+<!-- ╚═════════════════════════════════════════════════════╝ -->
+<div id="execMode">
+  <div class="exec-bg"></div>
+  <div class="exec-glow exec-glow-1"></div>
+  <div class="exec-glow exec-glow-2"></div>
+  <div class="exec-glow exec-glow-3"></div>
+
+  <header class="exec-header">
+    <div class="exec-brand">
+      <img src="logo.png" alt="logo"/>
+      <div>
+        <div class="exec-title">Executive Dashboard</div>
+        <div class="exec-subtitle">شركة الإنماء الذهبية للمقاولات العامة</div>
+      </div>
+    </div>
+    <div class="exec-nav">
+      <button class="exec-page-btn active" data-page="0" onclick="execGoto(0)">📊 نظرة عامة</button>
+      <button class="exec-page-btn" data-page="1" onclick="execGoto(1)">🏗 المشاريع</button>
+      <button class="exec-page-btn" data-page="2" onclick="execGoto(2)">📈 الحضور</button>
+      <button class="exec-page-btn" data-page="3" onclick="execGoto(3)">💰 الرواتب</button>
+      <button class="exec-page-btn" data-page="4" onclick="execGoto(4)">📐 النسب الشاملة</button>
+      <button class="exec-page-btn" data-page="5" onclick="execGoto(5)">⚠️ المخاطر</button>
+    </div>
+    <div class="exec-status">
+      <div class="exec-live"><span class="exec-pulse"></span>LIVE</div>
+      <div class="exec-time" id="execTime">—</div>
+      <button class="exec-btn" onclick="execFullscreen()" title="ملء الشاشة (F11)">⛶</button>
+      <button class="exec-btn exec-close" onclick="closeExecMode()" title="خروج (Esc)">✕</button>
+    </div>
+  </header>
+
+  <div class="exec-body">
+    <div class="exec-page active" id="execPage0"></div>
+    <div class="exec-page" id="execPage1"></div>
+    <div class="exec-page" id="execPage2"></div>
+    <div class="exec-page" id="execPage3"></div>
+    <div class="exec-page" id="execPage4"></div>
+    <div class="exec-page" id="execPage5"></div>
+  </div>
+
+  <div class="exec-footer">
+    <div class="exec-dots">
+      <span class="exec-dot active" onclick="execGoto(0)"></span>
+      <span class="exec-dot" onclick="execGoto(1)"></span>
+      <span class="exec-dot" onclick="execGoto(2)"></span>
+      <span class="exec-dot" onclick="execGoto(3)"></span>
+      <span class="exec-dot" onclick="execGoto(4)"></span>
+      <span class="exec-dot" onclick="execGoto(5)"></span>
+    </div>
+    <div class="exec-hint">⬅️ ➡️ للتنقل  ·  F للشاشة الكاملة  ·  Esc للخروج</div>
+  </div>
+</div>
 
 <!-- TOAST NOTIFICATIONS -->
 <div id="toastWrap"></div>
@@ -2922,6 +3087,593 @@ function buildStackedBar(segments,height,labelInside){
     <div style="display:flex;height:${height}px;border-radius:10px;overflow:hidden;border:1px solid var(--border)">${bars}</div>
     <div class="chart-legend">${legend}</div>
   </div>`;
+}
+
+// ═════════════════════════════════════════════════════════
+// 🎤 EXECUTIVE DASHBOARD (Power BI style)
+// ═════════════════════════════════════════════════════════
+let execCurrentPage=0,execTimerHandle=null,execClockHandle=null;
+
+function openExecMode(){
+  const ov=document.getElementById('execMode');if(!ov)return;
+  ov.classList.add('open');
+  execCurrentPage=0;
+  document.querySelectorAll('.exec-page-btn').forEach(b=>b.classList.toggle('active',b.dataset.page==='0'));
+  document.querySelectorAll('.exec-dot').forEach((d,i)=>d.classList.toggle('active',i===0));
+  document.querySelectorAll('.exec-page').forEach((p,i)=>p.classList.toggle('active',i===0));
+  buildExecPages();
+  startExecClock();
+  document.addEventListener('keydown',execKeyHandler);
+  // تحديث تلقائي كل 30 ثانية
+  execTimerHandle=setInterval(buildExecPages,30000);
+}
+
+function closeExecMode(){
+  document.getElementById('execMode').classList.remove('open');
+  document.removeEventListener('keydown',execKeyHandler);
+  if(execTimerHandle){clearInterval(execTimerHandle);execTimerHandle=null;}
+  if(execClockHandle){clearInterval(execClockHandle);execClockHandle=null;}
+  if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+}
+
+function execKeyHandler(e){
+  if(e.key==='Escape')closeExecMode();
+  else if(e.key==='ArrowRight'||e.key==='PageDown')execGoto(Math.max(0,execCurrentPage-1)); // RTL
+  else if(e.key==='ArrowLeft'||e.key==='PageUp')execGoto(Math.min(5,execCurrentPage+1));
+  else if(e.key==='f'||e.key==='F')execFullscreen();
+  else if(e.key>='0'&&e.key<='5')execGoto(parseInt(e.key));
+}
+
+function execGoto(n){
+  execCurrentPage=n;
+  document.querySelectorAll('.exec-page').forEach((p,i)=>p.classList.toggle('active',i===n));
+  document.querySelectorAll('.exec-page-btn').forEach(b=>b.classList.toggle('active',+b.dataset.page===n));
+  document.querySelectorAll('.exec-dot').forEach((d,i)=>d.classList.toggle('active',i===n));
+}
+
+function execFullscreen(){
+  if(document.fullscreenElement)document.exitFullscreen();
+  else document.getElementById('execMode').requestFullscreen?.();
+}
+
+function startExecClock(){
+  const update=()=>{
+    const d=new Date();
+    const time=d.toLocaleTimeString('ar-SA-u-nu-latn-ca-gregory',{hour:'2-digit',minute:'2-digit'});
+    const date=d.toLocaleDateString('ar-SA-u-nu-latn-ca-gregory',{weekday:'long',day:'numeric',month:'long'});
+    const el=document.getElementById('execTime');if(el)el.innerHTML=`<span style="opacity:.6">${date}</span> · <b>${time}</b>`;
+  };
+  update();execClockHandle=setInterval(update,60000);
+}
+
+function buildExecPages(){
+  buildExecPage0();
+  buildExecPage1();
+  buildExecPage2();
+  buildExecPage3();
+  buildExecPage4();
+  buildExecPage5();
+}
+
+// Ring (donut KPI)
+function execRing(pct,label,color){
+  pct=Math.min(Math.max(pct,0),100);
+  const r=58,c=2*Math.PI*r;
+  const off=c*(1-pct/100);
+  color=color||(pct>=80?'#22c55e':pct>=60?'#f59e0b':'#ef4444');
+  return `<div class="exec-ring">
+    <svg width="140" height="140" viewBox="0 0 140 140">
+      <circle cx="70" cy="70" r="${r}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="10"/>
+      <circle cx="70" cy="70" r="${r}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"
+        stroke-dasharray="${c}" stroke-dashoffset="${off}" style="transition:stroke-dashoffset 1s cubic-bezier(.34,1.56,.64,1);filter:drop-shadow(0 0 8px ${color}80)"/>
+    </svg>
+    <div class="exec-ring-center"><div class="exec-ring-val" style="color:${color}">${Math.round(pct)}<span style="font-size:.65rem;opacity:.7">/100</span></div><div class="exec-ring-lbl">${label||''}</div></div>
+  </div>`;
+}
+
+// Mini bar
+function execMiniBar(name,pct,color,val){
+  color=color||'#8d8253';
+  return `<div class="exec-mbar">
+    <div class="exec-mbar-name">${name}</div>
+    <div class="exec-mbar-track"><div class="exec-mbar-fill" style="width:${pct}%;--c:${color};--c2:${color}cc"></div></div>
+    <div class="exec-mbar-val">${val||pct+'%'}</div>
+  </div>`;
+}
+
+// SVG Line chart (compact for exec)
+function execLineChart(data,color){
+  if(!data.length)return '<div style="text-align:center;padding:40px;color:#475569">لا توجد بيانات</div>';
+  color=color||'#06b6d4';
+  const w=600,h=180,pad={l:35,r:15,t:15,b:25};
+  const maxV=Math.max(...data.map(d=>d.value),1);
+  const stepX=(w-pad.l-pad.r)/(data.length-1||1);
+  const pts=data.map((d,i)=>{
+    const x=pad.l+i*stepX;
+    const y=pad.t+(h-pad.t-pad.b)-(d.value/maxV)*(h-pad.t-pad.b);
+    return {x,y,label:d.label,value:d.value};
+  });
+  const path=pts.map((p,i)=>(i===0?'M':'L')+p.x+' '+p.y).join(' ');
+  const area=path+` L ${pts[pts.length-1].x} ${h-pad.b} L ${pad.l} ${h-pad.b} Z`;
+  const ySteps=4;
+  const yLines=Array.from({length:ySteps+1},(_,i)=>{
+    const val=maxV*(1-i/ySteps);
+    const y=pad.t+(h-pad.t-pad.b)*(i/ySteps);
+    return `<line x1="${pad.l}" y1="${y}" x2="${w-pad.r}" y2="${y}" stroke="rgba(255,255,255,.05)"/>
+      <text x="${pad.l-5}" y="${y+3}" font-size="9" fill="#64748b" text-anchor="end">${Math.round(val)}</text>`;
+  }).join('');
+  const skip=Math.max(1,Math.ceil(data.length/8));
+  const xLabels=pts.map((p,i)=>i%skip===0?`<text x="${p.x}" y="${h-pad.b+13}" font-size="8" fill="#64748b" text-anchor="middle">${p.label}</text>`:'').join('');
+  const dots=pts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="3" fill="${color}" stroke="#0f1626" stroke-width="1.5"/>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto">
+    <defs><linearGradient id="exec-grad-${color.replace('#','')}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${color}" stop-opacity=".45"/>
+      <stop offset="1" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    ${yLines}
+    <path d="${area}" fill="url(#exec-grad-${color.replace('#','')})"/>
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" style="filter:drop-shadow(0 0 6px ${color}80)"/>
+    ${dots}
+    ${xLabels}
+  </svg>`;
+}
+
+// ── PAGE 0: Executive Overview ──
+function buildExecPage0(){
+  const total=employees.length;
+  const active=employees.filter(e=>(e.status||'نشط')==='نشط').length;
+  const todayStr=localDateStr(new Date());
+  const day=attendance[todayStr]||{};
+  let tP=0,tA=0,tL=0,tT=0,tO=0,tM=0;
+  employees.forEach(e=>{const s=day[e.id];if(s==='P'){tP++;tM++;}else if(s==='A'){tA++;tM++;}else if(s==='L'){tL++;tM++;}else if(s==='T'){tT++;tM++;}else if(s==='O'){tO++;tM++;}});
+  const todayPct=tM?Math.round((tP+tT)/tM*100):0;
+  const totalSal=employees.reduce((s,e)=>s+(e.baseSalary||0),0);
+  const iqCount=iqamaAlerts().length;
+  // اتجاه آخر 14 يوم
+  const last14=[];
+  for(let i=13;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=localDateStr(d);
+    const att=attendance[ds]||{};let p=0,m=0;
+    employees.forEach(e=>{const s=att[e.id];if(s){m++;if(s==='P'||s==='T')p++;}});
+    last14.push({label:ds.substr(5),value:m?Math.round(p/m*100):0});
+  }
+  // أعلى المشاريع
+  const projPerf=PROJS.map(p=>{
+    const pl=employees.filter(e=>e.project===p);
+    if(!pl.length)return null;
+    let pp=0,pt=0,pm=0;
+    pl.forEach(e=>{const s=day[e.id];if(s){pm++;if(s==='P')pp++;else if(s==='T')pt++;}});
+    return{name:p,pct:pm?Math.round((pp+pt)/pm*100):0,count:pl.length};
+  }).filter(Boolean).sort((a,b)=>b.pct-a.pct);
+
+  document.getElementById('execPage0').innerHTML=`
+    <div class="exec-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:16px">
+      <div class="exec-tile exec-kpi t-blue">
+        <div class="exec-kpi-icon">👥</div>
+        <div class="exec-kpi-label">إجمالي الموظفين</div>
+        <div class="exec-kpi-value">${total}</div>
+        <div class="exec-kpi-delta up">▲ ${active} نشط</div>
+      </div>
+      <div class="exec-tile exec-kpi t-green">
+        <div class="exec-kpi-icon">✅</div>
+        <div class="exec-kpi-label">الحضور اليوم</div>
+        <div class="exec-kpi-value">${tP+tT}<span class="exec-kpi-unit">/${total}</span></div>
+        <div class="exec-kpi-delta ${todayPct>=85?'up':todayPct>=70?'neu':'down'}">${todayPct}%</div>
+      </div>
+      <div class="exec-tile exec-kpi t-red">
+        <div class="exec-kpi-icon">❌</div>
+        <div class="exec-kpi-label">غياب اليوم</div>
+        <div class="exec-kpi-value">${tA}</div>
+        <div class="exec-kpi-delta ${tA===0?'up':'down'}">${total?Math.round(tA/total*100):0}%</div>
+      </div>
+      <div class="exec-tile exec-kpi t-gold">
+        <div class="exec-kpi-icon">💰</div>
+        <div class="exec-kpi-label">إجمالي الرواتب</div>
+        <div class="exec-kpi-value">${(totalSal/1000).toFixed(1)}<span class="exec-kpi-unit">K ﷼</span></div>
+        <div class="exec-kpi-delta neu">شهرياً</div>
+      </div>
+      <div class="exec-tile exec-kpi ${iqCount>0?'t-amber':'t-green'}">
+        <div class="exec-kpi-icon">🛂</div>
+        <div class="exec-kpi-label">تنبيهات الإقامة</div>
+        <div class="exec-kpi-value">${iqCount}</div>
+        <div class="exec-kpi-delta ${iqCount>0?'down':'up'}">${iqCount?'تحتاج متابعة':'كل شيء جيد'}</div>
+      </div>
+    </div>
+
+    <div class="exec-grid" style="grid-template-columns:2fr 1fr;margin-bottom:16px">
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico">📈</span> اتجاه نسبة الحضور — آخر 14 يوم</div>
+        ${execLineChart(last14,'#06b6d4')}
+      </div>
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico">🎯</span> نسبة الحضور اليوم</div>
+        <div style="margin-top:20px">${execRing(todayPct,'من الحاضرين',todayPct>=85?'#22c55e':todayPct>=70?'#f59e0b':'#ef4444')}</div>
+      </div>
+    </div>
+
+    <div class="exec-grid" style="grid-template-columns:1fr 1fr">
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico">🏗</span> ترتيب المشاريع بالأداء</div>
+        ${projPerf.map((p,i)=>{
+          const colors=['#22c55e','#06b6d4','#f59e0b','#ef4444'];
+          return execMiniBar(`${i+1}. ${p.name}`,p.pct,colors[i]||'#8d8253',p.pct+'%');
+        }).join('')}
+      </div>
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico">📊</span> توزيع حالات اليوم</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px">
+          <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:10px;padding:14px;text-align:center"><div style="font-size:1.8rem;font-weight:800;color:#4ade80">${tP}</div><div style="font-size:.7rem;color:#94a3b8;margin-top:3px">حاضر</div></div>
+          <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:14px;text-align:center"><div style="font-size:1.8rem;font-weight:800;color:#f87171">${tA}</div><div style="font-size:.7rem;color:#94a3b8;margin-top:3px">غائب</div></div>
+          <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:14px;text-align:center"><div style="font-size:1.8rem;font-weight:800;color:#fbbf24">${tL}</div><div style="font-size:.7rem;color:#94a3b8;margin-top:3px">إجازة</div></div>
+          <div style="background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.25);border-radius:10px;padding:14px;text-align:center"><div style="font-size:1.8rem;font-weight:800;color:#c084fc">${tT}</div><div style="font-size:.7rem;color:#94a3b8;margin-top:3px">متأخر</div></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── PAGE 1: Projects Analysis ──
+function buildExecPage1(){
+  const thisMonth=localDateStr(new Date()).substr(0,7);
+  const mDates=getMonthDates(thisMonth);
+  const todayStr=localDateStr(new Date());
+  const recDates=mDates.filter(d=>d<=todayStr);
+
+  const projData=PROJS.map((p,i)=>{
+    const pl=employees.filter(e=>e.project===p);
+    if(!pl.length)return null;
+    let mP=0,mA=0,mL=0,mT=0,otTotal=0;
+    pl.forEach(e=>{const s=getAttSummary(mDates,e.id);mP+=s.P;mA+=s.A;mL+=s.L;mT+=s.T;otTotal+=getCoverageOT(e.id,thisMonth);});
+    const possible=pl.length*(recDates.length||1);
+    const pct=possible?Math.round((mP+mT)/possible*100):0;
+    const totalSal=pl.reduce((s,e)=>s+(e.baseSalary||0),0);
+    return{name:p,count:pl.length,pct,present:mP,absent:mA,leave:mL,late:mT,ot:otTotal,sal:totalSal};
+  }).filter(Boolean);
+
+  document.getElementById('execPage1').innerHTML=`
+    <div class="exec-grid" style="grid-template-columns:repeat(${projData.length},1fr);margin-bottom:16px">
+      ${projData.map((p,i)=>{
+        const colors=['#3b82f6','#a855f7','#06b6d4','#f59e0b'];
+        const c=colors[i%4];
+        return `<div class="exec-tile" style="--accent:${c}">
+          <div style="font-size:.7rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.05em">المشروع</div>
+          <div style="font-size:1.1rem;font-weight:800;color:#fff;margin:6px 0 14px">${p.name}</div>
+          <div style="margin-bottom:14px">${execRing(p.pct,'معدل الحضور',c)}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;text-align:center;margin-top:10px">
+            <div><div style="font-size:1.1rem;font-weight:800;color:#fff">${p.count}</div><div style="font-size:.65rem;color:#64748b">موظف</div></div>
+            <div><div style="font-size:1.1rem;font-weight:800;color:#fbbf24">${p.ot}h</div><div style="font-size:.65rem;color:#64748b">أوفر</div></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="exec-tile">
+      <div class="exec-tile-title"><span class="exec-tile-title-ico">📋</span> جدول مقارنة المشاريع — ${thisMonth}</div>
+      <table class="exec-table">
+        <thead><tr><th>المشروع</th><th>الموظفين</th><th>حضور</th><th>غياب</th><th>إجازة</th><th>أوفر تايم</th><th>معدل %</th></tr></thead>
+        <tbody>${projData.map(p=>`<tr>
+          <td class="exec-cell-bold">${p.name}</td>
+          <td>${p.count}</td>
+          <td style="color:#4ade80">${p.present}</td>
+          <td style="color:#f87171">${p.absent}</td>
+          <td style="color:#fbbf24">${p.leave}</td>
+          <td style="color:#22d3ee">${p.ot}h</td>
+          <td><span style="color:${p.pct>=85?'#4ade80':p.pct>=70?'#fbbf24':'#f87171'};font-weight:800">${p.pct}%</span></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+// ── PAGE 2: Attendance Deep Dive ──
+function buildExecPage2(){
+  const thisMonth=localDateStr(new Date()).substr(0,7);
+  const todayStr=localDateStr(new Date());
+  // اتجاه 30 يوم
+  const last30=[];
+  for(let i=29;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=localDateStr(d);
+    const att=attendance[ds]||{};let p=0,m=0;
+    employees.forEach(e=>{const s=att[e.id];if(s){m++;if(s==='P'||s==='T')p++;}});
+    last30.push({label:ds.substr(5),value:m?Math.round(p/m*100):0});
+  }
+  // معدلات أيام الأسبوع
+  const DOW=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const dowAvg=[0,1,2,3,4,5,6].map(i=>{
+    let sum=0,cnt=0;
+    last30.forEach(d=>{const dt=new Date('2026-'+d.label);if(dt.getDay()===i&&d.value>0){sum+=d.value;cnt++;}});
+    return{name:DOW[i],pct:cnt?Math.round(sum/cnt):0};
+  }).filter(d=>d.pct>0);
+  // أعلى/أقل أداءً
+  const empPerf=employees.map(e=>{
+    const att=getAttCount(thisMonth,e.id);
+    const work=att.P+att.A+att.T;
+    return{name:e.name,project:e.project,pct:work?Math.round((att.P+att.T)/work*100):0,present:att.P,absent:att.A};
+  }).filter(e=>e.pct>0).sort((a,b)=>b.pct-a.pct);
+  const top5=empPerf.slice(0,5);
+  const bottom5=empPerf.slice(-5).reverse();
+
+  document.getElementById('execPage2').innerHTML=`
+    <div class="exec-tile" style="margin-bottom:16px">
+      <div class="exec-tile-title"><span class="exec-tile-title-ico">📈</span> اتجاه الحضور — آخر 30 يوم</div>
+      ${execLineChart(last30,'#22c55e')}
+    </div>
+
+    <div class="exec-grid" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico">📅</span> أداء أيام الأسبوع</div>
+        ${dowAvg.map(d=>{const c=d.pct>=85?'#22c55e':d.pct>=70?'#f59e0b':'#ef4444';return execMiniBar(d.name,d.pct,c);}).join('')}
+      </div>
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico">🏆</span> أعلى 5 موظفين</div>
+        ${top5.map((e,i)=>`<div class="exec-mbar"><div class="exec-mbar-name">${i+1}. ${e.name}</div><div class="exec-mbar-val" style="color:#4ade80">${e.pct}%</div></div>`).join('')||'<div style="color:#475569;padding:20px;text-align:center">لا توجد بيانات</div>'}
+      </div>
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico">⚠️</span> الأقل أداءً</div>
+        ${bottom5.map((e,i)=>`<div class="exec-mbar"><div class="exec-mbar-name">${i+1}. ${e.name}</div><div class="exec-mbar-val" style="color:${e.pct>=70?'#fbbf24':'#f87171'}">${e.pct}%</div></div>`).join('')||'<div style="color:#475569;padding:20px;text-align:center">لا توجد بيانات</div>'}
+      </div>
+    </div>`;
+}
+
+// ── PAGE 3: Payroll & Costs ──
+function buildExecPage3(){
+  const thisMonth=localDateStr(new Date()).substr(0,7);
+  const totalBase=employees.reduce((s,e)=>s+(e.baseSalary||0),0);
+  let totalOT=0,totalDeductions=0;
+  employees.forEach(e=>{
+    const hourly=e.baseSalary?e.baseSalary/30/8:0;
+    const otH=getCoverageOT(e.id,thisMonth);
+    totalOT+=otH*hourly;
+    const att=getAttCount(thisMonth,e.id);
+    const daily=e.baseSalary?e.baseSalary/30:0;
+    totalDeductions+=att.A*daily;
+  });
+  const totalNet=totalBase+totalOT-totalDeductions;
+  const avgSalary=employees.length?Math.round(totalBase/employees.length):0;
+  // توزيع الرواتب
+  const ranges=[[0,1500],[1500,2500],[2500,4000],[4000,99999]];
+  const rangeLabels=['< 1,500','1,500-2,500','2,500-4,000','> 4,000'];
+  const rangeCounts=ranges.map(([min,max])=>employees.filter(e=>(e.baseSalary||0)>=min&&(e.baseSalary||0)<max).length);
+  // حسب المشروع
+  const projSal=PROJS.map(p=>{
+    const pl=employees.filter(e=>e.project===p);
+    return{name:p,total:pl.reduce((s,e)=>s+(e.baseSalary||0),0),count:pl.length};
+  }).filter(p=>p.total>0).sort((a,b)=>b.total-a.total);
+  const maxSal=Math.max(...projSal.map(p=>p.total),1);
+
+  document.getElementById('execPage3').innerHTML=`
+    <div class="exec-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+      <div class="exec-tile exec-kpi t-gold"><div class="exec-kpi-icon">💰</div><div class="exec-kpi-label">إجمالي الرواتب</div><div class="exec-kpi-value">${(totalBase/1000).toFixed(1)}<span class="exec-kpi-unit">K ﷼</span></div><div class="exec-kpi-delta neu">${employees.length} موظف</div></div>
+      <div class="exec-tile exec-kpi t-green"><div class="exec-kpi-icon">⏱️</div><div class="exec-kpi-label">الأوفر تايم</div><div class="exec-kpi-value">${Math.round(totalOT).toLocaleString()}<span class="exec-kpi-unit">﷼</span></div><div class="exec-kpi-delta up">+${totalBase?Math.round(totalOT/totalBase*100):0}%</div></div>
+      <div class="exec-tile exec-kpi t-red"><div class="exec-kpi-icon">📉</div><div class="exec-kpi-label">خصم الغياب</div><div class="exec-kpi-value">${Math.round(totalDeductions).toLocaleString()}<span class="exec-kpi-unit">﷼</span></div><div class="exec-kpi-delta down">−${totalBase?Math.round(totalDeductions/totalBase*100):0}%</div></div>
+      <div class="exec-tile exec-kpi t-cyan"><div class="exec-kpi-icon">💸</div><div class="exec-kpi-label">الصافي المتوقع</div><div class="exec-kpi-value">${(totalNet/1000).toFixed(1)}<span class="exec-kpi-unit">K ﷼</span></div><div class="exec-kpi-delta up">${thisMonth}</div></div>
+    </div>
+
+    <div class="exec-grid" style="grid-template-columns:1fr 1fr">
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico">📊</span> توزيع الرواتب</div>
+        ${rangeLabels.map((lbl,i)=>{
+          const cnt=rangeCounts[i];const pct=employees.length?Math.round(cnt/employees.length*100):0;
+          const colors=['#06b6d4','#22c55e','#f59e0b','#a855f7'];
+          return execMiniBar(lbl,pct,colors[i],cnt+' موظف');
+        }).join('')}
+        <div style="text-align:center;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:.72rem;color:#64748b">متوسط الراتب</div>
+          <div style="font-size:1.4rem;font-weight:800;color:#d4c585;margin-top:4px">${avgSalary.toLocaleString()} ﷼</div>
+        </div>
+      </div>
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico">🏗</span> تكلفة الرواتب بالمشروع</div>
+        ${projSal.map((p,i)=>{
+          const pct=Math.round(p.total/maxSal*100);
+          const colors=['#8d8253','#06b6d4','#22c55e','#a855f7'];
+          return execMiniBar(p.name,pct,colors[i],(p.total/1000).toFixed(0)+'K');
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+// ── PAGE 4: Comprehensive Percentages ──
+function buildExecPage4(){
+  // 1) نسبة اكتمال ملفات الموظفين
+  const requiredFields=['empNum','name','nationality','passportNum','iqamaNum','iqamaExpiry','sponsor','phone','startDate','baseSalary','shift','medExamDate','medExamExpiry','vaccMMR','vaccInfluenza'];
+  const empCompletion=employees.map(e=>{
+    const filled=requiredFields.filter(f=>e[f]&&String(e[f]).trim()).length;
+    return{e,pct:Math.round(filled/requiredFields.length*100),filled,total:requiredFields.length};
+  });
+  const avgCompletion=empCompletion.length?Math.round(empCompletion.reduce((s,x)=>s+x.pct,0)/empCompletion.length):0;
+  const completeEmps=empCompletion.filter(x=>x.pct>=80).length;
+  const incompleteEmps=empCompletion.filter(x=>x.pct<50);
+
+  // 2) نسبة الحضور الفعلي (بدون الإجازة)
+  const thisMonth=localDateStr(new Date()).substr(0,7);
+  let mP=0,mA=0,mT=0;
+  employees.forEach(e=>{const s=getAttCount(thisMonth,e.id);mP+=s.P;mA+=s.A;mT+=s.T;});
+  const actualAttPct=(mP+mA+mT)?Math.round((mP+mT)/(mP+mA+mT)*100):0;
+  const actualAbsPct=100-actualAttPct;
+
+  // 3) نسب الرواتب — كلها مقيدة 0-100%
+  const totalBase=employees.reduce((s,e)=>s+(e.baseSalary||0),0);
+  let totalOT=0,totalDeduct=0;
+  employees.forEach(e=>{
+    const hr=e.baseSalary?e.baseSalary/30/8:0;
+    const dr=e.baseSalary?e.baseSalary/30:0;
+    totalOT+=getCoverageOT(e.id,thisMonth)*hr;
+    const att=getAttCount(thisMonth,e.id);
+    totalDeduct+=att.A*dr;
+  });
+  const totalGross=totalBase+totalOT;  // الإجمالي (أساسي + أوفر) — هذا الـ100%
+  const totalNet=totalGross-totalDeduct;
+  // نسبة كفاءة الرواتب: كم الصافي من الإجمالي المستحق
+  const salaryEfficiency=totalGross?Math.min(100,Math.round(totalNet/totalGross*100)):100;
+  const deductPct=totalGross?Math.min(100,Math.round(totalDeduct/totalGross*100)):0;
+  // نسبة الأوفر من الإجمالي
+  const otShare=totalGross?Math.min(100,Math.round(totalOT/totalGross*100)):0;
+
+  // 4) نسبة التقييم لكل موظف
+  const monthEvals=evaluations[thisMonth]||{};
+  const evalScores=employees.map(e=>{
+    const rec=monthEvals[e.id];
+    if(!rec)return null;
+    const sc=computeEvalScore(rec,thisMonth,e.id);
+    return{e,score:sc.total};
+  }).filter(Boolean).sort((a,b)=>b.score-a.score);
+  const evaluatedCount=evalScores.length;
+  const evalCompletePct=employees.length?Math.round(evaluatedCount/employees.length*100):0;
+  const avgScore=evaluatedCount?Math.round(evalScores.reduce((s,x)=>s+x.score,0)/evaluatedCount):0;
+
+  // 5) التقييم العام للشركة (مركّب من 100)
+  const overallScore=Math.min(100,Math.max(0,Math.round(
+    (actualAttPct*0.35)+
+    (avgCompletion*0.20)+
+    (avgScore*0.30)+
+    (salaryEfficiency*0.15)
+  )));
+  const overallRating=overallScore>=90?'ممتاز':overallScore>=75?'جيد جداً':overallScore>=60?'جيد':'يحتاج تحسين';
+  const overallColor=overallScore>=90?'#22c55e':overallScore>=75?'#06b6d4':overallScore>=60?'#f59e0b':'#ef4444';
+
+  document.getElementById('execPage4').innerHTML=`
+    <!-- 🎯 التقييم العام (من 100) -->
+    <div class="exec-tile" style="margin-bottom:16px;background:linear-gradient(135deg,rgba(141,130,83,.12),rgba(212,197,133,.06));border:1px solid rgba(141,130,83,.3)">
+      <div style="display:grid;grid-template-columns:200px 1fr 240px;gap:24px;align-items:center">
+        <div>${execRing(overallScore,'من 100',overallColor)}</div>
+        <div>
+          <div style="font-size:.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Overall Performance Index / 100</div>
+          <div style="font-size:2rem;font-weight:800;color:${overallColor};margin:6px 0;letter-spacing:-.02em">${overallRating}</div>
+          <div style="font-size:.85rem;color:#cbd5e1;line-height:1.7;margin-top:10px">المؤشر المركّب لأداء الشركة (من 100) محسوب من:</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;font-size:.72rem">
+            <span style="background:rgba(34,197,94,.15);color:#4ade80;padding:4px 10px;border-radius:14px;font-weight:700">الحضور 35%</span>
+            <span style="background:rgba(59,130,246,.15);color:#60a5fa;padding:4px 10px;border-radius:14px;font-weight:700">اكتمال الملفات 20%</span>
+            <span style="background:rgba(168,85,247,.15);color:#c084fc;padding:4px 10px;border-radius:14px;font-weight:700">التقييمات 30%</span>
+            <span style="background:rgba(245,158,11,.15);color:#fbbf24;padding:4px 10px;border-radius:14px;font-weight:700">كفاءة الرواتب 15%</span>
+          </div>
+        </div>
+        <div style="text-align:center;background:rgba(0,0,0,.2);padding:14px;border-radius:10px">
+          <div style="font-size:.7rem;color:#64748b;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">تفصيل المكوّنات</div>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:.78rem">
+            <div style="display:flex;justify-content:space-between"><span style="color:#94a3b8">حضور:</span><b style="color:#4ade80">${actualAttPct}/100</b></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#94a3b8">اكتمال:</span><b style="color:#60a5fa">${avgCompletion}/100</b></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#94a3b8">تقييم:</span><b style="color:#c084fc">${avgScore}/100</b></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#94a3b8">رواتب:</span><b style="color:#fbbf24">${salaryEfficiency}/100</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- صف النسب الأربع (كلها /100) -->
+    <div class="exec-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico" style="color:#3b82f6">📋</span> اكتمال الملفات /100</div>
+        ${execRing(avgCompletion,avgCompletion+'/100','#3b82f6')}
+        <div style="margin-top:14px;text-align:center;font-size:.78rem;color:#94a3b8">
+          <b style="color:#4ade80">${completeEmps}</b> ملف مكتمل (≥80) من ${employees.length}
+        </div>
+      </div>
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico" style="color:#22c55e">✅</span> الحضور الفعلي /100</div>
+        ${execRing(actualAttPct,actualAttPct+'/100','#22c55e')}
+        <div style="margin-top:14px;font-size:.78rem;display:flex;justify-content:space-between">
+          <span style="color:#4ade80">✓ حاضر: ${mP+mT}</span>
+          <span style="color:#f87171">✗ غائب: ${mA}</span>
+        </div>
+        <div style="text-align:center;font-size:.7rem;color:#64748b;margin-top:4px">(الإجازات مستبعدة)</div>
+      </div>
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico" style="color:#d4c585">💰</span> كفاءة الرواتب /100</div>
+        ${execRing(salaryEfficiency,salaryEfficiency+'/100','#d4c585')}
+        <div style="margin-top:14px;font-size:.72rem;display:flex;justify-content:space-between;color:#94a3b8">
+          <span style="color:#4ade80">أوفر: ${otShare}%</span>
+          <span style="color:#f87171">خصم: ${deductPct}%</span>
+        </div>
+        <div style="text-align:center;font-size:.7rem;color:#64748b;margin-top:4px">(الصافي / الإجمالي المستحق)</div>
+      </div>
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico" style="color:#a855f7">⭐</span> التقييمات /100</div>
+        ${execRing(evalCompletePct,evalCompletePct+'/100','#a855f7')}
+        <div style="margin-top:14px;text-align:center;font-size:.78rem;color:#94a3b8">
+          المُقيَّمون: <b style="color:#c084fc">${evaluatedCount}/${employees.length}</b>
+        </div>
+        <div style="text-align:center;font-size:.7rem;color:#64748b;margin-top:4px">متوسط النتيجة: <b style="color:#c084fc">${avgScore}/100</b></div>
+      </div>
+    </div>
+
+    <!-- تفصيل أكثر -->
+    <div class="exec-grid" style="grid-template-columns:1fr 1fr;margin-bottom:16px">
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico" style="color:#fbbf24">⚠️</span> ملفات تحتاج إكمال (أقل 50%)</div>
+        ${incompleteEmps.length?incompleteEmps.slice(0,8).map(x=>execMiniBar(x.e.name,x.pct,'#f87171',x.pct+'%')).join(''):'<div style="text-align:center;padding:30px;color:#4ade80">✓ كل الملفات أعلى من 50%</div>'}
+        ${incompleteEmps.length>8?`<div style="text-align:center;color:#64748b;margin-top:8px;font-size:.72rem">+${incompleteEmps.length-8} موظف آخر</div>`:''}
+      </div>
+      <div class="exec-tile">
+        <div class="exec-tile-title"><span class="exec-tile-title-ico" style="color:#c084fc">🏆</span> أعلى التقييمات</div>
+        ${evalScores.length?evalScores.slice(0,8).map(x=>{
+          const c=x.score>=90?'#4ade80':x.score>=75?'#60a5fa':x.score>=60?'#fbbf24':'#f87171';
+          return execMiniBar(x.e.name,x.score,c,x.score+'/100');
+        }).join(''):'<div style="text-align:center;padding:30px;color:#64748b">لا توجد تقييمات هذا الشهر</div>'}
+      </div>
+    </div>
+
+    <!-- ملخص نهائي (كله من 100) -->
+    <div class="exec-tile" style="background:rgba(255,255,255,.02)">
+      <div class="exec-tile-title"><span class="exec-tile-title-ico" style="color:#06b6d4">💡</span> ملخص الأداء — ${thisMonth} (كل النسب من 100)</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;text-align:center;padding:10px 0">
+        <div><div style="font-size:1.6rem;font-weight:800;color:#4ade80">${actualAttPct}<span style="font-size:.9rem;opacity:.7">/100</span></div><div style="font-size:.72rem;color:#94a3b8;margin-top:4px">حضور فعلي</div></div>
+        <div><div style="font-size:1.6rem;font-weight:800;color:#60a5fa">${avgCompletion}<span style="font-size:.9rem;opacity:.7">/100</span></div><div style="font-size:.72rem;color:#94a3b8;margin-top:4px">ملفات مكتملة</div></div>
+        <div><div style="font-size:1.6rem;font-weight:800;color:#c084fc">${avgScore||0}<span style="font-size:.9rem;opacity:.7">/100</span></div><div style="font-size:.72rem;color:#94a3b8;margin-top:4px">متوسط التقييم</div></div>
+        <div><div style="font-size:1.6rem;font-weight:800;color:${overallColor}">${overallScore}<span style="font-size:.9rem;opacity:.7">/100</span></div><div style="font-size:.72rem;color:#94a3b8;margin-top:4px">المؤشر العام</div></div>
+      </div>
+    </div>`;
+}
+
+// ── PAGE 5: Risk Center (نقل من 4 إلى 5) ──
+function buildExecPage5(){
+  const today=new Date();
+  // إقامات منتهية أو قريبة
+  const iqAlerts=employees.filter(e=>e.iqamaExpiry).map(e=>{
+    const ref=(h2g(e.iqamaExpiry)||new Date(e.iqamaExpiry));
+    const days=Math.floor((ref-today)/86400000);
+    return{e,days};
+  }).filter(x=>x.days<90).sort((a,b)=>a.days-b.days);
+  // فحوصات طبية
+  const medAlerts=employees.filter(e=>e.medExamExpiry).map(e=>{
+    const ref=new Date(e.medExamExpiry);
+    const days=Math.floor((ref-today)/86400000);
+    return{e,days};
+  }).filter(x=>x.days<90).sort((a,b)=>a.days-b.days);
+  // غياب متكرر (3+ أيام في الشهر)
+  const thisMonth=localDateStr(today).substr(0,7);
+  const frequentAbsent=employees.map(e=>{
+    const att=getAttCount(thisMonth,e.id);
+    return{e,absent:att.A};
+  }).filter(x=>x.absent>=3).sort((a,b)=>b.absent-a.absent);
+
+  document.getElementById('execPage5').innerHTML=`
+    <div class="exec-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+      <div class="exec-tile exec-kpi t-red"><div class="exec-kpi-icon">🛂</div><div class="exec-kpi-label">إقامات حرجة</div><div class="exec-kpi-value">${iqAlerts.length}</div><div class="exec-kpi-delta down">≤ 90 يوم</div></div>
+      <div class="exec-tile exec-kpi t-amber"><div class="exec-kpi-icon">🏥</div><div class="exec-kpi-label">فحوصات طبية</div><div class="exec-kpi-value">${medAlerts.length}</div><div class="exec-kpi-delta neu">تنتهي قريباً</div></div>
+      <div class="exec-tile exec-kpi t-purple"><div class="exec-kpi-icon">⚠️</div><div class="exec-kpi-label">غياب متكرر</div><div class="exec-kpi-value">${frequentAbsent.length}</div><div class="exec-kpi-delta down">3+ أيام هذا الشهر</div></div>
+    </div>
+
+    <div class="exec-grid" style="grid-template-columns:1fr 1fr">
+      <div class="exec-tile">
+        <div class="exec-tile-title" style="color:#f87171"><span class="exec-tile-title-ico">🚨</span> تنبيهات الإقامة العاجلة</div>
+        ${iqAlerts.length?`<table class="exec-table"><thead><tr><th>الموظف</th><th>المشروع</th><th>تنتهي خلال</th></tr></thead>
+          <tbody>${iqAlerts.slice(0,10).map(x=>`<tr>
+            <td class="exec-cell-bold">${x.e.name}</td>
+            <td>${x.e.project}</td>
+            <td><span style="color:${x.days<0?'#f87171':x.days<30?'#fbbf24':'#fb923c'};font-weight:800">${x.days<0?'منتهية منذ '+Math.abs(x.days)+'ي':x.days+' يوم'}</span></td>
+          </tr>`).join('')}</tbody></table>`:'<div style="text-align:center;padding:40px;color:#4ade80">✓ لا توجد تنبيهات</div>'}
+      </div>
+      <div class="exec-tile">
+        <div class="exec-tile-title" style="color:#fbbf24"><span class="exec-tile-title-ico">📋</span> أعلى موظفين غياباً</div>
+        ${frequentAbsent.length?`<table class="exec-table"><thead><tr><th>الموظف</th><th>المشروع</th><th>أيام الغياب</th></tr></thead>
+          <tbody>${frequentAbsent.slice(0,10).map(x=>`<tr>
+            <td class="exec-cell-bold">${x.e.name}</td>
+            <td>${x.e.project}</td>
+            <td><span style="color:#f87171;font-weight:800">${x.absent} يوم</span></td>
+          </tr>`).join('')}</tbody></table>`:'<div style="text-align:center;padding:40px;color:#4ade80">✓ لا يوجد غياب متكرر</div>'}
+      </div>
+    </div>`;
 }
 
 function renderDashboard(){

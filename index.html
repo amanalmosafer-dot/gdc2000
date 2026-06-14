@@ -1104,21 +1104,21 @@ td{padding:9px 12px;vertical-align:middle}
   <!-- ⚡ شريط التحضير الجماعي الذكي -->
   <div class="quickfill-bar no-print" style="background:linear-gradient(135deg,#0f2444,#1e3a5f);color:#fff;padding:14px 18px;border-radius:14px;margin-bottom:14px;box-shadow:var(--sh)">
     <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-      <div style="font-weight:800;font-size:.95rem">⚡ تحضير سريع</div>
+      <div id="qfTitleLbl" style="font-weight:800;font-size:.95rem">⚡ تحضير سريع</div>
       <select id="qfShift" style="padding:7px 12px;border-radius:8px;border:none;font-family:inherit;font-size:.83rem;background:rgba(255,255,255,.18);color:#fff;font-weight:600">
         <option value="" style="color:#000">كل الشفتات</option>
       </select>
       <div style="display:flex;gap:5px;flex-wrap:wrap">
-        <button class="qfb" style="background:#16a34a" onclick="bulkSet('P')">✅ حاضر</button>
-        <button class="qfb" style="background:#dc2626" onclick="bulkSet('A')">❌ غائب</button>
-        <button class="qfb" style="background:#d97706" onclick="bulkSet('L')">🌴 إجازة</button>
-        <button class="qfb" style="background:#7c3aed" onclick="bulkSet('T')">⏱️ تأخير</button>
-        <button class="qfb" style="background:#0891b2" onclick="bulkSet('O')">🛌 راحة</button>
+        <button id="qfBtnP" class="qfb" style="background:#16a34a" onclick="bulkSet('P')">✅ حاضر</button>
+        <button id="qfBtnA" class="qfb" style="background:#dc2626" onclick="bulkSet('A')">❌ غائب</button>
+        <button id="qfBtnL" class="qfb" style="background:#d97706" onclick="bulkSet('L')">🌴 إجازة</button>
+        <button id="qfBtnT" class="qfb" style="background:#7c3aed" onclick="bulkSet('T')">⏱️ تأخير</button>
+        <button id="qfBtnO" class="qfb" style="background:#0891b2" onclick="bulkSet('O')">🛌 راحة</button>
       </div>
       <div style="border-right:2px solid rgba(255,255,255,.25);height:30px;margin:0 4px"></div>
-      <button class="qfb" style="background:#6366f1" onclick="copyAttFrom('yesterday')" title="نسخ تحضير أمس">📋 نسخ من أمس</button>
-      <button class="qfb" style="background:#a16207" onclick="copyAttFromDate()" title="اختيار تاريخ">🔄 نسخ من تاريخ...</button>
-      <button class="qfb" style="background:#7f1d1d" onclick="clearAttDay()" title="مسح كل تحضير اليوم">🗑️ مسح</button>
+      <button id="qfBtnYest" class="qfb" style="background:#6366f1" onclick="copyAttFrom('yesterday')">📋 نسخ من أمس</button>
+      <button id="qfBtnDate" class="qfb" style="background:#a16207" onclick="copyAttFromDate()">🔄 نسخ من تاريخ...</button>
+      <button id="qfBtnClear" class="qfb" style="background:#7f1d1d" onclick="clearAttDay()">🗑️ مسح</button>
     </div>
   </div>
   <div class="tbl-wrap">
@@ -1692,6 +1692,42 @@ const T={
     pcBaseSal:'الراتب الأساسي',pcOTRate:'معدل الأوفر',
     pcSecTitle:'بيانات الموظف الكاملة',pcPrintDate:'تاريخ الطباعة:',pcNumHash:'· رقم #',
     pcIqExpired:'منتهية',
+    // iqama dashboard & alerts
+    iqSumNoAlerts:'لا توجد إقامات منتهية أو قريبة من الانتهاء',
+    iqSumExpired:'إقامات منتهية',iqSumSoon30:'تنتهي خلال 30 يوم',iqSumSoon90:'تنتهي خلال 90 يوم',
+    bellIqAlerts:'🪪 تنبيهات الإقامة',bellMedAlerts:'🏥 تنبيهات الفحص الطبي',bellNoAlerts:'لا توجد تنبيهات',
+    dayUnit:' يوم',iqBadgeExpired:'منتهي',
+    // attendance
+    attN:'لم يُسجّل',attNoEmpMatch:'لا يوجد موظفون مطابقون لهذا الفلتر',
+    attClearFilter:'إلغاء',attFilteredPrefix:'مُصفّى: ',
+    // alerts tables
+    alertsNoAlerts:'لا توجد تنبيهات',alertsTitle:'قائمة التنبيهات',
+    alertsTitleRecent:'قائمة التنبيهات — أحدث 5',alertsShowAll:'عرض الكل',alertsShowLess:'عرض أقل',
+    // evaluation
+    evalBtnEdit:'✏️ تعديل',evalBtnStart:'⭐ تقييم',evalSumOf:'مقيّم من',evalTitlePrefix:'تقييم الموظفين — ',
+    // reports
+    repKpiPresent:'إجمالي حضور',repKpiAbsent:'إجمالي غياب',repKpiOTH:'ساعات أوفر',repKpiRate:'معدل الحضور',
+    repIqAlertsLbl:'تنبيهات إقامة',repKpiTotalEmp:'إجمالي الموظفين',
+    repToday:'اليوم',repThisWeek:'هذا الأسبوع',repThisMonth:'هذا الشهر',
+    repDaysRec:'يوم مسجّل',repDaysRec2:'أيام مسجّلة',
+    repAttDays:'أيام حضور',repAbsDays:'أيام غياب',repLeaveDays:'أيام إجازة',
+    repLast14:'معدل الحضور — آخر 14 يوم',repDonutAtt:'توزيع حالات الحضور (هذا الشهر)',
+    repOTSources:'مصادر الأوفر تايم',repOTCov:'تغطية مؤقتة',repOTMan:'يدوي',
+    repNoOT:'لا يوجد أوفر تايم هذا الشهر',repMonthStacked:'ملخص الشهر — Stacked View',
+    repProjRate:'معدل الحضور بالمشروع (هذا الشهر)',repNoData:'لا توجد بيانات',
+    repGaugeToday:'نسبة الحضور اليوم',repTotal:'إجمالي',
+    repAttLbl:'حضور',repAbsLbl:'غياب',repLeaveLbl:'إجازة',repLateLbl:'تأخير',
+    repHours:'ساعة',moreEmps:'موظف آخر',
+    // weekly/monthly/compare reports
+    repWeeklyTitle:'التقرير الأسبوعي',repMonthlyTitle:'التقرير الشهري',repCmpTitle:'تقرير المقارنة',
+    repEmpCount:'عدد الموظفين',repDaysRecorded:'أيام مسجّلة',
+    repProjSummary:'ملخص المشاريع',repEmpDailyDetail:'تفصيل الموظفين يوماً بيوم',repEmpDetail2:'تفصيل الموظفين',
+    repNotMarkedToday:'لم يُسجَّل حضورهم اليوم',
+    repTblProject:'المشروع',repTblEmps:'موظفين',repTblPresent:'حضور',repTblAbsent:'غياب',
+    repTblLeave:'إجازة',repTblRate:'معدل',repTblOTH:'أوفر ساعة',repTblName:'الاسم',
+    repSalHdr:'الراتب',repAbsDeductHdr:'خصم غياب',repOTAmtHdr:'أوفر ﷼',repNetHdr:'الصافي',
+    // calendar & heatmap
+    repCalSection:'تقويم',repHeatSection:'الخريطة الحرارية للحضور',
   },
   en:{
     sysTitle:'Employee Management System',
@@ -1819,6 +1855,42 @@ const T={
     pcBaseSal:'Base Salary',pcOTRate:'OT Rate',
     pcSecTitle:'Full Employee Details',pcPrintDate:'Print Date:',pcNumHash:'· No. #',
     pcIqExpired:'Expired',
+    // iqama dashboard & alerts
+    iqSumNoAlerts:'No expired or expiring iqamas',
+    iqSumExpired:'Expired Iqamas',iqSumSoon30:'Expiring within 30 days',iqSumSoon90:'Expiring within 90 days',
+    bellIqAlerts:'🪪 Iqama Alerts',bellMedAlerts:'🏥 Medical Check Alerts',bellNoAlerts:'No alerts',
+    dayUnit:' days',iqBadgeExpired:'Expired',
+    // attendance
+    attN:'Not Marked',attNoEmpMatch:'No employees match this filter',
+    attClearFilter:'Clear',attFilteredPrefix:'Filtered: ',
+    // alerts tables
+    alertsNoAlerts:'No alerts',alertsTitle:'Alerts List',
+    alertsTitleRecent:'Alerts — Last 5',alertsShowAll:'Show All',alertsShowLess:'Show Less',
+    // evaluation
+    evalBtnEdit:'✏️ Edit',evalBtnStart:'⭐ Evaluate',evalSumOf:'evaluated of',evalTitlePrefix:'Employee Evaluation — ',
+    // reports
+    repKpiPresent:'Total Present',repKpiAbsent:'Total Absent',repKpiOTH:'OT Hours',repKpiRate:'Att. Rate',
+    repIqAlertsLbl:'Iqama Alerts',repKpiTotalEmp:'Total Employees',
+    repToday:'Today',repThisWeek:'This Week',repThisMonth:'This Month',
+    repDaysRec:'days recorded',repDaysRec2:'days recorded',
+    repAttDays:'Present Days',repAbsDays:'Absent Days',repLeaveDays:'Leave Days',
+    repLast14:'Attendance Rate — Last 14 Days',repDonutAtt:'Attendance Status (This Month)',
+    repOTSources:'OT Sources',repOTCov:'Coverage OT',repOTMan:'Manual',
+    repNoOT:'No overtime this month',repMonthStacked:'Monthly Summary — Stacked View',
+    repProjRate:'Attendance Rate by Project (This Month)',repNoData:'No data',
+    repGaugeToday:"Today's Attendance",repTotal:'Total',
+    repAttLbl:'Present',repAbsLbl:'Absent',repLeaveLbl:'Leave',repLateLbl:'Late',
+    repHours:'hrs',moreEmps:'more employees',
+    // weekly/monthly/compare reports
+    repWeeklyTitle:'Weekly Report',repMonthlyTitle:'Monthly Report',repCmpTitle:'Comparison Report',
+    repEmpCount:'Employees',repDaysRecorded:'Days Recorded',
+    repProjSummary:'Project Summary',repEmpDailyDetail:'Daily Employee Breakdown',repEmpDetail2:'Employee Details',
+    repNotMarkedToday:'Not Marked Today',
+    repTblProject:'Project',repTblEmps:'Employees',repTblPresent:'Present',repTblAbsent:'Absent',
+    repTblLeave:'Leave',repTblRate:'Rate',repTblOTH:'OT Hours',repTblName:'Name',
+    repSalHdr:'Salary',repAbsDeductHdr:'Abs. Deduct',repOTAmtHdr:'OT Amt',repNetHdr:'Net Pay',
+    // calendar & heatmap
+    repCalSection:'Calendar',repHeatSection:'Attendance Heatmap',
   }
 };
 
@@ -1867,6 +1939,14 @@ function applyLang(){
   // attendance
   const bma=document.querySelector('#tab-attendance .btn-success');if(bma)bma.textContent=t('btnMarkAll');
   setText('attSumLabel',t('attSumLbl'));
+  // quick attendance bar
+  const isArLng=currentLang==='ar';
+  setText('qfTitleLbl',isArLng?'⚡ تحضير سريع':'⚡ Quick Attendance');
+  setText('qfBtnP',`✅ ${t('attP')}`);setText('qfBtnA',`❌ ${t('attA')}`);
+  setText('qfBtnL',`🌴 ${t('attL')}`);setText('qfBtnT',`⏱️ ${t('attT')}`);setText('qfBtnO',`🛌 ${t('attO')}`);
+  setText('qfBtnYest',isArLng?'📋 نسخ من أمس':'📋 Copy Yesterday');
+  setText('qfBtnDate',isArLng?'🔄 نسخ من تاريخ...':'🔄 Copy from Date...');
+  setText('qfBtnClear',isArLng?'🗑️ مسح':'🗑️ Clear');
   setText('attSumTitle',t('attSumH2'));
   setText('ath-sum-name',t('thName'));
   setText('ath-sum-proj',t('thProject'));
@@ -1902,6 +1982,9 @@ function applyLang(){
   });
   // re-build selects (updates "All Projects" label)
   initSelects();
+  // update shift filter display text (values stay Arabic for DB compatibility)
+  const _fs=document.getElementById('fltShift');
+  if(_fs){const _sm={'الشفت 1':t('fShift1'),'الشفت 2':t('fShift2'),'الشفت 3':t('fShift3')};Array.from(_fs.options).forEach(o=>{if(_sm[o.value])o.textContent=_sm[o.value];});}
   // reports section headers
   setText('repTitlesH3',t('repTitlesTitle'));
   setText('repProjH3',t('repProjTitle'));
@@ -3611,7 +3694,7 @@ function buildExecPage4(){
       <div class="exec-tile">
         <div class="exec-tile-title"><span class="exec-tile-title-ico" style="color:#fbbf24">⚠️</span> ملفات تحتاج إكمال (أقل 50%)</div>
         ${incompleteEmps.length?incompleteEmps.slice(0,8).map(x=>execMiniBar(x.e.name,x.pct,'#f87171',x.pct+'%')).join(''):'<div style="text-align:center;padding:30px;color:#4ade80">✓ كل الملفات أعلى من 50%</div>'}
-        ${incompleteEmps.length>8?`<div style="text-align:center;color:#64748b;margin-top:8px;font-size:.72rem">+${incompleteEmps.length-8} موظف آخر</div>`:''}
+        ${incompleteEmps.length>8?`<div style="text-align:center;color:#64748b;margin-top:8px;font-size:.72rem">+${incompleteEmps.length-8} ${t('moreEmps')}</div>`:''}
       </div>
       <div class="exec-tile">
         <div class="exec-tile-title"><span class="exec-tile-title-ico" style="color:#c084fc">🏆</span> أعلى التقييمات</div>
@@ -3779,19 +3862,19 @@ function renderDashboard(){
 
   // Summary cards
   document.getElementById('dashIqSummary').innerHTML = alerts.length === 0
-    ? `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--txt2);font-size:.88rem">✅ لا توجد إقامات منتهية أو قريبة من الانتهاء</div>`
+    ? `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--txt2);font-size:.88rem">✅ ${t('iqSumNoAlerts')}</div>`
     : `
     <div class="iq-sum-card iq-expired">
       <div class="iq-sum-ico">🔴</div>
-      <div><div class="iq-sum-num">${expired.length}</div><div class="iq-sum-lbl">إقامات منتهية</div></div>
+      <div><div class="iq-sum-num">${expired.length}</div><div class="iq-sum-lbl">${t('iqSumExpired')}</div></div>
     </div>
     <div class="iq-sum-card iq-soon">
       <div class="iq-sum-ico">🟠</div>
-      <div><div class="iq-sum-num">${soon30.length}</div><div class="iq-sum-lbl">تنتهي خلال 30 يوم</div></div>
+      <div><div class="iq-sum-num">${soon30.length}</div><div class="iq-sum-lbl">${t('iqSumSoon30')}</div></div>
     </div>
     <div class="iq-sum-card iq-warn90">
       <div class="iq-sum-ico">🟡</div>
-      <div><div class="iq-sum-num">${soon90.length}</div><div class="iq-sum-lbl">تنتهي خلال 90 يوم</div></div>
+      <div><div class="iq-sum-num">${soon90.length}</div><div class="iq-sum-lbl">${t('iqSumSoon90')}</div></div>
     </div>`;
 
   // Table
@@ -3811,8 +3894,9 @@ function renderDashboard(){
   if(!bellItems) return;
   const iqRows=alerts.slice(0,4).map(e=>{
     const d=getDays(e);
-    const chip=d<0?`<span style="color:#dc2626;font-size:.72rem;font-weight:700">إقامة منتهية منذ ${Math.abs(d)} يوم</span>`
-               :`<span style="color:#d97706;font-size:.72rem;font-weight:700">إقامة تنتهي خلال ${d} يوم</span>`;
+    const isAr=currentLang==='ar';
+    const chip=d<0?`<span style="color:#dc2626;font-size:.72rem;font-weight:700">${isAr?`إقامة منتهية منذ ${Math.abs(d)} يوم`:`Iqama expired ${Math.abs(d)} days ago`}</span>`
+               :`<span style="color:#d97706;font-size:.72rem;font-weight:700">${isAr?`إقامة تنتهي خلال ${d} يوم`:`Iqama expires in ${d} days`}</span>`;
     return`<div style="padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--surface2)">
       <div style="font-weight:700;font-size:.84rem">${e.name}</div>
       <div style="display:flex;justify-content:space-between;margin-top:2px">${chip}<span style="font-size:.72rem;color:var(--txt2)">${e.project}</span></div>
@@ -3821,17 +3905,18 @@ function renderDashboard(){
   const medRows=medAlerts.slice(0,4).map(e=>{
     const ref=new Date(e.medExamExpiry);
     const d=Math.floor((ref-new Date())/86400000);
-    const chip=d<0?`<span style="color:#dc2626;font-size:.72rem;font-weight:700">فحص طبي منتهي منذ ${Math.abs(d)} يوم</span>`
-               :`<span style="color:#d97706;font-size:.72rem;font-weight:700">فحص طبي ينتهي خلال ${d} يوم</span>`;
+    const isAr=currentLang==='ar';
+    const chip=d<0?`<span style="color:#dc2626;font-size:.72rem;font-weight:700">${isAr?`فحص طبي منتهي منذ ${Math.abs(d)} يوم`:`Medical check expired ${Math.abs(d)} days ago`}</span>`
+               :`<span style="color:#d97706;font-size:.72rem;font-weight:700">${isAr?`فحص طبي ينتهي خلال ${d} يوم`:`Medical check expires in ${d} days`}</span>`;
     return`<div style="padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--surface2)">
       <div style="font-weight:700;font-size:.84rem">${e.name}</div>
       <div style="display:flex;justify-content:space-between;margin-top:2px">${chip}<span style="font-size:.72rem;color:var(--txt2)">${e.project}</span></div>
     </div>`;
   }).join('');
   bellItems.innerHTML=totalAlerts===0
-    ?`<p style="padding:12px;color:var(--txt2);font-size:.84rem;text-align:center">✅ لا توجد تنبيهات</p>`
-    :(alerts.length?`<div style="padding:6px 10px 3px;font-size:.74rem;font-weight:700;color:var(--txt2)">🪪 تنبيهات الإقامة</div>${iqRows}`:'')
-    +(medAlerts.length?`<div style="padding:6px 10px 3px;font-size:.74rem;font-weight:700;color:var(--txt2)">🏥 تنبيهات الفحص الطبي</div>${medRows}`:'');
+    ?`<p style="padding:12px;color:var(--txt2);font-size:.84rem;text-align:center">✅ ${t('bellNoAlerts')}</p>`
+    :(alerts.length?`<div style="padding:6px 10px 3px;font-size:.74rem;font-weight:700;color:var(--txt2)">${t('bellIqAlerts')}</div>${iqRows}`:'')
+    +(medAlerts.length?`<div style="padding:6px 10px 3px;font-size:.74rem;font-weight:700;color:var(--txt2)">${t('bellMedAlerts')}</div>${medRows}`:'');
 
   // Today's attendance summary
   const todayKey=localDateStr(new Date());
@@ -3960,9 +4045,9 @@ function medBadge(exp){
   const ref=new Date(exp);
   if(isNaN(ref))return`<span style="color:var(--txt2)">${exp}</span>`;
   const days=Math.floor((ref-new Date())/86400000);
-  if(days<0)return`<span class="iq-bad">منتهي (${exp})</span>`;
-  if(days<30)return`<span class="iq-bad">${exp} (${days} يوم)</span>`;
-  if(days<90)return`<span class="iq-warn">${exp} (${days} يوم)</span>`;
+  if(days<0)return`<span class="iq-bad">${t('iqBadgeExpired')} (${exp})</span>`;
+  if(days<30)return`<span class="iq-bad">${exp} (${days}${t('dayUnit')})</span>`;
+  if(days<90)return`<span class="iq-warn">${exp} (${days}${t('dayUnit')})</span>`;
   return`<span class="iq-ok">${exp}</span>`;
 }
 
@@ -4897,11 +4982,11 @@ function renderEvaluations(){
     tr.innerHTML=`<td style="color:var(--txt2)">${i+1}</td><td><strong>${e.name}</strong></td>
       <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
       <td>${scoreCell}</td><td>${ratingCell}</td><td style="color:var(--txt2);font-size:.82rem">${lastCell}</td>
-      <td style="text-align:left">${canEval?`<button class="btn btn-primary btn-sm" onclick="openEvalModal('${e.id}')">${rec?'✏️ تعديل':'⭐ تقييم'}</button>`:'—'}</td>`;
+      <td style="text-align:left">${canEval?`<button class="btn btn-primary btn-sm" onclick="openEvalModal('${e.id}')">${rec?t('evalBtnEdit'):t('evalBtnStart')}</button>`:'—'}</td>`;
     tbody.appendChild(tr);
   });
-  const sumEl=document.getElementById('evalSum');if(sumEl)sumEl.textContent=`${done} مقيّم من ${list.length}`;
-  const ttl=document.getElementById('evalTitle');if(ttl)ttl.textContent='تقييم الموظفين — '+(month||'');
+  const sumEl=document.getElementById('evalSum');if(sumEl)sumEl.textContent=`${done} ${t('evalSumOf')} ${list.length}`;
+  const ttl=document.getElementById('evalTitle');if(ttl)ttl.textContent=t('evalTitlePrefix')+(month||'');
 
   // الرسوم البيانية للتقييم
   const chartsEl=document.getElementById('evalCharts');
@@ -5578,7 +5663,8 @@ let attFilter=''; // فلتر الحالة المختار: P/A/L/T/O/N (لم ي�
 function renderAtt(){
   const date=document.getElementById('attDate').value;
   const proj=document.getElementById('attProj').value;
-  document.getElementById('attTitle').textContent=t('attTitle')+' — '+(date||t('attSelectDate'))+(attFilter?` · مُصفّى: ${attFilter==='P'?'حاضرون':attFilter==='A'?'غائبون':attFilter==='L'?'في إجازة':attFilter==='T'?'متأخرون':attFilter==='O'?'في راحة':'لم يُسجّلوا'}`:'');
+  const _fLbl={P:t('attP'),A:t('attA'),L:t('attL'),T:t('attT'),O:t('attO'),N:t('attN')};
+  document.getElementById('attTitle').textContent=t('attTitle')+' — '+(date||t('attSelectDate'))+(attFilter?` · ${t('attFilteredPrefix')}${_fLbl[attFilter]||''}`:'');
   const myProj=getMyProject();
   const allList=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj});
   const day=date?(attendance[date]||{}):{};
@@ -5589,7 +5675,7 @@ function renderAtt(){
   const list=attFilter?allList.filter(e=>{const st=day[e.id]||'';return attFilter==='N'?!st:st===attFilter;}):allList;
   const tbody=document.getElementById('attBody');tbody.innerHTML='';
   if(!list.length){
-    tbody.innerHTML=`<tr class="erow"><td colspan="5" style="text-align:center;padding:40px;color:var(--txt2)">لا يوجد موظفون مطابقون لهذا الفلتر</td></tr>`;
+    tbody.innerHTML=`<tr class="erow"><td colspan="5" style="text-align:center;padding:40px;color:var(--txt2)">${t('attNoEmpMatch')}</td></tr>`;
   } else list.forEach((e,i)=>{
     const st=day[e.id]||'';
     const pi=PROJS.indexOf(e.project);
@@ -5615,13 +5701,13 @@ function renderAtt(){
     <span style="font-size:.7rem;opacity:.85">${label}</span>
   </button>`;
   document.getElementById('attSum').innerHTML=
-    mkBtn('P',P,'#16a34a','✅','حاضر')+
-    mkBtn('A',A,'#dc2626','❌','غائب')+
-    mkBtn('L',L,'#d97706','🌴','إجازة')+
-    mkBtn('T',T,'#7c3aed','⏱️','متأخر')+
-    mkBtn('O',O,'#0891b2','🛌','راحة')+
-    (N>0?mkBtn('N',N,'#94a3b8','○','لم يُسجّل'):'')+
-    (attFilter?`<button class="att-filter-btn att-clear" onclick="toggleAttFilter('')" title="إلغاء الفلتر"><span style="font-size:1.1rem">✕</span><span style="font-size:.75rem;font-weight:700">إلغاء</span></button>`:'');
+    mkBtn('P',P,'#16a34a','✅',t('attP'))+
+    mkBtn('A',A,'#dc2626','❌',t('attA'))+
+    mkBtn('L',L,'#d97706','🌴',t('attL'))+
+    mkBtn('T',T,'#7c3aed','⏱️',t('attT'))+
+    mkBtn('O',O,'#0891b2','🛌',t('attO'))+
+    (N>0?mkBtn('N',N,'#94a3b8','○',t('attN')): '')+
+    (attFilter?`<button class="att-filter-btn att-clear" onclick="toggleAttFilter('')"><span style="font-size:1.1rem">✕</span><span style="font-size:.75rem;font-weight:700">${t('attClearFilter')}</span></button>`:'');
 }
 
 function toggleAttFilter(status){
@@ -5717,9 +5803,9 @@ function clearAttDay(){
 // تعبئة dropdown الشفت في شريط التحضير السريع
 function populateQfShift(){
   const sel=document.getElementById('qfShift');if(!sel)return;
-  sel.innerHTML='<option value="" style="color:#000">كل الشفتات</option>'+
+  sel.innerHTML=`<option value="" style="color:#000">${t('optAllShifts')}</option>`+
     Object.entries(SL).filter(([k])=>k!=='-').map(([k,v])=>`<option value="${k}" style="color:#000">${v}</option>`).join('')+
-    '<option value="-" style="color:#000">بدون شفت</option>';
+    `<option value="-" style="color:#000">${t('optNoShift')}</option>`;
 }
 
 function renderAttSum(){
@@ -6077,7 +6163,7 @@ function renderCalendarView(){
           ${a>0?`<span style="background:#fee2e2;color:#b91c1c">✗${a}</span>`:''}
           ${l>0?`<span style="background:#fef9c3;color:#a16207">🌴${l}</span>`:''}
         </div>
-      `:isFuture?'<div style="text-align:center;color:#94a3b8;font-size:.75rem;margin-top:auto">—</div>':'<div style="text-align:center;color:#cbd5e1;font-size:.75rem;margin-top:auto">لم يُسجّل</div>'}
+      `:isFuture?'<div style="text-align:center;color:#94a3b8;font-size:.75rem;margin-top:auto">—</div>':`<div style="text-align:center;color:#cbd5e1;font-size:.75rem;margin-top:auto">${t('attN')}</div>`}
     </div>`;
   }).join('');
 
@@ -6091,23 +6177,24 @@ function renderCalendarView(){
   });
   const monthPct=(totalP+totalT+totalA)?Math.round((totalP+totalT)/(totalP+totalT+totalA)*100):0;
 
+  const isArC=currentLang==='ar';
   document.getElementById('calendarContent').innerHTML=`
     <div class="rep-section">
-      <div class="rep-section-title">📅 تقويم ${month} — ${proj||'كل المشاريع'} (${list.length} موظف)</div>
+      <div class="rep-section-title">📅 ${t('repCalSection')} ${month} — ${proj||t('allProjects')} (${list.length} ${t('dEmpWord')})</div>
       <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:14px">
-        <div class="kpi-card kpi-blue"><div class="kpi-ico">📅</div><div class="kpi-val">${totalDays}</div><div class="kpi-lbl">يوم مسجّل</div></div>
-        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${totalP}</div><div class="kpi-lbl">حضور</div></div>
-        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${totalA}</div><div class="kpi-lbl">غياب</div></div>
-        <div class="kpi-card kpi-amber"><div class="kpi-ico">🌴</div><div class="kpi-val" style="color:#d97706">${totalL}</div><div class="kpi-lbl">إجازة</div></div>
-        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${monthPct}%</div><div class="kpi-lbl">معدل الحضور</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📅</div><div class="kpi-val">${totalDays}</div><div class="kpi-lbl">${t('repDaysRec')}</div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${totalP}</div><div class="kpi-lbl">${t('repAttLbl')}</div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${totalA}</div><div class="kpi-lbl">${t('repAbsLbl')}</div></div>
+        <div class="kpi-card kpi-amber"><div class="kpi-ico">🌴</div><div class="kpi-val" style="color:#d97706">${totalL}</div><div class="kpi-lbl">${t('repLeaveLbl')}</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${monthPct}%</div><div class="kpi-lbl">${t('repKpiRate')}</div></div>
       </div>
       <div class="cal-grid">${headers}${emptyStart}${cells}</div>
       <div style="margin-top:14px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font-size:.78rem;color:var(--txt2)">
-        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;background:#bbf7d0;border-radius:4px"></span>حضور عالي (≥90%)</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;background:#fde68a;border-radius:4px"></span>متوسط (70-89%)</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;background:#fecaca;border-radius:4px"></span>منخفض (<70%)</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;background:var(--surface2);border-radius:4px"></span>الجمعة (إجازة)</div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;border:2px solid var(--accent);border-radius:4px"></span>اليوم</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;background:#bbf7d0;border-radius:4px"></span>${isArC?'حضور عالي (≥90%)':'High Att. (≥90%)'}</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;background:#fde68a;border-radius:4px"></span>${isArC?'متوسط (70-89%)':'Medium (70-89%)'}</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;background:#fecaca;border-radius:4px"></span>${isArC?'منخفض (<70%)':'Low (<70%)'}</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;background:var(--surface2);border-radius:4px"></span>${isArC?'الجمعة (إجازة)':'Friday (off)'}</div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:18px;border:2px solid var(--accent);border-radius:4px"></span>${isArC?'اليوم':'Today'}</div>
       </div>
     </div>`;
 }
@@ -6158,27 +6245,28 @@ function renderHeatmap(){
     </tr>`;
   }).join('');
 
+  const isArH=currentLang==='ar';
   document.getElementById('heatmapContent').innerHTML=`
     <div class="rep-section">
-      <div class="rep-section-title">🔥 الخريطة الحرارية للحضور — ${month} (${list.length} موظف × ${days.length} يوم)</div>
+      <div class="rep-section-title">🔥 ${t('repHeatSection')} — ${month} (${list.length} ${t('dEmpWord')} × ${days.length} ${t('repDaysRec')})</div>
       <div class="hm-wrap">
         <table class="hm-table">
           <thead><tr>
-            <th class="hm-name" style="background:var(--hdr);color:#fff">الموظف</th>
+            <th class="hm-name" style="background:var(--hdr);color:#fff">${t('thName')}</th>
             ${dayHead}
-            <th class="hm-name" style="background:var(--hdr);color:#fff;min-width:60px">المعدل</th>
+            <th class="hm-name" style="background:var(--hdr);color:#fff;min-width:60px">${t('repKpiRate')}</th>
           </tr></thead>
-          <tbody>${rows||'<tr><td colspan="32" style="text-align:center;padding:20px;color:var(--txt2)">لا توجد بيانات</td></tr>'}</tbody>
+          <tbody>${rows||`<tr><td colspan="32" style="text-align:center;padding:20px;color:var(--txt2)">${t('repNoData')}</td></tr>`}</tbody>
         </table>
       </div>
       <div class="hm-legend">
-        <div class="hm-legend-item"><span class="hm-legend-box hm-color-P"></span>حاضر</div>
-        <div class="hm-legend-item"><span class="hm-legend-box hm-color-A"></span>غائب</div>
-        <div class="hm-legend-item"><span class="hm-legend-box hm-color-L"></span>إجازة</div>
-        <div class="hm-legend-item"><span class="hm-legend-box hm-color-T"></span>تأخير</div>
-        <div class="hm-legend-item"><span class="hm-legend-box hm-color-O"></span>راحة</div>
-        <div class="hm-legend-item"><span class="hm-legend-box hm-color-empty"></span>لم يُسجّل</div>
-        <div class="hm-legend-item"><span class="hm-legend-box hm-color-fri"></span>جمعة</div>
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-P"></span>${t('attP')}</div>
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-A"></span>${t('attA')}</div>
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-L"></span>${t('attL')}</div>
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-T"></span>${t('attT')}</div>
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-O"></span>${t('attO')}</div>
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-empty"></span>${t('attN')}</div>
+        <div class="hm-legend-item"><span class="hm-legend-box hm-color-fri"></span>${isArH?'جمعة':'Fri'}</div>
       </div>
     </div>`;
 }
@@ -6227,12 +6315,12 @@ function switchRepTab(id,btn){
 function renderReports(){
   // init project dropdowns for reports
   const myProj=getMyProject();
-  const opts='<option value="">كل المشاريع</option>'+PROJS.map(p=>`<option value="${p}">${p}</option>`).join('');
+  const opts=`<option value="">${t('allProjects')}</option>`+PROJS.map(p=>`<option value="${p}">${p}</option>`).join('');
   ['repWeekProj','repMonthProj','repCmpProj'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
     if(myProj){
       if(myProj.length===1){el.innerHTML=`<option value="${myProj[0]}">${myProj[0]}</option>`;el.disabled=true;}
-      else{el.innerHTML='<option value="">كل المشاريع</option>'+myProj.map(p=>`<option value="${p}">${p}</option>`).join('');el.disabled=false;}
+      else{el.innerHTML=`<option value="">${t('allProjects')}</option>`+myProj.map(p=>`<option value="${p}">${p}</option>`).join('');el.disabled=false;}
     }else{el.innerHTML=opts;el.disabled=false;}
   });
   // default picker values
@@ -6317,88 +6405,88 @@ function renderLiveDashboard(){
   }
   // 4) Stacked bar: ملخص الشهر
   const monthSegments=[
-    {label:'حضور',value:mP,color:'#16a34a'},
-    {label:'تأخير',value:mT,color:'#7c3aed'},
-    {label:'غياب',value:mA,color:'#dc2626'},
-    {label:'إجازة',value:mL,color:'#d97706'},
+    {label:t('repAttLbl'),value:mP,color:'#16a34a'},
+    {label:t('repLateLbl'),value:mT,color:'#7c3aed'},
+    {label:t('repAbsLbl'),value:mA,color:'#dc2626'},
+    {label:t('repLeaveLbl'),value:mL,color:'#d97706'},
   ];
 
   document.getElementById('repLiveContent').innerHTML=`
     <div class="rep-section">
-      <div class="rep-section-title">📍 اليوم — ${todayStr}</div>
+      <div class="rep-section-title">📍 ${t('repToday')} — ${todayStr}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center">
         <div>
           <div class="kpi-grid" style="grid-template-columns:1fr 1fr">
-            <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${tP}</div><div class="kpi-lbl">حضور</div></div>
-            <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${tA}</div><div class="kpi-lbl">غياب</div></div>
-            <div class="kpi-card kpi-amber"><div class="kpi-ico">🌙</div><div class="kpi-val" style="color:#d97706">${tL}</div><div class="kpi-lbl">إجازة</div></div>
-            <div class="kpi-card kpi-purple"><div class="kpi-ico">⏱️</div><div class="kpi-val" style="color:#7c3aed">${tT}</div><div class="kpi-lbl">تأخير</div></div>
+            <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${tP}</div><div class="kpi-lbl">${t('repAttLbl')}</div></div>
+            <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${tA}</div><div class="kpi-lbl">${t('repAbsLbl')}</div></div>
+            <div class="kpi-card kpi-amber"><div class="kpi-ico">🌙</div><div class="kpi-val" style="color:#d97706">${tL}</div><div class="kpi-lbl">${t('repLeaveLbl')}</div></div>
+            <div class="kpi-card kpi-purple"><div class="kpi-ico">⏱️</div><div class="kpi-val" style="color:#7c3aed">${tT}</div><div class="kpi-lbl">${t('repLateLbl')}</div></div>
           </div>
         </div>
         <div class="chart-wrap" style="background:transparent;border:none;box-shadow:none;padding:0">
-          ${buildGauge(todayPct,100,'نسبة الحضور اليوم')}
+          ${buildGauge(todayPct,100,t('repGaugeToday'))}
         </div>
       </div>
     </div>
 
     <div class="rep-section">
-      <div class="rep-section-title">📆 هذا الأسبوع (${wDates.length} أيام مسجّلة)</div>
+      <div class="rep-section-title">📆 ${t('repThisWeek')} (${wDates.length} ${t('repDaysRec2')})</div>
       <div class="kpi-grid">
-        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${wP}</div><div class="kpi-lbl">أيام حضور</div></div>
-        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${wA}</div><div class="kpi-lbl">أيام غياب</div></div>
-        <div class="kpi-card kpi-amber"><div class="kpi-ico">🌙</div><div class="kpi-val" style="color:#d97706">${wL}</div><div class="kpi-lbl">أيام إجازة</div></div>
-        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${wDates.length&&total?pct(wP+wT,total*wDates.length):0}%</div><div class="kpi-lbl">معدل الحضور</div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${wP}</div><div class="kpi-lbl">${t('repAttDays')}</div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${wA}</div><div class="kpi-lbl">${t('repAbsDays')}</div></div>
+        <div class="kpi-card kpi-amber"><div class="kpi-ico">🌙</div><div class="kpi-val" style="color:#d97706">${wL}</div><div class="kpi-lbl">${t('repLeaveDays')}</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${wDates.length&&total?pct(wP+wT,total*wDates.length):0}%</div><div class="kpi-lbl">${t('repKpiRate')}</div></div>
       </div>
     </div>
 
     <div class="rep-section">
-      <div class="rep-section-title">📅 هذا الشهر — ${thisMonth} (${recDates.length} يوم مسجّل)</div>
+      <div class="rep-section-title">📅 ${t('repThisMonth')} — ${thisMonth} (${recDates.length} ${t('repDaysRec')})</div>
       <div class="kpi-grid">
-        <div class="kpi-card kpi-blue"><div class="kpi-ico">👥</div><div class="kpi-val">${total}</div><div class="kpi-lbl">إجمالي الموظفين</div></div>
-        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${mP}</div><div class="kpi-lbl">إجمالي حضور</div></div>
-        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${mA}</div><div class="kpi-lbl">إجمالي غياب</div></div>
-        <div class="kpi-card kpi-purple"><div class="kpi-ico">⏱️</div><div class="kpi-val" style="color:#7c3aed">${mOT}</div><div class="kpi-lbl">ساعات أوفر</div></div>
-        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${pct(mP+mT,total*(recDates.length||1))}%</div><div class="kpi-lbl">معدل الحضور</div></div>
-        ${iqCount?`<div class="kpi-card kpi-amber"><div class="kpi-ico">🔔</div><div class="kpi-val" style="color:#d97706">${iqCount}</div><div class="kpi-lbl">تنبيهات إقامة</div></div>`:''}
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">👥</div><div class="kpi-val">${total}</div><div class="kpi-lbl">${t('repKpiTotalEmp')}</div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${mP}</div><div class="kpi-lbl">${t('repKpiPresent')}</div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${mA}</div><div class="kpi-lbl">${t('repKpiAbsent')}</div></div>
+        <div class="kpi-card kpi-purple"><div class="kpi-ico">⏱️</div><div class="kpi-val" style="color:#7c3aed">${mOT}</div><div class="kpi-lbl">${t('repKpiOTH')}</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${pct(mP+mT,total*(recDates.length||1))}%</div><div class="kpi-lbl">${t('repKpiRate')}</div></div>
+        ${iqCount?`<div class="kpi-card kpi-amber"><div class="kpi-ico">🔔</div><div class="kpi-val" style="color:#d97706">${iqCount}</div><div class="kpi-lbl">${t('repIqAlertsLbl')}</div></div>`:''}
       </div>
     </div>
 
     <div class="rep-section">
-      <div class="rep-section-title">📈 معدل الحضور — آخر 14 يوم</div>
+      <div class="rep-section-title">📈 ${t('repLast14')}</div>
       ${buildLineChart(last14,'#2563eb',240,'%')}
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
       <div class="rep-section" style="margin-bottom:0">
-        <div class="rep-section-title">🥧 توزيع حالات الحضور (هذا الشهر)</div>
+        <div class="rep-section-title">🥧 ${t('repDonutAtt')}</div>
         ${buildDonutChart([
-          {label:'حضور',value:mP,color:'#16a34a'},
-          {label:'غياب',value:mA,color:'#dc2626'},
-          {label:'إجازة',value:mL,color:'#d97706'},
-          {label:'تأخير',value:mT,color:'#7c3aed'},
-        ],200,(mP+mT+mA+mL),'إجمالي')}
+          {label:t('repAttLbl'),value:mP,color:'#16a34a'},
+          {label:t('repAbsLbl'),value:mA,color:'#dc2626'},
+          {label:t('repLeaveLbl'),value:mL,color:'#d97706'},
+          {label:t('repLateLbl'),value:mT,color:'#7c3aed'},
+        ],200,(mP+mT+mA+mL),t('repTotal'))}
       </div>
       <div class="rep-section" style="margin-bottom:0">
-        <div class="rep-section-title">🍩 مصادر الأوفر تايم</div>
+        <div class="rep-section-title">🍩 ${t('repOTSources')}</div>
         ${(covOTTotal+manOTTotal)>0?buildDonutChart([
-          {label:'تغطية مؤقتة',value:covOTTotal,color:'#0891b2'},
-          {label:'يدوي',value:manOTTotal,color:'#7c3aed'},
-        ],200,covOTTotal+manOTTotal,'ساعة'):'<p style="color:var(--txt2);text-align:center;padding:30px">لا يوجد أوفر تايم هذا الشهر</p>'}
+          {label:t('repOTCov'),value:covOTTotal,color:'#0891b2'},
+          {label:t('repOTMan'),value:manOTTotal,color:'#7c3aed'},
+        ],200,covOTTotal+manOTTotal,t('repHours')):`<p style="color:var(--txt2);text-align:center;padding:30px">${t('repNoOT')}</p>`}
       </div>
     </div>
 
     <div class="rep-section">
-      <div class="rep-section-title">📊 ملخص الشهر — Stacked View</div>
+      <div class="rep-section-title">📊 ${t('repMonthStacked')}</div>
       ${buildStackedBar(monthSegments,40,true)}
     </div>
 
     <div class="rep-section">
-      <div class="rep-section-title">🏗 معدل الحضور بالمشروع (هذا الشهر)</div>
-      <div class="bar-chart">${projBreak||'<p style="color:var(--txt2)">لا توجد بيانات</p>'}</div>
+      <div class="rep-section-title">🏗 ${t('repProjRate')}</div>
+      <div class="bar-chart">${projBreak||`<p style="color:var(--txt2)">${t('repNoData')}</p>`}</div>
     </div>
 
     ${isMgr&&notMarked.length?`<div class="rep-section">
-      <div class="rep-section-title">⚠️ لم يُسجَّل حضورهم اليوم (${notMarked.length})</div>
+      <div class="rep-section-title">⚠️ ${t('repNotMarkedToday')} (${notMarked.length})</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px">
         ${notMarked.map(e=>`<span style="background:var(--surface2);padding:5px 12px;border-radius:20px;font-size:.84rem">${e.name}</span>`).join('')}
       </div>
@@ -6410,7 +6498,7 @@ function renderLiveDashboard(){
 function renderWeeklyReport(){
   const weekStr=document.getElementById('repWeekPick').value;
   const proj=document.getElementById('repWeekProj').value;
-  if(!weekStr){toast('اختر الأسبوع أولاً','warn');return;}
+  if(!weekStr){toast(currentLang==='ar'?'اختر الأسبوع أولاً':'Select a week first','warn');return;}
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
   const wDates=getWeekDates(weekStr);
@@ -6465,28 +6553,28 @@ function renderWeeklyReport(){
 
   document.getElementById('repWeeklyContent').innerHTML=`
     <div class="rep-section">
-      <div class="rep-section-title">📋 التقرير الأسبوعي — ${weekStr}</div>
+      <div class="rep-section-title">📋 ${t('repWeeklyTitle')} — ${weekStr}</div>
       <div class="kpi-grid">
-        <div class="kpi-card kpi-blue"><div class="kpi-ico">👥</div><div class="kpi-val">${list.length}</div><div class="kpi-lbl">عدد الموظفين</div></div>
-        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${totP}</div><div class="kpi-lbl">أيام حضور</div></div>
-        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${totA}</div><div class="kpi-lbl">أيام غياب</div></div>
-        <div class="kpi-card kpi-amber"><div class="kpi-ico">🌙</div><div class="kpi-val" style="color:#d97706">${totL}</div><div class="kpi-lbl">أيام إجازة</div></div>
-        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${workDays&&list.length?pct(totP+totT,list.length*workDays):0}%</div><div class="kpi-lbl">معدل الحضور</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">👥</div><div class="kpi-val">${list.length}</div><div class="kpi-lbl">${t('repEmpCount')}</div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${totP}</div><div class="kpi-lbl">${t('repAttDays')}</div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${totA}</div><div class="kpi-lbl">${t('repAbsDays')}</div></div>
+        <div class="kpi-card kpi-amber"><div class="kpi-ico">🌙</div><div class="kpi-val" style="color:#d97706">${totL}</div><div class="kpi-lbl">${t('repLeaveDays')}</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${workDays&&list.length?pct(totP+totT,list.length*workDays):0}%</div><div class="kpi-lbl">${t('repKpiRate')}</div></div>
       </div>
     </div>
     <div class="rep-section">
-      <div class="rep-section-title">🏗 ملخص المشاريع</div>
-      <table class="rep-tbl"><thead><tr><th>المشروع</th><th>موظفين</th><th>حضور</th><th>غياب</th><th>إجازة</th><th>معدل</th></tr></thead>
-      <tbody>${projRows||'<tr><td colspan="6" style="text-align:center;color:var(--txt2)">لا توجد بيانات</td></tr>'}</tbody></table>
+      <div class="rep-section-title">🏗 ${t('repProjSummary')}</div>
+      <table class="rep-tbl"><thead><tr><th>${t('repTblProject')}</th><th>${t('repTblEmps')}</th><th>${t('repTblPresent')}</th><th>${t('repTblAbsent')}</th><th>${t('repTblLeave')}</th><th>${t('repTblRate')}</th></tr></thead>
+      <tbody>${projRows||`<tr><td colspan="6" style="text-align:center;color:var(--txt2)">${t('repNoData')}</td></tr>`}</tbody></table>
     </div>
     <div class="rep-section">
-      <div class="rep-section-title">👤 تفصيل الموظفين يوماً بيوم</div>
+      <div class="rep-section-title">👤 ${t('repEmpDailyDetail')}</div>
       <div style="overflow-x:auto">
         <table class="rep-tbl">
-          <thead><tr><th>#</th><th>الاسم</th><th>المشروع</th>
+          <thead><tr><th>#</th><th>${t('repTblName')}</th><th>${t('repTblProject')}</th>
             ${dayNames.map((d,i)=>`<th style="font-size:.72rem;min-width:38px">${d}<br><span style="color:var(--txt2);font-size:.68rem">${wDates[i].substr(5)}</span></th>`).join('')}
             <th>✓</th><th>✗</th><th>إج</th><th>🛌</th><th>%</th></tr></thead>
-          <tbody>${empRows||'<tr><td colspan="12" style="text-align:center;color:var(--txt2)">لا توجد بيانات</td></tr>'}</tbody>
+          <tbody>${empRows||`<tr><td colspan="12" style="text-align:center;color:var(--txt2)">${t('repNoData')}</td></tr>`}</tbody>
         </table>
       </div>
     </div>`;
@@ -6496,7 +6584,7 @@ function renderWeeklyReport(){
 function renderMonthlyReport(){
   const monthStr=document.getElementById('repMonthPick').value;
   const proj=document.getElementById('repMonthProj').value;
-  if(!monthStr){toast('اختر الشهر أولاً','warn');return;}
+  if(!monthStr){toast(t('errSelectMonth'),'warn');return;}
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
   const mDates=getMonthDates(monthStr);
@@ -6526,7 +6614,7 @@ function renderMonthlyReport(){
     </tr>`;
   }).join('');
 
-  const salHdr=isMgr?'<th>الراتب</th><th>خصم غياب</th><th>أوفر ﷼</th><th>الصافي</th>':'';
+  const salHdr=isMgr?`<th>${t('repSalHdr')}</th><th>${t('repAbsDeductHdr')}</th><th>${t('repOTAmtHdr')}</th><th>${t('repNetHdr')}</th>`:'';
   const empRows=list.map((e,i)=>{
     const s=getAttSummary(mDates,e.id);
     const pay=mPay[e.id]||{};
@@ -6557,27 +6645,27 @@ function renderMonthlyReport(){
 
   document.getElementById('repMonthlyContent').innerHTML=`
     <div class="rep-section">
-      <div class="rep-section-title">📅 التقرير الشهري — ${monthStr}</div>
+      <div class="rep-section-title">📅 ${t('repMonthlyTitle')} — ${monthStr}</div>
       <div class="kpi-grid">
-        <div class="kpi-card kpi-blue"><div class="kpi-ico">👥</div><div class="kpi-val">${list.length}</div><div class="kpi-lbl">الموظفين</div></div>
-        <div class="kpi-card kpi-blue"><div class="kpi-ico">📋</div><div class="kpi-val">${recDates.length}</div><div class="kpi-lbl">أيام مسجّلة</div></div>
-        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${totP}</div><div class="kpi-lbl">إجمالي حضور</div></div>
-        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${totA}</div><div class="kpi-lbl">إجمالي غياب</div></div>
-        <div class="kpi-card kpi-purple"><div class="kpi-ico">⏱️</div><div class="kpi-val" style="color:#7c3aed">${totOT}</div><div class="kpi-lbl">ساعات أوفر</div></div>
-        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${attPct}%</div><div class="kpi-lbl">معدل الحضور</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">👥</div><div class="kpi-val">${list.length}</div><div class="kpi-lbl">${t('repEmpCount')}</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📋</div><div class="kpi-val">${recDates.length}</div><div class="kpi-lbl">${t('repDaysRecorded')}</div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-ico">✅</div><div class="kpi-val" style="color:#16a34a">${totP}</div><div class="kpi-lbl">${t('repKpiPresent')}</div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-ico">❌</div><div class="kpi-val" style="color:#dc2626">${totA}</div><div class="kpi-lbl">${t('repKpiAbsent')}</div></div>
+        <div class="kpi-card kpi-purple"><div class="kpi-ico">⏱️</div><div class="kpi-val" style="color:#7c3aed">${totOT}</div><div class="kpi-lbl">${t('repKpiOTH')}</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-ico">📈</div><div class="kpi-val">${attPct}%</div><div class="kpi-lbl">${t('repKpiRate')}</div></div>
       </div>
     </div>
     <div class="rep-section">
-      <div class="rep-section-title">🏗 ملخص المشاريع</div>
-      <table class="rep-tbl"><thead><tr><th>المشروع</th><th>موظفين</th><th>حضور</th><th>غياب</th><th>إجازة</th><th>أوفر ساعة</th><th>معدل</th></tr></thead>
-      <tbody>${projRows||'<tr><td colspan="7" style="text-align:center;color:var(--txt2)">لا توجد بيانات</td></tr>'}</tbody></table>
+      <div class="rep-section-title">🏗 ${t('repProjSummary')}</div>
+      <table class="rep-tbl"><thead><tr><th>${t('repTblProject')}</th><th>${t('repTblEmps')}</th><th>${t('repTblPresent')}</th><th>${t('repTblAbsent')}</th><th>${t('repTblLeave')}</th><th>${t('repTblOTH')}</th><th>${t('repTblRate')}</th></tr></thead>
+      <tbody>${projRows||`<tr><td colspan="7" style="text-align:center;color:var(--txt2)">${t('repNoData')}</td></tr>`}</tbody></table>
     </div>
     <div class="rep-section">
-      <div class="rep-section-title">👤 تفصيل الموظفين</div>
+      <div class="rep-section-title">👤 ${t('repEmpDetail2')}</div>
       <div style="overflow-x:auto">
         <table class="rep-tbl">
-          <thead><tr><th>#</th><th>الاسم</th><th>المشروع</th><th>حضور</th><th>غياب</th><th>إجازة</th><th>أوفر ساعة</th><th>%</th>${salHdr}</tr></thead>
-          <tbody>${empRows||'<tr><td colspan="8" style="text-align:center;color:var(--txt2)">لا توجد بيانات</td></tr>'}</tbody>
+          <thead><tr><th>#</th><th>${t('repTblName')}</th><th>${t('repTblProject')}</th><th>${t('repTblPresent')}</th><th>${t('repTblAbsent')}</th><th>${t('repTblLeave')}</th><th>${t('repTblOTH')}</th><th>%</th>${salHdr}</tr></thead>
+          <tbody>${empRows||`<tr><td colspan="8" style="text-align:center;color:var(--txt2)">${t('repNoData')}</td></tr>`}</tbody>
         </table>
       </div>
     </div>`;
@@ -6588,7 +6676,7 @@ function renderCompareReport(){
   const m1=document.getElementById('repCmp1').value;
   const m2=document.getElementById('repCmp2').value;
   const proj=document.getElementById('repCmpProj').value;
-  if(!m1||!m2){toast('اختر شهرين للمقارنة','warn');return;}
+  if(!m1||!m2){toast(currentLang==='ar'?'اختر شهرين للمقارنة':'Select two months to compare','warn');return;}
   const myProj=getMyProject();
   const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj;});
   const isMgr=currentUser&&currentUser.role==='manager';
@@ -6634,8 +6722,9 @@ function renderCompareReport(){
     </tr>`;
   }).join('');
 
+  const isArCmp=currentLang==='ar';
   const salRow=isMgr?`<tr style="font-weight:700;border-top:2px solid var(--border)">
-    <td>💰 صافي الرواتب (﷼)</td>
+    <td>💰 ${isArCmp?'صافي الرواتب (﷼)':'Net Salaries (SAR)'}</td>
     <td style="text-align:center">${s1.net.toLocaleString()}</td>
     <td style="text-align:center">${s2.net.toLocaleString()}</td>
     <td style="text-align:center">${dlt(s2.net,s1.net)}</td>
@@ -6644,25 +6733,25 @@ function renderCompareReport(){
 
   document.getElementById('repCompareContent').innerHTML=`
     <div class="rep-section">
-      <div class="rep-section-title">⚖️ مقارنة: ${m1} مقابل ${m2}</div>
+      <div class="rep-section-title">⚖️ ${isArCmp?'مقارنة':'Compare'}: ${m1} ${isArCmp?'مقابل':'vs'} ${m2}</div>
       <table class="rep-tbl">
-        <thead><tr><th>المؤشر</th><th>${m1}</th><th>${m2}</th><th>التغيير</th><th>النسبة</th></tr></thead>
+        <thead><tr><th>${isArCmp?'المؤشر':'Metric'}</th><th>${m1}</th><th>${m2}</th><th>${isArCmp?'التغيير':'Change'}</th><th>${isArCmp?'النسبة':'%'}</th></tr></thead>
         <tbody>
-          <tr><td>👥 عدد الموظفين</td><td style="text-align:center">${list.length}</td><td style="text-align:center">${list.length}</td><td>—</td><td>—</td></tr>
-          <tr><td>✅ إجمالي الحضور</td><td style="text-align:center">${s1.P}</td><td style="text-align:center">${s2.P}</td><td style="text-align:center">${dlt(s2.P,s1.P)}</td><td style="text-align:center">${pdlt(s2.P,s1.P)}</td></tr>
-          <tr><td>❌ إجمالي الغياب</td><td style="text-align:center">${s1.A}</td><td style="text-align:center">${s2.A}</td><td style="text-align:center">${dlt(s2.A,s1.A,true)}</td><td style="text-align:center">${pdlt(s2.A,s1.A)}</td></tr>
-          <tr><td>🌙 الإجازات</td><td style="text-align:center">${s1.L}</td><td style="text-align:center">${s2.L}</td><td style="text-align:center">${dlt(s2.L,s1.L,true)}</td><td style="text-align:center">${pdlt(s2.L,s1.L)}</td></tr>
-          <tr><td>⏱️ ساعات أوفر تايم</td><td style="text-align:center">${s1.OT}</td><td style="text-align:center">${s2.OT}</td><td style="text-align:center">${dlt(s2.OT,s1.OT)}</td><td style="text-align:center">${pdlt(s2.OT,s1.OT)}</td></tr>
+          <tr><td>👥 ${t('repEmpCount')}</td><td style="text-align:center">${list.length}</td><td style="text-align:center">${list.length}</td><td>—</td><td>—</td></tr>
+          <tr><td>✅ ${t('repKpiPresent')}</td><td style="text-align:center">${s1.P}</td><td style="text-align:center">${s2.P}</td><td style="text-align:center">${dlt(s2.P,s1.P)}</td><td style="text-align:center">${pdlt(s2.P,s1.P)}</td></tr>
+          <tr><td>❌ ${t('repKpiAbsent')}</td><td style="text-align:center">${s1.A}</td><td style="text-align:center">${s2.A}</td><td style="text-align:center">${dlt(s2.A,s1.A,true)}</td><td style="text-align:center">${pdlt(s2.A,s1.A)}</td></tr>
+          <tr><td>🌙 ${t('repLeaveLbl')}</td><td style="text-align:center">${s1.L}</td><td style="text-align:center">${s2.L}</td><td style="text-align:center">${dlt(s2.L,s1.L,true)}</td><td style="text-align:center">${pdlt(s2.L,s1.L)}</td></tr>
+          <tr><td>⏱️ ${t('repKpiOTH')}</td><td style="text-align:center">${s1.OT}</td><td style="text-align:center">${s2.OT}</td><td style="text-align:center">${dlt(s2.OT,s1.OT)}</td><td style="text-align:center">${pdlt(s2.OT,s1.OT)}</td></tr>
           ${salRow}
         </tbody>
       </table>
     </div>
     <div class="rep-section">
-      <div class="rep-section-title">👤 مقارنة الموظفين تفصيلياً</div>
+      <div class="rep-section-title">👤 ${isArCmp?'مقارنة الموظفين تفصيلياً':'Detailed Employee Comparison'}</div>
       <div style="overflow-x:auto">
         <table class="rep-tbl">
-          <thead><tr><th>#</th><th>الاسم</th><th>المشروع</th><th>حضور (${m1}→${m2})</th><th>غياب (${m1}→${m2})</th><th>أوفر (${m1}→${m2})</th></tr></thead>
-          <tbody>${empRows||'<tr><td colspan="6" style="text-align:center;color:var(--txt2)">لا توجد بيانات</td></tr>'}</tbody>
+          <thead><tr><th>#</th><th>${t('repTblName')}</th><th>${t('repTblProject')}</th><th>${t('repTblPresent')} (${m1}→${m2})</th><th>${t('repTblAbsent')} (${m1}→${m2})</th><th>${t('repTblOTH')} (${m1}→${m2})</th></tr></thead>
+          <tbody>${empRows||`<tr><td colspan="6" style="text-align:center;color:var(--txt2)">${t('repNoData')}</td></tr>`}</tbody>
         </table>
       </div>
     </div>`;
@@ -6739,16 +6828,17 @@ function renderIqTable(showAll){
   const list = showAll ? alerts : alerts.slice(0,5);
   const tbody = document.getElementById('dashIqTableBody');
   if(!tbody) return;
+  const isAr=currentLang==='ar';
   if(!alerts.length){
-    tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--txt2)">✅ لا توجد تنبيهات</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--txt2)">✅ ${t('alertsNoAlerts')}</td></tr>`;
     return;
   }
   tbody.innerHTML = list.map((e,i)=>{
     const d = getDays(e);
     let chip, chipClass;
-    if(d < 0){ chip=`منتهية منذ ${Math.abs(d)} يوم`; chipClass='exp'; }
-    else if(d<=30){ chip=`تنتهي خلال ${d} يوم`; chipClass='s30'; }
-    else { chip=`تنتهي خلال ${d} يوم`; chipClass='s90'; }
+    if(d < 0){ chip=isAr?`منتهية منذ ${Math.abs(d)} يوم`:`Expired ${Math.abs(d)} days ago`; chipClass='exp'; }
+    else if(d<=30){ chip=isAr?`تنتهي خلال ${d} يوم`:`Expires in ${d} days`; chipClass='s30'; }
+    else { chip=isAr?`تنتهي خلال ${d} يوم`:`Expires in ${d} days`; chipClass='s90'; }
     return `<tr>
       <td style="color:var(--txt2)">${i+1}</td>
       <td style="font-weight:700">${e.name}</td>
@@ -6759,8 +6849,8 @@ function renderIqTable(showAll){
   }).join('');
   const btn = document.getElementById('dashIqToggleBtn');
   const title = document.getElementById('dashIqTableTitle');
-  if(btn){ btn.textContent = showAll ? 'عرض أقل' : `عرض الكل (${alerts.length})`; }
-  if(title){ title.textContent = `قائمة التنبيهات${showAll?'':' — أحدث 5'}`; }
+  if(btn){ btn.textContent = showAll ? t('alertsShowLess') : `${t('alertsShowAll')} (${alerts.length})`; }
+  if(title){ title.textContent = showAll ? t('alertsTitle') : t('alertsTitleRecent'); }
 }
 function toggleAllIqama(){
   window._iqShowAll = !window._iqShowAll;
@@ -6804,18 +6894,18 @@ function renderIqamaModal(){
   const sumEl = document.getElementById('modalIqSummary');
   if(sumEl){
     sumEl.innerHTML = alerts.length === 0
-      ? `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--txt2);font-size:.88rem">✅ لا توجد إقامات منتهية أو قريبة من الانتهاء</div>`
+      ? `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--txt2);font-size:.88rem">✅ ${t('iqSumNoAlerts')}</div>`
       : `<div class="iq-sum-card iq-expired">
           <div class="iq-sum-ico">🔴</div>
-          <div><div class="iq-sum-num">${expired.length}</div><div class="iq-sum-lbl">إقامات منتهية</div></div>
+          <div><div class="iq-sum-num">${expired.length}</div><div class="iq-sum-lbl">${t('iqSumExpired')}</div></div>
         </div>
         <div class="iq-sum-card iq-soon30">
           <div class="iq-sum-ico">🟠</div>
-          <div><div class="iq-sum-num">${soon30.length}</div><div class="iq-sum-lbl">تنتهي خلال 30 يوم</div></div>
+          <div><div class="iq-sum-num">${soon30.length}</div><div class="iq-sum-lbl">${t('iqSumSoon30')}</div></div>
         </div>
         <div class="iq-sum-card iq-soon90">
           <div class="iq-sum-ico">🟡</div>
-          <div><div class="iq-sum-num">${soon90.length}</div><div class="iq-sum-lbl">تنتهي خلال 90 يوم</div></div>
+          <div><div class="iq-sum-num">${soon90.length}</div><div class="iq-sum-lbl">${t('iqSumSoon90')}</div></div>
         </div>`;
   }
   // Table
@@ -6832,15 +6922,16 @@ function renderIqamaModalTable(showAll){
   const list = showAll ? alerts : alerts.slice(0,5);
   const tbody = document.getElementById('modalIqTableBody');
   if(!tbody) return;
+  const isArM=currentLang==='ar';
   if(!alerts.length){
-    tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--txt2)">✅ لا توجد تنبيهات</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--txt2)">✅ ${t('alertsNoAlerts')}</td></tr>`;
   } else {
     tbody.innerHTML = list.map((e,i)=>{
       const d = getDays(e);
       let chip, chipClass;
-      if(d < 0){ chip=`منتهية منذ ${Math.abs(d)} يوم`; chipClass='exp'; }
-      else if(d<=30){ chip=`تنتهي خلال ${d} يوم`; chipClass='s30'; }
-      else { chip=`تنتهي خلال ${d} يوم`; chipClass='s90'; }
+      if(d < 0){ chip=isArM?`منتهية منذ ${Math.abs(d)} يوم`:`Expired ${Math.abs(d)} days ago`; chipClass='exp'; }
+      else if(d<=30){ chip=isArM?`تنتهي خلال ${d} يوم`:`Expires in ${d} days`; chipClass='s30'; }
+      else { chip=isArM?`تنتهي خلال ${d} يوم`:`Expires in ${d} days`; chipClass='s90'; }
       return `<tr>
         <td style="color:var(--txt2)">${i+1}</td>
         <td style="font-weight:700">${e.name}</td>
@@ -6852,8 +6943,8 @@ function renderIqamaModalTable(showAll){
   }
   const btn = document.getElementById('modalIqToggleBtn');
   const title = document.getElementById('modalIqTableTitle');
-  if(btn){ btn.textContent = showAll ? 'عرض أقل' : `عرض الكل (${alerts.length})`; }
-  if(title){ title.textContent = `قائمة التنبيهات${showAll?'':' — أحدث 5'}`; }
+  if(btn){ btn.textContent = showAll ? t('alertsShowLess') : `${t('alertsShowAll')} (${alerts.length})`; }
+  if(title){ title.textContent = showAll ? t('alertsTitle') : t('alertsTitleRecent'); }
 }
 function toggleAllIqamaModal(){
   window._iqModalShowAll = !window._iqModalShowAll;

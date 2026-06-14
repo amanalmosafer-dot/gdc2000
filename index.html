@@ -928,23 +928,23 @@ td{padding:9px 12px;vertical-align:middle}
 
   <!-- Home Navigation Cards -->
   <div class="home-nav-grid" id="homeNavGrid">
-    <div class="home-nav-card" onclick="switchTab('employees', document.getElementById('tab-btn-employees'))">
+    <div class="home-nav-card" id="hnav-employees" onclick="switchTab('employees', document.getElementById('tab-btn-employees'))">
       <div class="home-nav-ico">👥</div>
       <div class="home-nav-lbl">الموظفون</div>
     </div>
-    <div class="home-nav-card" onclick="switchTab('attendance', document.getElementById('tab-btn-attendance'))">
+    <div class="home-nav-card" id="hnav-attendance" onclick="switchTab('attendance', document.getElementById('tab-btn-attendance'))">
       <div class="home-nav-ico">📋</div>
       <div class="home-nav-lbl">الحضور</div>
     </div>
-    <div class="home-nav-card" onclick="switchTab('payroll', document.getElementById('tab-btn-payroll'))">
+    <div class="home-nav-card" id="hnav-payroll" onclick="switchTab('payroll', document.getElementById('tab-btn-payroll'))">
       <div class="home-nav-ico">💰</div>
       <div class="home-nav-lbl">الرواتب</div>
     </div>
-    <div class="home-nav-card" onclick="switchTab('reports', document.getElementById('tab-btn-reports'))">
+    <div class="home-nav-card" id="hnav-reports" onclick="switchTab('reports', document.getElementById('tab-btn-reports'))">
       <div class="home-nav-ico">📈</div>
       <div class="home-nav-lbl">التقارير</div>
     </div>
-    <div class="home-nav-card" onclick="switchTab('evaluation', document.getElementById('tab-btn-evaluation'))">
+    <div class="home-nav-card" id="hnav-evaluation" onclick="switchTab('evaluation', document.getElementById('tab-btn-evaluation'))">
       <div class="home-nav-ico">⭐</div>
       <div class="home-nav-lbl">التقييم</div>
     </div>
@@ -2133,6 +2133,12 @@ function applyPermissions(){
   can('attendance')?show('tab-btn-attendance'):hide('tab-btn-attendance');
   can('reports')?show('tab-btn-reports'):hide('tab-btn-reports');
   can('evaluation')?show('tab-btn-evaluation'):hide('tab-btn-evaluation');
+  // home nav cards — same permissions as tabs
+  can('employees_view')?show('hnav-employees'):hide('hnav-employees');
+  can('payroll')?show('hnav-payroll'):hide('hnav-payroll');
+  can('attendance')?show('hnav-attendance'):hide('hnav-attendance');
+  can('reports')?show('hnav-reports'):hide('hnav-reports');
+  can('evaluation')?show('hnav-evaluation'):hide('hnav-evaluation');
   // header buttons
   can('employees_add')?show('btnAdd'):hide('btnAdd');
   // الوضع التنفيذي: للمدير فقط
@@ -2985,6 +2991,9 @@ let sortCol=null,sortDir=1,editIdx=-1,photoData='';
 
 // ── TABS ─────────────────────────────────────────────────────
 function switchTab(name,btn){
+  // permission guard — block access to unauthorized tabs
+  const permMap={employees:'employees_view',payroll:'payroll',attendance:'attendance',reports:'reports',evaluation:'evaluation'};
+  if(name!=='dashboard'&&permMap[name]&&!can(permMap[name]))return;
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');

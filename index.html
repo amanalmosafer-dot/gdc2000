@@ -930,23 +930,23 @@ td{padding:9px 12px;vertical-align:middle}
   <div class="home-nav-grid" id="homeNavGrid">
     <div class="home-nav-card" id="hnav-employees" onclick="switchTab('employees', document.getElementById('tab-btn-employees'))">
       <div class="home-nav-ico">👥</div>
-      <div class="home-nav-lbl">الموظفون</div>
+      <div class="home-nav-lbl" id="hnav-lbl-employees">الموظفون</div>
     </div>
     <div class="home-nav-card" id="hnav-attendance" onclick="switchTab('attendance', document.getElementById('tab-btn-attendance'))">
       <div class="home-nav-ico">📋</div>
-      <div class="home-nav-lbl">الحضور</div>
+      <div class="home-nav-lbl" id="hnav-lbl-attendance">الحضور</div>
     </div>
     <div class="home-nav-card" id="hnav-payroll" onclick="switchTab('payroll', document.getElementById('tab-btn-payroll'))">
       <div class="home-nav-ico">💰</div>
-      <div class="home-nav-lbl">الرواتب</div>
+      <div class="home-nav-lbl" id="hnav-lbl-payroll">الرواتب</div>
     </div>
     <div class="home-nav-card" id="hnav-reports" onclick="switchTab('reports', document.getElementById('tab-btn-reports'))">
       <div class="home-nav-ico">📈</div>
-      <div class="home-nav-lbl">التقارير</div>
+      <div class="home-nav-lbl" id="hnav-lbl-reports">التقارير</div>
     </div>
     <div class="home-nav-card" id="hnav-evaluation" onclick="switchTab('evaluation', document.getElementById('tab-btn-evaluation'))">
       <div class="home-nav-ico">⭐</div>
-      <div class="home-nav-lbl">التقييم</div>
+      <div class="home-nav-lbl" id="hnav-lbl-evaluation">التقييم</div>
     </div>
   </div>
 
@@ -968,11 +968,11 @@ td{padding:9px 12px;vertical-align:middle}
   <!-- ③ Two-column: Project Distribution + Attendance Today -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
     <div class="dash-section">
-      <div class="dash-section-title">📁 توزيع الموظفين حسب المشروع</div>
+      <div class="dash-section-title" id="dashProjDistTitle">📁 توزيع الموظفين حسب المشروع</div>
       <div id="dashProjBars"></div>
     </div>
     <div class="dash-section">
-      <div class="dash-section-title">📋 الحضور اليوم</div>
+      <div class="dash-section-title" id="dashAttTodayTitle">📋 الحضور اليوم</div>
       <div class="att-today-grid" id="dashAttSum"></div>
     </div>
   </div>
@@ -1728,6 +1728,7 @@ const T={
     repSalHdr:'الراتب',repAbsDeductHdr:'خصم غياب',repOTAmtHdr:'أوفر ﷼',repNetHdr:'الصافي',
     // calendar & heatmap
     repCalSection:'تقويم',repHeatSection:'الخريطة الحرارية للحضور',
+    sar:'ريال',sarH:'ريال/ساعة',dTermLbl:'منتهية خدمتهم',dNeedsFollowUp:'تحتاج متابعة',dAllGood:'كل شيء جيد',dActiveEmp:'موظفون نشطون',dAvgSal:'متوسط',dSalPerEmp:'ريال/موظف',dAttToday:'📋 الحضور اليوم',
   },
   en:{
     sysTitle:'Employee Management System',
@@ -1891,6 +1892,7 @@ const T={
     repSalHdr:'Salary',repAbsDeductHdr:'Abs. Deduct',repOTAmtHdr:'OT Amt',repNetHdr:'Net Pay',
     // calendar & heatmap
     repCalSection:'Calendar',repHeatSection:'Attendance Heatmap',
+    dTermLbl:'Terminated',dNeedsFollowUp:'Needs attention',dAllGood:'All good',dActiveEmp:'Active employees',dAvgSal:'Avg.',dSalPerEmp:'SAR/emp',dAttToday:'📋 Today\'s Attendance',
   }
 };
 
@@ -2020,8 +2022,20 @@ function applyLang(){
   setText('projLockTxt',t('projLockMsg'));
   // page title & h1
   document.title=t('sysTitle');
-  const h1El=document.querySelector('header h1');
-  if(h1El){const tn=Array.from(h1El.childNodes).find(n=>n.nodeType===3);if(tn)tn.textContent=t('sysTitle')+' ';}
+  const h1SpanEl=document.querySelector('header h1 span');
+  if(h1SpanEl)h1SpanEl.textContent=t('sysTitle');
+  // executive mode & users buttons
+  setText('btnExec',isAr?'🎤 وضع التنفيذي':'🎤 Executive Mode');
+  setText('btnUsersMgmt',isAr?'👥 مستخدمون':'👥 Users');
+  // home nav card labels
+  const _hnavL={employees:{ar:'الموظفون',en:'Employees'},attendance:{ar:'الحضور',en:'Attendance'},payroll:{ar:'الرواتب',en:'Payroll'},reports:{ar:'التقارير',en:'Reports'},evaluation:{ar:'التقييم',en:'Evaluation'}};
+  Object.keys(_hnavL).forEach(k=>setText('hnav-lbl-'+k,_hnavL[k][currentLang]));
+  // dashboard section titles
+  setText('dashProjDistTitle',t('dProjDist'));
+  setText('dashAttTodayTitle',t('dAttToday'));
+  // user chip role badge refresh
+  const _chip=document.getElementById('userChip');
+  if(_chip&&currentUser){const _myP=getMyProject();const _pb=_myP?'<span class="role-badge" style="background:rgba(124,58,237,.35)">'+_myP+'</span>':'';_chip.innerHTML='<span>👤 '+currentUser.username+'</span><span class="role-badge">'+(currentUser.role==='manager'?t('roleManager'):t('roleSupervisor'))+'</span>'+_pb;}
   // re-render active tab
   const activeTab=document.querySelector('.tab-content.active');
   if(activeTab){
@@ -3801,7 +3815,7 @@ function renderDashboard(){
       <div class="stat-ico-new">👥</div>
       <div class="stat-num-new">${total}</div>
       <div class="stat-lbl-new">${t('dTotalEmp')}</div>
-      <div class="stat-sub-new trend-up">▲ ${active} نشط</div>
+      <div class="stat-sub-new trend-up">▲ ${active} ${t('active')}</div>
       <div class="stat-progress"><div class="stat-progress-fill" style="width:${activePct}%;background:linear-gradient(90deg,#2563eb,#60a5fa)"></div></div>
     </div>
     <div class="stat-card s-purple">
@@ -3821,21 +3835,21 @@ function renderDashboard(){
       <div class="stat-ico-new">🌴</div>
       <div class="stat-num-new">${onLeave}</div>
       <div class="stat-lbl-new">${t('dOnLeave')}</div>
-      <div class="stat-sub-new">${onLeavePct}% من الإجمالي</div>
+      <div class="stat-sub-new">${onLeavePct}${t('dOfTotal')}</div>
       <div class="stat-progress"><div class="stat-progress-fill" style="width:${onLeavePct}%;background:linear-gradient(90deg,#d97706,#fbbf24)"></div></div>
     </div>
     <div class="stat-card s-red">
       <div class="stat-ico-new">🚫</div>
       <div class="stat-num-new">${terminated}</div>
-      <div class="stat-lbl-new">منتهية خدمتهم</div>
-      <div class="stat-sub-new">${termPct}% من الإجمالي</div>
+      <div class="stat-lbl-new">${t('dTermLbl')}</div>
+      <div class="stat-sub-new">${termPct}${t('dOfTotal')}</div>
       <div class="stat-progress"><div class="stat-progress-fill" style="width:${termPct}%;background:linear-gradient(90deg,#dc2626,#f87171)"></div></div>
     </div>
     <div class="stat-card s-teal" style="cursor:pointer" onclick="document.getElementById('dashIqSection').scrollIntoView({behavior:'smooth'})">
       <div class="stat-ico-new">🛂</div>
       <div class="stat-num-new" style="${iqCount>0?'color:#dc2626':''}">${iqCount}</div>
       <div class="stat-lbl-new">${t('dIqAlerts')}</div>
-      <div class="stat-sub-new ${iqCount>0?'trend-down':''}">${iqCount>0?'⚠️ تحتاج متابعة':'✓ كل شيء جيد'}</div>
+      <div class="stat-sub-new ${iqCount>0?'trend-down':''}">${iqCount>0?'⚠️ '+t('dNeedsFollowUp'):'✓ '+t('dAllGood')}</div>
     </div>`;
 
   // ② Salary section — admin only
@@ -3844,9 +3858,9 @@ function renderDashboard(){
   if(currentUser && currentUser.role==='admin'){
     salSection.style.display='block';
     salCard.innerHTML=`
-      <div class="sal-admin-title">💰 إجمالي الرواتب الشهرية</div>
-      <div class="sal-admin-num">${totalSal.toLocaleString()} <span style="font-size:1rem;opacity:.7">ريال</span></div>
-      <div class="sal-admin-sub">موظفون نشطون: ${active} — متوسط: ${active?Math.round(totalSal/active).toLocaleString():0} ريال/موظف</div>`;
+      <div class="sal-admin-title">💰 ${t('dTotalSal')}</div>
+      <div class="sal-admin-num">${totalSal.toLocaleString()} <span style="font-size:1rem;opacity:.7">${t('sar')}</span></div>
+      <div class="sal-admin-sub">${t('dActiveEmp')}: ${active} — ${t('dAvgSal')}: ${active?Math.round(totalSal/active).toLocaleString():0} ${t('dSalPerEmp')}</div>`;
   } else {
     salSection.style.display='none';
   }

@@ -3195,18 +3195,26 @@ let coverages=JSON.parse(localStorage.getItem('coverages')||'[]');
 // أوفر تايم يدوي بساعات محددة: [{id, empId, date, hours, reason, by}]
 let overtimes=JSON.parse(localStorage.getItem('overtimes')||'[]');
 
-// حقول سرية تبقى محلياً فقط ولا ترفع لـ Firebase
+// حقول الرواتب — تُزامن مع Firebase في مسار منفصل (payrollData) بدل ما تُحبس بالمتصفح المحلي،
+// بحيث أي مستخدم يدخل بيانات راتب يشوفها باقي المستخدمين المصرح لهم من أي جهاز.
+// تظل محمية بنفس نظام صلاحيات الموقع (can('payroll')) — إخفاء بالواجهة، مثل باقي الميزات الحساسة بالنظام.
 const LOCAL_ONLY_FIELDS=['baseSalary','overtimeRate','housingAllowance','transportAllowance','insuranceType','driverName','driverPhone','driverCost','salaryNotes'];
+let payrollDataCache={};
 function saveEmps(){
   localStorage.setItem('employees',JSON.stringify(employees));
   if(fbReady){
     const o={};
+    const payrollOut={};
     employees.forEach(e=>{
       const pub={...e};
-      LOCAL_ONLY_FIELDS.forEach(f=>delete pub[f]);
+      const priv={};
+      LOCAL_ONLY_FIELDS.forEach(f=>{if(e[f]!==undefined){priv[f]=e[f];}delete pub[f];});
       o[e.id]=pub;
+      payrollOut[e.id]=priv;
     });
     db.ref('employees').set(o);
+    db.ref('payrollData').set(payrollOut);
+    payrollDataCache=payrollOut;
   }
 }
 function saveAtt(){localStorage.setItem('attendance',JSON.stringify(attendance));if(fbReady)db.ref('attendance').set(attendance);}
@@ -3302,12 +3310,15 @@ function attachDataListeners(){
   db.ref('employees').on('value',snap=>{
     const v=snap.val();
     if(v){
-      // احتفظ بالحقول السرية المحلية عند المزامنة مع Firebase
-      const localMap={};
-      employees.forEach(e=>{const s={};LOCAL_ONLY_FIELDS.forEach(f=>{if(e[f]!==undefined)s[f]=e[f];});localMap[e.id]=s;});
-      employees=Object.values(v).map(e=>({...e,...(localMap[e.id]||{})}));
+      employees=Object.values(v).map(e=>({...e,...(payrollDataCache[e.id]||{})}));
       localStorage.setItem('employees',JSON.stringify(employees));
     }
+    renderActive();
+  },onErr);
+  db.ref('payrollData').on('value',snap=>{
+    payrollDataCache=snap.val()||{};
+    employees=employees.map(e=>({...e,...(payrollDataCache[e.id]||{})}));
+    localStorage.setItem('employees',JSON.stringify(employees));
     renderActive();
   },onErr);
   db.ref('attendance').on('value',snap=>{

@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
 <title>نظام إدارة الموظفين</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2964,6 +2967,29 @@ firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 const auth=firebase.auth();
 var fbReady=false;
+
+// ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
+// (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
+const BUILD_VERSION="2026.07.23.0310";
+let _updateBannerShown=false;
+async function checkForUpdate(){
+  try{
+    const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});
+    if(!r.ok)return;
+    const j=await r.json();
+    if(j&&j.version&&j.version!==BUILD_VERSION&&!_updateBannerShown){
+      _updateBannerShown=true;
+      const b=document.createElement('div');
+      b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:100000;background:#0f766e;color:#fff;padding:12px 16px;text-align:center;font-family:Tajawal,sans-serif;font-size:.9rem;box-shadow:0 -4px 20px rgba(0,0,0,.3)';
+      b.innerHTML='🔄 يتوفر تحديث جديد للنظام — سيتم التحديث تلقائياً خلال ثوانٍ &nbsp; <button onclick="location.reload(true)" style="background:#fff;color:#0f766e;border:none;padding:6px 16px;border-radius:8px;font-weight:700;cursor:pointer;margin-right:8px">تحديث الآن</button>';
+      document.body.appendChild(b);
+      setTimeout(()=>location.reload(true),6000);
+    }
+  }catch(e){/* تجاهل أخطاء الشبكة */}
+}
+// افحص عند بدء التشغيل وكل 3 دقائق
+setTimeout(checkForUpdate,4000);
+setInterval(checkForUpdate,180000);
 // المستخدم يكتب اسمه فقط، ونحوّله داخلياً لبريد ثابت
 function uname2email(u){return u.includes('@')?u:u.toLowerCase()+'@gdc2000.local';}
 
@@ -3212,12 +3238,43 @@ function saveEmps(){
       o[e.id]=pub;
       payrollOut[e.id]=priv;
     });
-    db.ref('employees').set(o);
-    db.ref('payrollData').set(payrollOut);
+    // update() يدمج بدل ما يستبدل — يحمي من مسح تعديلات مستخدم آخر يعدّل بنفس اللحظة
+    db.ref('employees').update(o);
+    db.ref('payrollData').update(payrollOut);
     payrollDataCache=payrollOut;
   }
 }
-function saveAtt(){localStorage.setItem('attendance',JSON.stringify(attendance));if(fbReady)db.ref('attendance').set(attendance);}
+// حفظ موظف واحد فقط (أدق وأأمن من كتابة كل القائمة عند تعديل شخص واحد)
+function saveOneEmp(e){
+  localStorage.setItem('employees',JSON.stringify(employees));
+  if(fbReady&&e&&e.id){
+    const pub={...e};const priv={};
+    LOCAL_ONLY_FIELDS.forEach(f=>{if(e[f]!==undefined){priv[f]=e[f];}delete pub[f];});
+    db.ref('employees/'+e.id).set(pub);
+    db.ref('payrollData/'+e.id).set(priv);
+    payrollDataCache[e.id]=priv;
+  }
+}
+// حذف موظف واحد من Firebase مباشرة (بدل إعادة كتابة القائمة كلها)
+function removeOneEmp(id){
+  localStorage.setItem('employees',JSON.stringify(employees));
+  if(fbReady&&id){
+    db.ref('employees/'+id).remove();
+    db.ref('payrollData/'+id).remove();
+    delete payrollDataCache[id];
+  }
+}
+function saveAtt(){localStorage.setItem('attendance',JSON.stringify(attendance));if(fbReady)db.ref('attendance').update(attendance);}
+// كتابة تحضير خلية واحدة مباشرة (يمنع مسح تحضير مشرف آخر بنفس اليوم)
+function saveAttCell(date,empId,status){
+  localStorage.setItem('attendance',JSON.stringify(attendance));
+  if(fbReady)db.ref('attendance/'+date+'/'+empId).set(status||null);
+}
+// كتابة عدة خلايا بنفس اليوم عبر الدمج (لا تمسح موظفين آخرين سجّلهم مشرف آخر)
+function saveAttDateMerge(date,map){
+  localStorage.setItem('attendance',JSON.stringify(attendance));
+  if(fbReady)db.ref('attendance/'+date).update(map);
+}
 function savePay(){localStorage.setItem('payroll',JSON.stringify(payroll));/* payroll stays local only — never synced to Firebase */}
 function saveEval(){localStorage.setItem('evaluations',JSON.stringify(evaluations));if(fbReady)db.ref('evaluations').set(evaluations);}
 function saveCoverages(){localStorage.setItem('coverages',JSON.stringify(coverages));if(fbReady)db.ref('coverages').set(coverages);}
@@ -4405,8 +4462,8 @@ function restoreData(inp){
   r.onload=ev=>{
     try{
       const data=JSON.parse(ev.target.result);
-      if(data.employees){employees=data.employees;saveEmps()}
-      if(data.attendance){attendance=data.attendance;saveAtt()}
+      if(data.employees){employees=data.employees;saveEmps();}
+      if(data.attendance){attendance=data.attendance;localStorage.setItem('attendance',JSON.stringify(attendance));if(fbReady)db.ref('attendance').set(attendance);}
       if(data.payroll){payroll=data.payroll;savePay()}
       toast(t('msgRestoreOk'),'ok');
       render();renderDashboard();
@@ -4720,7 +4777,21 @@ function closeModal(){document.getElementById('modalBg').classList.remove('open'
 function prevPhoto(inp){
   const f=inp.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=e=>{photoData=e.target.result;document.getElementById('photoPrev').innerHTML=`<img src="${photoData}"/>`};
+  r.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      // ضغط الصورة قبل الحفظ — صور كبيرة تفشل بصمت أو تتأخر كثيراً عند المزامنة مع Firebase
+      const MAX=300;
+      let w=img.width,h=img.height;
+      if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}
+      else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}
+      const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      photoData=cv.toDataURL('image/jpeg',0.7);
+      document.getElementById('photoPrev').innerHTML=`<img src="${photoData}"/>`;
+    };
+    img.src=e.target.result;
+  };
   r.readAsDataURL(f);
 }
 
@@ -4765,14 +4836,15 @@ function saveEmp(){
   };
   const isEdit=editIdx>=0;
   if(isEdit)employees[editIdx]=emp;else employees.push(emp);
-  saveEmps();closeModal();render();
+  saveOneEmp(emp);closeModal();render();
   logAudit(isEdit?'✏️':'➕',isEdit?'تعديل موظف':'إضافة موظف',emp.name);
 }
 
 function delEmp(idx){
   const nm=employees[idx].name;
+  const id=employees[idx].id;
   if(!confirm(t('confirmDeleteEmp')+' "'+nm+'"؟'))return;
-  employees.splice(idx,1);saveEmps();render();
+  employees.splice(idx,1);removeOneEmp(id);render();
   logAudit('🗑️','حذف موظف',nm);
 }
 
@@ -6180,9 +6252,10 @@ function setAtt(date,empId,status,btn){
   if(!date){toast(t('errSelectDate'),'err');return}
   if(!attendance[date])attendance[date]={};
   const prev=attendance[date][empId];
-  if(prev===status){delete attendance[date][empId]}
-  else{attendance[date][empId]=status}
-  saveAtt();renderAtt();
+  let newStatus;
+  if(prev===status){delete attendance[date][empId];newStatus='';}
+  else{attendance[date][empId]=status;newStatus=status;}
+  saveAttCell(date,empId,newStatus);renderAtt();
 }
 
 function markAllP(){bulkSet('P');}
@@ -6202,8 +6275,9 @@ function bulkSet(status){
     return true;
   });
   if(!list.length){toast('لا يوجد موظفون مطابقون','warn');return;}
-  list.forEach(e=>attendance[date][e.id]=status);
-  saveAtt();renderAtt();
+  const _map={};
+  list.forEach(e=>{attendance[date][e.id]=status;_map[e.id]=status;});
+  saveAttDateMerge(date,_map);renderAtt();
   const labels={P:'حاضرين',A:'غائبين',L:'إجازة',T:'متأخرين',O:'راحة'};
   toast(`✅ تم تحضير ${list.length} موظف كـ"${labels[status]}"`,'ok');
 }
@@ -6222,15 +6296,15 @@ function copyAttFrom(when){
   const shift=document.getElementById('qfShift')?document.getElementById('qfShift').value:'';
   const myProj=getMyProject();
   if(!attendance[date])attendance[date]={};
-  let n=0;
+  let n=0;const _map={};
   employees.forEach(e=>{
     if(myProj&&!myProj.includes(e.project))return;
     if(proj&&e.project!==proj)return;
     if(shift&&(e.shift||'-')!==shift)return;
-    if(src[e.id]){attendance[date][e.id]=src[e.id];n++;}
+    if(src[e.id]){attendance[date][e.id]=src[e.id];_map[e.id]=src[e.id];n++;}
   });
   if(!n){toast('لم يُنسخ أي شيء (تأكد من المرشحات)','warn');return;}
-  saveAtt();renderAtt();
+  saveAttDateMerge(date,_map);renderAtt();
   toast(`📋 تم نسخ ${n} تحضير من ${srcDate}`,'ok');
 }
 
@@ -6250,14 +6324,14 @@ function clearAttDay(){
   const shift=document.getElementById('qfShift')?document.getElementById('qfShift').value:'';
   const myProj=getMyProject();
   if(!attendance[date])return;
-  let n=0;
+  let n=0;const _map={};
   employees.forEach(e=>{
     if(myProj&&!myProj.includes(e.project))return;
     if(proj&&e.project!==proj)return;
     if(shift&&(e.shift||'-')!==shift)return;
-    if(attendance[date][e.id]){delete attendance[date][e.id];n++;}
+    if(attendance[date][e.id]){delete attendance[date][e.id];_map[e.id]=null;n++;}
   });
-  saveAtt();renderAtt();
+  saveAttDateMerge(date,_map);renderAtt();
   toast(`🗑️ تم مسح ${n} تحضير`,'ok');
 }
 

@@ -615,6 +615,14 @@ td{padding:10px 13px;vertical-align:middle}
 /* ── AUDIT LOG MODAL ── */
 #auditModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2500;align-items:center;justify-content:center;backdrop-filter:blur(3px);direction:rtl}
 #auditModal.open{display:flex}
+#compModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2500;align-items:center;justify-content:center;backdrop-filter:blur(3px);direction:rtl}
+#compModal.open{display:flex}
+.comp-bar{height:8px;border-radius:5px;background:var(--surface2);overflow:hidden;flex:1;min-width:70px}
+.comp-bar-fill{height:100%;border-radius:5px}
+.comp-emp-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin-bottom:5px;background:var(--surface2);border:1px solid var(--border);font-size:.82rem}
+.comp-miss-chip{display:inline-block;background:var(--danger,#c0392b);color:#fff;font-size:.68rem;padding:1px 7px;border-radius:20px;margin:1px 2px;white-space:nowrap;opacity:.85}
+.comp-stat{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;flex:1}
+.comp-stat b{display:block;font-size:1.5rem;font-weight:800}
 .audit-card{background:var(--surface);border-radius:14px;width:620px;max-width:96vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35)}
 .audit-head{background:var(--grad);color:#fff;padding:16px 20px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 .audit-body{overflow-y:auto;flex:1;padding:16px}
@@ -1108,6 +1116,7 @@ td{padding:10px 13px;vertical-align:middle}
       <option value="expiring" id="optIqExpiring">🟡 تنتهي قريباً (90 يوم)</option>
     </select>
     <input type="text" id="srch" placeholder="🔍 بحث بالاسم أو الرقم..." oninput="render()"/>
+    <button class="btn btn-info no-print" id="btnCompleteness" onclick="openCompleteness()" style="white-space:nowrap">📋 <span id="btnCompletenessTxt">نواقص البيانات</span></button>
     <div class="spacer"></div>
     <span id="cnt" style="font-size:.83rem;color:var(--txt2);white-space:nowrap"></span>
   </div>
@@ -1811,6 +1820,17 @@ td{padding:10px 13px;vertical-align:middle}
   </div>
 </div>
 
+<!-- DATA COMPLETENESS MODAL -->
+<div id="compModal">
+  <div class="audit-card" style="width:860px">
+    <div class="audit-head">
+      <h3 id="compModalTitle" style="font-size:.97rem;font-weight:700">📋 اكتمال بيانات الموظفين</h3>
+      <button class="close-x" onclick="document.getElementById('compModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="audit-body" id="compBody"></div>
+  </div>
+</div>
+
 <!-- LOGIN OVERLAY -->
 <div id="loginOverlay">
   <div class="login-orb"></div>
@@ -2209,6 +2229,7 @@ function applyLang(){
   setText('btnBackupTxt',t('btnBackup'));
   setText('btnRestoreTxt',t('btnRestore'));
   setText('btnAdd',t('btnAdd'));
+  setText('btnCompletenessTxt',currentLang==='ar'?'نواقص البيانات':'Data gaps');
   const isDark=document.getElementById('app').classList.contains('dark');
   const db=document.getElementById('darkBtn');if(db)db.textContent=isDark?t('btnLight'):t('btnDark');
   const di=document.getElementById('darkIco');if(di)di.textContent=isDark?'☀️':'🌙';
@@ -2716,6 +2737,72 @@ function openAuditLog(){
   document.getElementById('auditModal').classList.add('open');
 }
 
+// ── DATA COMPLETENESS ────────────────────────────────────────
+// الحقول الأساسية المطلوبة لكل موظف + تسمياتها ثنائية اللغة
+const COMP_FIELDS=[
+  {key:'name',        ar:'الاسم',        en:'Name'},
+  {key:'nationality', ar:'الجنسية',      en:'Nationality'},
+  {key:'iqamaNum',    ar:'رقم الإقامة',  en:'Iqama No.'},
+  {key:'iqamaExpiry', ar:'انتهاء الإقامة',en:'Iqama Expiry'},
+  {key:'phone',       ar:'الجوال',       en:'Mobile'},
+  {key:'passportNum', ar:'رقم الجواز',   en:'Passport'},
+  {key:'birthDate',   ar:'تاريخ الميلاد',en:'Birth Date'},
+  {key:'startDate',   ar:'تاريخ التعيين',en:'Joining Date'},
+  {key:'sponsor',     ar:'الكفيل',       en:'Sponsor'},
+  {key:'photo',       ar:'الصورة',       en:'Photo'},
+];
+function _isFilled(v){return v!==undefined&&v!==null&&String(v).trim()!==''&&String(v).trim()!=='-';}
+function openCompleteness(){
+  const isAr=currentLang==='ar';
+  // احترم فلتر المشروع الحالي للمشرف
+  const myProj=getMyProject();
+  const list=employees.filter(e=>!myProj||myProj.includes(e.project));
+  const total=list.length||1;
+  // احسب النقص لكل موظف + عدّاد لكل حقل
+  const fieldMissing={};COMP_FIELDS.forEach(f=>fieldMissing[f.key]=0);
+  const rows=list.map(e=>{
+    const missing=COMP_FIELDS.filter(f=>!_isFilled(e[f.key]));
+    missing.forEach(f=>fieldMissing[f.key]++);
+    const pct=Math.round((COMP_FIELDS.length-missing.length)/COMP_FIELDS.length*100);
+    return {e,missing,pct};
+  }).sort((a,b)=>a.pct-b.pct); // الأقل اكتمالاً أولاً
+  const avg=Math.round(rows.reduce((s,r)=>s+r.pct,0)/total);
+  const complete=rows.filter(r=>r.missing.length===0).length;
+  const barColor=p=>p>=80?'#1e8e3e':p>=50?'#b7791f':'#c0392b';
+
+  // ملخص علوي
+  let html=`<div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+    <div class="comp-stat"><b style="color:#2E5C8A">${avg}%</b><span style="font-size:.75rem;color:var(--txt2)">${isAr?'متوسط الاكتمال':'Avg. completeness'}</span></div>
+    <div class="comp-stat"><b style="color:#1e8e3e">${complete}</b><span style="font-size:.75rem;color:var(--txt2)">${isAr?'مكتمل بالكامل':'Fully complete'}</span></div>
+    <div class="comp-stat"><b style="color:#c0392b">${total-complete}</b><span style="font-size:.75rem;color:var(--txt2)">${isAr?'ناقص بيانات':'Has gaps'}</span></div>
+  </div>`;
+
+  // أكثر الحقول نقصاً
+  const worst=COMP_FIELDS.map(f=>({f,n:fieldMissing[f.key]})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n);
+  if(worst.length){
+    html+=`<div style="font-size:.8rem;font-weight:700;margin:4px 2px 6px">${isAr?'📉 أكثر الحقول نقصاً:':'📉 Most missing fields:'}</div>`;
+    html+='<div style="margin-bottom:14px">'+worst.map(x=>`<span class="comp-miss-chip" style="opacity:1">${isAr?x.f.ar:x.f.en} · ${x.n}</span>`).join(' ')+'</div>';
+  }
+
+  // قائمة الموظفين (الأقل اكتمالاً أولاً)
+  html+=`<div style="font-size:.8rem;font-weight:700;margin:4px 2px 6px">${isAr?'👤 الموظفون (الأقل اكتمالاً أولاً):':'👤 Employees (least complete first):'}</div>`;
+  html+=rows.map(r=>{
+    const chips=r.missing.length
+      ? r.missing.map(f=>`<span class="comp-miss-chip">${isAr?f.ar:f.en}</span>`).join('')
+      : `<span style="color:#1e8e3e;font-weight:700;font-size:.78rem">✓ ${isAr?'مكتمل':'Complete'}</span>`;
+    return `<div class="comp-emp-row">
+      <div style="min-width:130px;font-weight:600">${r.e.name||'—'}<div style="font-size:.7rem;color:var(--txt2);font-weight:400">${r.e.project||''}</div></div>
+      <div class="comp-bar"><div class="comp-bar-fill" style="width:${r.pct}%;background:${barColor(r.pct)}"></div></div>
+      <span style="min-width:36px;font-weight:700;color:${barColor(r.pct)}">${r.pct}%</span>
+      <div style="flex:2;min-width:160px;text-align:${isAr?'right':'left'}">${chips}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('compBody').innerHTML=html;
+  document.getElementById('compModalTitle').textContent=isAr?'📋 اكتمال بيانات الموظفين':'📋 Employee data completeness';
+  document.getElementById('compModal').classList.add('open');
+}
+
 // ── PAYSLIP ──────────────────────────────────────────────────
 function showPayslip(empId,month){
   const e=employees.find(x=>x.id===empId);if(!e)return;
@@ -2970,7 +3057,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.07.23.0310";
+const BUILD_VERSION="2026.07.23.0341";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{

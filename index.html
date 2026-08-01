@@ -3057,7 +3057,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.07.23.0341";
+const BUILD_VERSION="2026.08.01.1646";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{
@@ -3362,7 +3362,7 @@ function saveAttDateMerge(date,map){
   localStorage.setItem('attendance',JSON.stringify(attendance));
   if(fbReady)db.ref('attendance/'+date).update(map);
 }
-function savePay(){localStorage.setItem('payroll',JSON.stringify(payroll));/* payroll stays local only — never synced to Firebase */}
+function savePay(){localStorage.setItem('payroll',JSON.stringify(payroll));if(fbReady)db.ref('payrollRuns').update(payroll);/* كشف الرواتب الشهري يتزامن الآن عبر مسار محمي payrollRuns */}
 function saveEval(){localStorage.setItem('evaluations',JSON.stringify(evaluations));if(fbReady)db.ref('evaluations').set(evaluations);}
 function saveCoverages(){localStorage.setItem('coverages',JSON.stringify(coverages));if(fbReady)db.ref('coverages').set(coverages);}
 function saveOvertimes(){localStorage.setItem('overtimes',JSON.stringify(overtimes));if(fbReady)db.ref('overtimes').set(overtimes);}
@@ -3469,7 +3469,10 @@ function attachDataListeners(){
     attendance=snap.val()||{};localStorage.setItem('attendance',JSON.stringify(attendance));
     renderActive();
   },onErr);
-  /* payroll — local only, never synced from Firebase */
+  db.ref('payrollRuns').on('value',snap=>{
+    payroll=snap.val()||{};localStorage.setItem('payroll',JSON.stringify(payroll));
+    renderActive();
+  },onErr);
   db.ref('evaluations').on('value',snap=>{
     evaluations=snap.val()||{};localStorage.setItem('evaluations',JSON.stringify(evaluations));
     renderActive();

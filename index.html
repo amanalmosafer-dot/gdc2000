@@ -3057,7 +3057,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.08.01.1646";
+const BUILD_VERSION="2026.08.12.0357";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{
@@ -3313,6 +3313,8 @@ let overtimes=JSON.parse(localStorage.getItem('overtimes')||'[]');
 // تظل محمية بنفس نظام صلاحيات الموقع (can('payroll')) — إخفاء بالواجهة، مثل باقي الميزات الحساسة بالنظام.
 const LOCAL_ONLY_FIELDS=['baseSalary','overtimeRate','housingAllowance','transportAllowance','insuranceType','driverName','driverPhone','driverCost','salaryNotes'];
 let payrollDataCache={};
+// المدير فقط يكتب/يقرأ بيانات الرواتب على مستوى قاعدة البيانات (مطابق لقواعد Firebase)
+function isMgr(){return !!(currentUser&&currentUser.role==='manager');}
 function saveEmps(){
   localStorage.setItem('employees',JSON.stringify(employees));
   if(fbReady){
@@ -3327,8 +3329,8 @@ function saveEmps(){
     });
     // update() يدمج بدل ما يستبدل — يحمي من مسح تعديلات مستخدم آخر يعدّل بنفس اللحظة
     db.ref('employees').update(o);
-    db.ref('payrollData').update(payrollOut);
-    payrollDataCache=payrollOut;
+    // الرواتب: يكتبها المدير فقط (قاعدة Firebase تمنع غيره) — .catch يمنع ظهور أي خطأ للمشرفين
+    if(isMgr()){db.ref('payrollData').update(payrollOut).catch(()=>{});payrollDataCache=payrollOut;}
   }
 }
 // حفظ موظف واحد فقط (أدق وأأمن من كتابة كل القائمة عند تعديل شخص واحد)
@@ -3338,8 +3340,7 @@ function saveOneEmp(e){
     const pub={...e};const priv={};
     LOCAL_ONLY_FIELDS.forEach(f=>{if(e[f]!==undefined){priv[f]=e[f];}delete pub[f];});
     db.ref('employees/'+e.id).set(pub);
-    db.ref('payrollData/'+e.id).set(priv);
-    payrollDataCache[e.id]=priv;
+    if(isMgr()){db.ref('payrollData/'+e.id).set(priv).catch(()=>{});payrollDataCache[e.id]=priv;}
   }
 }
 // حذف موظف واحد من Firebase مباشرة (بدل إعادة كتابة القائمة كلها)
@@ -3347,7 +3348,7 @@ function removeOneEmp(id){
   localStorage.setItem('employees',JSON.stringify(employees));
   if(fbReady&&id){
     db.ref('employees/'+id).remove();
-    db.ref('payrollData/'+id).remove();
+    if(isMgr())db.ref('payrollData/'+id).remove().catch(()=>{});
     delete payrollDataCache[id];
   }
 }
@@ -3362,7 +3363,7 @@ function saveAttDateMerge(date,map){
   localStorage.setItem('attendance',JSON.stringify(attendance));
   if(fbReady)db.ref('attendance/'+date).update(map);
 }
-function savePay(){localStorage.setItem('payroll',JSON.stringify(payroll));if(fbReady)db.ref('payrollRuns').update(payroll);/* كشف الرواتب الشهري يتزامن الآن عبر مسار محمي payrollRuns */}
+function savePay(){localStorage.setItem('payroll',JSON.stringify(payroll));if(fbReady&&isMgr())db.ref('payrollRuns').update(payroll).catch(()=>{});/* كشف الرواتب الشهري: يكتبه المدير فقط، محمي بقاعدة Firebase */}
 function saveEval(){localStorage.setItem('evaluations',JSON.stringify(evaluations));if(fbReady)db.ref('evaluations').set(evaluations);}
 function saveCoverages(){localStorage.setItem('coverages',JSON.stringify(coverages));if(fbReady)db.ref('coverages').set(coverages);}
 function saveOvertimes(){localStorage.setItem('overtimes',JSON.stringify(overtimes));if(fbReady)db.ref('overtimes').set(overtimes);}
@@ -3459,18 +3460,21 @@ function attachDataListeners(){
     }
     renderActive();
   },onErr);
-  db.ref('payrollData').on('value',snap=>{
-    payrollDataCache=snap.val()||{};
-    employees=employees.map(e=>({...e,...(payrollDataCache[e.id]||{})}));
-    localStorage.setItem('employees',JSON.stringify(employees));
-    renderActive();
-  },onErr);
+  // مسارات الرواتب: المدير فقط يقرأها (قاعدة Firebase تمنع غيره) — نُفعّل المستمع للمدير فقط
+  if(isMgr()){
+    db.ref('payrollData').on('value',snap=>{
+      payrollDataCache=snap.val()||{};
+      employees=employees.map(e=>({...e,...(payrollDataCache[e.id]||{})}));
+      localStorage.setItem('employees',JSON.stringify(employees));
+      renderActive();
+    },onErr);
+    db.ref('payrollRuns').on('value',snap=>{
+      payroll=snap.val()||{};localStorage.setItem('payroll',JSON.stringify(payroll));
+      renderActive();
+    },onErr);
+  }
   db.ref('attendance').on('value',snap=>{
     attendance=snap.val()||{};localStorage.setItem('attendance',JSON.stringify(attendance));
-    renderActive();
-  },onErr);
-  db.ref('payrollRuns').on('value',snap=>{
-    payroll=snap.val()||{};localStorage.setItem('payroll',JSON.stringify(payroll));
     renderActive();
   },onErr);
   db.ref('evaluations').on('value',snap=>{

@@ -1188,6 +1188,11 @@ td{padding:10px 13px;vertical-align:middle}
 <!-- TAB: ATTENDANCE -->
 <div class="tab-content" id="tab-attendance">
 <div class="container">
+  <div id="attModeBar" class="no-print" style="display:none;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+    <button class="btn btn-primary btn-sm" id="attModeGen" onclick="setAttMode('general')">التحضير العام</button>
+    <button class="btn btn-secondary btn-sm" id="attModeSa" onclick="setAttMode('saudi')">الموظفون السعوديون</button>
+  </div>
+  <div id="attGeneralWrap">
   <div class="toolbar">
     <label id="lblDate">التاريخ:</label>
     <input type="date" id="attDate" onchange="renderAtt()"/>
@@ -1250,6 +1255,43 @@ td{padding:10px 13px;vertical-align:middle}
         </tr></thead>
         <tbody id="attSumBody"></tbody>
       </table>
+      </div>
+    </div>
+  </div>
+  </div><!-- /attGeneralWrap -->
+  <div id="attSaudiWrap" style="display:none">
+    <div class="toolbar">
+      <label id="saLblDate">التاريخ:</label>
+      <input type="date" id="saDate" onchange="renderSaudiAtt()"/>
+      <div class="spacer"></div>
+    </div>
+    <div class="tbl-wrap">
+      <div class="tbl-hdr"><h2 id="saTitle">حضور وانصراف الموظفين السعوديين</h2></div>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>#</th><th id="saThName">الاسم</th><th id="saThTitle">المسمى</th><th id="saThProj">المشروع</th>
+          <th id="saThIn">وقت الحضور</th><th id="saThOut">وقت الانصراف</th><th id="saThHours">الساعات</th><th id="saThNote">ملاحظة</th>
+        </tr></thead>
+        <tbody id="saBody"></tbody>
+      </table>
+      </div>
+    </div>
+    <div style="margin-top:20px">
+      <div class="toolbar" style="margin-bottom:12px">
+        <label id="saLblMonth">الشهر:</label>
+        <input type="month" id="saMonth" onchange="renderSaudiSum()"/>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-hdr"><h2 id="saSumTitle">ملخص الساعات الشهري</h2></div>
+        <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th>#</th><th>الاسم</th><th id="saSumDaysTh">أيام الحضور</th><th id="saSumTotalTh">إجمالي الساعات</th><th id="saSumAvgTh">متوسط الساعات/يوم</th>
+          </tr></thead>
+          <tbody id="saSumBody"></tbody>
+        </table>
+        </div>
       </div>
     </div>
   </div>
@@ -1974,7 +2016,7 @@ const T={
     // permissions
     permDashboard:'📊 لوحة التحكم',permEmpView:'👁️ رؤية الموظفين',
     permEmpEdit:'✏️ تعديل الموظفين',permEmpAdd:'➕ إضافة موظف',
-    permEmpDel:'🗑️ حذف موظف',permAttendance:'📋 الحضور والغياب',
+    permEmpDel:'🗑️ حذف موظف',permAttendance:'📋 الحضور والغياب',permAttAdmin:'🕐 حضور الموظفين السعوديين (تسجيل وتعديل)',attModeGen:'التحضير العام',attModeSa:'الموظفون السعوديون',saTitle:'حضور وانصراف الموظفين السعوديين',saLblDate:'التاريخ:',saThName:'الاسم',saThTitle:'المسمى',saThProj:'المشروع',saThIn:'وقت الحضور',saThOut:'وقت الانصراف',saThHours:'الساعات',saThNote:'ملاحظة',saEmpty:'لا يوجد موظفون سعوديون مسجّلون',saSumTitle:'ملخص الساعات الشهري',saLblMonth:'الشهر:',saSumDays:'أيام الحضور',saSumTotal:'إجمالي الساعات',saSumAvg:'متوسط الساعات/يوم',
     permReports:'📈 التقارير',permEvaluation:'⭐ التقييم',permPayroll:'💰 الرواتب',permBackup:'💾 نسخ/استعادة',permWarehouse:'📦 المستودع',
     // errors & confirms
     errLoginRequired:'يرجى إدخال اسم المستخدم وكلمة المرور',
@@ -2138,7 +2180,7 @@ const T={
     // permissions
     permDashboard:'📊 Dashboard',permEmpView:'👁️ View Employees',
     permEmpEdit:'✏️ Edit Employees',permEmpAdd:'➕ Add Employee',
-    permEmpDel:'🗑️ Delete Employee',permAttendance:'📋 Attendance',
+    permEmpDel:'🗑️ Delete Employee',permAttendance:'📋 Attendance',permAttAdmin:'🕐 Saudi staff attendance (record & edit)',attModeGen:'General attendance',attModeSa:'Saudi staff',saTitle:'Saudi staff check-in / check-out',saLblDate:'Date:',saThName:'Name',saThTitle:'Job title',saThProj:'Project',saThIn:'Check-in',saThOut:'Check-out',saThHours:'Hours',saThNote:'Note',saEmpty:'No Saudi employees registered',saSumTitle:'Monthly hours summary',saLblMonth:'Month:',saSumDays:'Days worked',saSumTotal:'Total hours',saSumAvg:'Avg hours/day',
     permReports:'📈 Reports',permEvaluation:'⭐ Evaluation',permPayroll:'💰 Payroll',permBackup:'💾 Backup/Restore',permWarehouse:'📦 Warehouse',
     // errors & confirms
     errLoginRequired:'Please enter username and password',
@@ -2386,6 +2428,7 @@ const PERMS_KEYS=[
   {key:'employees_add',    tkey:'permEmpAdd'},
   {key:'employees_delete', tkey:'permEmpDel'},
   {key:'attendance',       tkey:'permAttendance'},
+  {key:'attendance_admin', tkey:'permAttAdmin'},
   {key:'reports',          tkey:'permReports'},
   {key:'evaluation',       tkey:'permEvaluation'},
   {key:'payroll',          tkey:'permPayroll'},
@@ -2749,6 +2792,96 @@ function openAuditLog(){
   document.getElementById('auditModal').classList.add('open');
 }
 
+// ── حضور وانصراف الموظفين السعوديين (مرام والمدير فقط) ─────────────────
+// البيانات: saudiAttendance/{التاريخ}/{معرّف الموظف} = {in,out,hours,note,by,at}
+let saudiAtt={};try{saudiAtt=JSON.parse(localStorage.getItem('saudiAttendance')||'{}')||{}}catch{}
+let attMode='general';
+function calcHours(inT,outT){
+  if(!inT||!outT)return null;
+  const a=String(inT).split(':').map(Number),b=String(outT).split(':').map(Number);
+  if(a.length<2||b.length<2||[a[0],a[1],b[0],b[1]].some(isNaN))return null;
+  let m=(b[0]*60+b[1])-(a[0]*60+a[1]);if(m<0)m+=1440; // الانصراف بعد منتصف الليل
+  return Math.round(m/60*100)/100;
+}
+function fmtHours(h){
+  if(h==null||isNaN(h))return '—';
+  const hh=Math.floor(h),mm=Math.round((h-hh)*60);
+  return hh+':'+String(mm).padStart(2,'0');
+}
+function saudiEmps(){return employees.filter(e=>empIsSaudi(e)&&e.status!=='منتهية خدمته');}
+function initAttModes(){
+  const bar=document.getElementById('attModeBar');if(!bar)return;
+  const ok=can('attendance_admin');
+  bar.style.display=ok?'flex':'none';
+  if(!ok)attMode='general';
+  setAttMode(attMode);
+}
+function setAttMode(m){
+  attMode=(m==='saudi'&&can('attendance_admin'))?'saudi':'general';
+  const g=document.getElementById('attGeneralWrap'),s=document.getElementById('attSaudiWrap');
+  if(g)g.style.display=attMode==='general'?'':'none';
+  if(s)s.style.display=attMode==='saudi'?'':'none';
+  [['attModeGen','general'],['attModeSa','saudi']].forEach(([id,k])=>{const b=document.getElementById(id);if(b){b.classList.toggle('btn-primary',attMode===k);b.classList.toggle('btn-secondary',attMode!==k);}});
+  setText('attModeGen',t('attModeGen'));setText('attModeSa',t('attModeSa'));
+  if(attMode==='saudi'){renderSaudiAtt();renderSaudiSum();}
+}
+function renderSaudiAtt(){
+  const dateEl=document.getElementById('saDate'),body=document.getElementById('saBody');
+  if(!dateEl||!body)return;
+  if(!dateEl.value)dateEl.value=localDateStr(new Date());
+  [['saTitle','saTitle'],['saLblDate','saLblDate'],['saThName','saThName'],['saThTitle','saThTitle'],['saThProj','saThProj'],['saThIn','saThIn'],['saThOut','saThOut'],['saThHours','saThHours'],['saThNote','saThNote']].forEach(([id,k])=>setText(id,t(k)));
+  const date=dateEl.value,day=saudiAtt[date]||{},list=saudiEmps(),edit=can('attendance_admin');
+  if(!list.length){body.innerHTML=`<tr class="erow"><td colspan="8" style="text-align:center;padding:40px;color:var(--txt2)">${esc(t('saEmpty'))}</td></tr>`;return;}
+  body.innerHTML=list.map((e,i)=>{
+    const r=day[e.id]||{};
+    const dis=edit?'':' disabled';
+    const f=(k,type,extra)=>`<input class="pay-input" type="${type}" value="${esc(r[k]||'')}"${dis}${extra||''} onchange="saudiSet('${escJs(date)}','${escJs(e.id)}','${k}',this.value,${i})"/>`;
+    return `<tr>
+      <td style="color:var(--txt2)">${i+1}</td>
+      <td><strong>${esc(e.name)}</strong></td>
+      <td>${esc(e.title||'—')}</td>
+      <td>${esc(e.project||'—')}</td>
+      <td>${f('in','time',' style="width:120px"')}</td>
+      <td>${f('out','time',' style="width:120px"')}</td>
+      <td id="sah_${i}" style="font-weight:700;font-variant-numeric:tabular-nums">${r.hours!=null?esc(fmtHours(r.hours)):'—'}</td>
+      <td>${f('note','text',' maxlength="80" style="width:180px" placeholder="..."')}</td>
+    </tr>`;
+  }).join('');
+}
+function saudiSet(date,empId,field,value,idx){
+  if(!can('attendance_admin')||!date)return;
+  if(!['in','out','note'].includes(field))return;
+  const emp=employees.find(x=>x.id===empId);if(!emp||!empIsSaudi(emp))return;
+  const day=saudiAtt[date]||(saudiAtt[date]={});
+  const r=day[empId]||(day[empId]={});
+  r[field]=String(value||'').trim();
+  const h=calcHours(r.in,r.out);
+  if(h==null)delete r.hours;else r.hours=h;
+  r.by=currentUser?currentUser.username:'';r.at=Date.now();
+  const empty=!r.in&&!r.out&&!r.note;
+  if(empty){delete day[empId];if(!Object.keys(day).length)delete saudiAtt[date];}
+  localStorage.setItem('saudiAttendance',JSON.stringify(saudiAtt));
+  if(typeof fbReady!=='undefined'&&fbReady){
+    const ref=db.ref('saudiAttendance/'+date+'/'+empId);
+    (empty?ref.remove():ref.set(r)).catch(err=>toast('تعذّر حفظ الحضور: '+(err&&err.code||''),'err'));
+  }
+  const c=document.getElementById('sah_'+idx);if(c)c.textContent=h==null?'—':fmtHours(h);
+  logAudit('🕐','حضور موظف سعودي',`${emp.name} — ${date} — ${r.in||'—'} → ${r.out||'—'}${h!=null?' ('+fmtHours(h)+')':''}`);
+  renderSaudiSum();
+}
+function renderSaudiSum(){
+  const mEl=document.getElementById('saMonth'),body=document.getElementById('saSumBody');
+  if(!mEl||!body)return;
+  if(!mEl.value)mEl.value=localDateStr(new Date()).slice(0,7);
+  [['saSumTitle','saSumTitle'],['saLblMonth','saLblMonth'],['saSumDaysTh','saSumDays'],['saSumTotalTh','saSumTotal'],['saSumAvgTh','saSumAvg']].forEach(([id,k])=>setText(id,t(k)));
+  const m=mEl.value,list=saudiEmps();
+  body.innerHTML=list.map((e,i)=>{
+    let days=0,tot=0;
+    Object.keys(saudiAtt).forEach(d=>{if(d.startsWith(m)){const r=(saudiAtt[d]||{})[e.id];if(r&&typeof r.hours==='number'&&r.hours>0){days++;tot+=r.hours;}}});
+    return `<tr><td style="color:var(--txt2)">${i+1}</td><td><strong>${esc(e.name)}</strong></td><td>${days}</td><td style="font-weight:700">${esc(fmtHours(tot))}</td><td>${days?esc(fmtHours(tot/days)):'—'}</td></tr>`;
+  }).join('')||`<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--txt2)">${esc(t('saEmpty'))}</td></tr>`;
+}
+
 // ── DATA COMPLETENESS ────────────────────────────────────────
 // الحقول الأساسية المطلوبة لكل موظف + تسمياتها ثنائية اللغة
 const COMP_FIELDS=[
@@ -3086,7 +3219,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.10.14.0305";
+const BUILD_VERSION="2026.10.14.0420";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{
@@ -3516,6 +3649,10 @@ function attachDataListeners(){
     coverages=v?Object.values(v).map(c=>({...c,coverShift:normShift(c.coverShift)})):[];localStorage.setItem('coverages',JSON.stringify(coverages));
     renderActive();
   },onErr);
+  db.ref('saudiAttendance').on('value',snap=>{
+    saudiAtt=snap.val()||{};localStorage.setItem('saudiAttendance',JSON.stringify(saudiAtt));
+    if(attMode==='saudi'){renderSaudiAtt();renderSaudiSum();}
+  },onErr);
   db.ref('overtimes').on('value',snap=>{
     const v=snap.val();
     overtimes=v?Object.values(v):[];localStorage.setItem('overtimes',JSON.stringify(overtimes));
@@ -3566,7 +3703,7 @@ function switchTab(name,btn){
     if(homeGrid){homeGrid.style.display='none';}
     if(name==='employees')render();
     if(name==='payroll')renderPayroll();
-    if(name==='attendance')renderAtt();
+    if(name==='attendance'){renderAtt();initAttModes();}
     if(name==='reports')renderReports();
     if(name==='evaluation')renderEvaluations();
     if(name==='warehouse')renderWarehouse();
@@ -6329,7 +6466,7 @@ function renderAtt(){
   const _fLbl={P:t('attP'),A:t('attA'),L:t('attL'),T:t('attT'),O:t('attO'),N:t('attN')};
   document.getElementById('attTitle').textContent=t('attTitle')+' — '+(date||t('attSelectDate'))+(attFilter?` · ${t('attFilteredPrefix')}${_fLbl[attFilter]||''}`:'');
   const myProj=getMyProject();
-  const allList=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj});
+  const allList=employees.filter(e=>{if(empIsSaudi(e))return false;if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj});
   const day=date?(attendance[date]||{}):{};
   // العدّات (دائماً من القائمة الكاملة قبل الفلترة)
   let P=0,A=0,L=0,T=0,O=0,N=0;
@@ -6399,6 +6536,7 @@ function bulkSet(status){
   if(!attendance[date])attendance[date]={};
   const myProj=getMyProject();
   const list=employees.filter(e=>{
+    if(empIsSaudi(e))return false;
     if(myProj&&!myProj.includes(e.project))return false;
     if(proj&&e.project!==proj)return false;
     if(shift&&(e.shift||'-')!==shift)return false;
@@ -6428,6 +6566,7 @@ function copyAttFrom(when){
   if(!attendance[date])attendance[date]={};
   let n=0;const _map={};
   employees.forEach(e=>{
+    if(empIsSaudi(e))return;
     if(myProj&&!myProj.includes(e.project))return;
     if(proj&&e.project!==proj)return;
     if(shift&&(e.shift||'-')!==shift)return;
@@ -6456,6 +6595,7 @@ function clearAttDay(){
   if(!attendance[date])return;
   let n=0;const _map={};
   employees.forEach(e=>{
+    if(empIsSaudi(e))return;
     if(myProj&&!myProj.includes(e.project))return;
     if(proj&&e.project!==proj)return;
     if(shift&&(e.shift||'-')!==shift)return;

@@ -33,6 +33,41 @@
 body{font-family:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--txt);direction:rtl;transition:background .3s,color .3s;min-height:100vh;font-feature-settings:'kern' 1,'liga' 1}
 #app{background:var(--bg);min-height:100vh;background-image:radial-gradient(ellipse 100% 60% at 10% 0%,rgba(37,99,235,.1),transparent 60%),radial-gradient(ellipse 80% 60% at 90% 100%,rgba(124,58,237,.08),transparent 60%),radial-gradient(ellipse 60% 40% at 50% 50%,rgba(212,168,67,.04),transparent 70%)}
 #app.dark{background-image:radial-gradient(ellipse 100% 60% at 10% 0%,rgba(37,99,235,.16),transparent 60%),radial-gradient(ellipse 80% 60% at 90% 100%,rgba(124,58,237,.12),transparent 60%)}
+
+/* ── كشف الرواتب المطبوع (A4 أفقي) — أولوية أعلى من تنسيق التحضير اليومي ── */
+.da-card.pr-sheet{max-width:none;font-size:.72rem}
+.da-card.pr-sheet .da-hdr{padding:4px 0 8px;margin-bottom:8px}
+.da-card.pr-sheet .da-hdr-logo{height:36px}
+.da-card.pr-sheet .da-title-main{font-size:1.15rem}
+.da-card.pr-sheet .da-title-sub{font-size:.7rem;margin-top:1px}
+.da-card.pr-sheet .da-title-en{display:none}
+.da-card.pr-sheet .da-meta{display:flex;flex-wrap:wrap;gap:4px 26px;margin-bottom:8px;font-size:.78rem}
+.da-card.pr-sheet .da-meta>div{flex:0 0 auto;width:auto}
+.da-card.pr-sheet table{width:100%;border-collapse:collapse;font-size:.7rem}
+.da-card.pr-sheet thead{display:table-header-group}
+.da-card.pr-sheet tr{page-break-inside:avoid}
+.da-card.pr-sheet thead th{background:#0f2444!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:4px 3px;border:1px solid #0f2444;font-weight:700;text-align:center;white-space:nowrap;line-height:1.2}
+.da-card.pr-sheet tbody td{padding:2px 5px;border:1px solid #dfe3ea;vertical-align:middle;line-height:1.25;height:auto}
+.da-card.pr-sheet td.num{text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+.da-card.pr-sheet td.nm{font-weight:700;white-space:nowrap;text-align:start}
+.da-card.pr-sheet td.nt{max-width:110px;font-size:.62rem;color:#475569}
+.da-card.pr-sheet tr.pr-grp td{background:#eef2f7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-weight:800;color:#0f2444;padding:3px 6px;text-align:start}
+.da-card.pr-sheet tr.pr-sub td{background:#f4f1e8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-weight:800}
+.da-card.pr-sheet tr.pr-tot td{background:#0f2444!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-weight:800;font-size:.76rem;border-color:#0f2444;padding:4px 5px}
+.da-card.pr-sheet .neg{color:#b91c1c;font-weight:700}
+.da-card.pr-sheet .pos{color:#15803d;font-weight:700}
+.pr-strip{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 2px;font-size:.74rem;font-weight:700}
+.pr-strip span{padding:4px 10px;border:1px solid #d6cfb8;border-radius:8px;background:#faf8f2!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.da-card.pr-sheet .pr-foot{display:flex;justify-content:space-between;gap:30px;margin-top:26px;font-size:.78rem;page-break-inside:avoid}
+@media print{
+  body.printing-att #dailyAttPrint .pr-sheet .da-meta,
+  body.printing-att #dailyAttPrint .pr-sheet .pr-foot,
+  body.printing-att #dailyAttPrint .pr-sheet .pr-strip{display:flex!important}
+  body.printing-att #dailyAttPrint .pr-sheet .da-meta>div,
+  body.printing-att #dailyAttPrint .pr-sheet .pr-strip>span{display:block!important}
+  body.printing-att #dailyAttPrint .pr-sheet .da-title-en{display:none!important}
+  body.printing-att #dailyAttPrint .pr-sheet .pr-foot>.da-sign{display:block!important;flex:1 1 0}
+}
 /* ── Calendar View ── */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
 .cal-head{background:var(--hdr);color:#fff;padding:8px;text-align:center;font-weight:800;font-size:.82rem;border-radius:8px}
@@ -1150,7 +1185,7 @@ td{padding:10px 13px;vertical-align:middle}
     <span id="payGrand" style="font-weight:700;color:var(--ok);font-size:.93rem"></span>
     <button class="btn btn-success" onclick="savePayroll()">💾 حفظ</button>
     <button class="btn btn-info no-print" onclick="exportPayCSV()">⬇️ Excel</button>
-    <button class="btn btn-info no-print" onclick="window.print()">🖨️ طباعة</button>
+    <button class="btn btn-info no-print" onclick="printPayrollSheet()">🖨️ طباعة الكشف</button>
     <button class="btn no-print" style="background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff" onclick="printOvertimeReport()">⏱️ تقرير الأوفر تايم</button>
   </div>
   <!-- ملخص الشهر -->
@@ -2851,6 +2886,94 @@ function renderSaudiAtt(){
     </tr>`;
   }).join('');
 }
+// ── طباعة كشف الرواتب: A4 أفقي، يطابق أرقام الشاشة ──
+function _setPrintOrientation(o){
+  let s=document.getElementById('pgOrient');
+  if(!s){s=document.createElement('style');s.id='pgOrient';document.head.appendChild(s);}
+  s.textContent=o?`@page{size:A4 ${o};margin:9mm}`:'';
+}
+async function printPayrollSheet(){
+  if(!can('payroll'))return;
+  const month=document.getElementById('payMonth').value;
+  if(!month){toast(t('paySelectMonth'),'err');return}
+  const proj=document.getElementById('payProj').value;
+  const mgr=isMgr();
+  const lang=await askPrintLang();if(!lang)return;const isAr=lang==='ar';
+  const myProj=getMyProject();
+  const list=employees.filter(e=>{if(myProj&&!myProj.includes(e.project))return false;return!proj||e.project===proj});
+  const data=payroll[month]||{};
+  const fm=n=>n?(+n).toLocaleString('en-US',{maximumFractionDigits:2}):'—';
+  const H=isAr?{ttl:'كشف الرواتب الشهري',month:'الشهر',proj:'المشروع',all:'كل المشاريع',cnt:'عدد الموظفين',name:'الاسم',project:'المشروع',base:'الراتب الأساسي',pres:'حضور',abs:'غياب',leave:'إجازة',absd:'خصم الغياب',oth:'ساعات أوفر',ott:'إجمالي الأوفر',bonus:'مكافآت',extra:'خصومات إضافية',net:'الصافي',notes:'ملاحظات',sub:'إجمالي',grand:'الإجمالي العام',sar:'ريال',prep:'إعداد',rev:'مراجعة',appr:'اعتماد المدير'}
+              :{ttl:'Monthly Payroll Sheet',month:'Month',proj:'Project',all:'All projects',cnt:'Employees',name:'Name',project:'Project',base:'Base salary',pres:'Present',abs:'Absent',leave:'Leave',absd:'Absence ded.',oth:'OT hours',ott:'OT total',bonus:'Bonus',extra:'Extra ded.',net:'Net',notes:'Notes',sub:'Subtotal',grand:'Grand total',sar:'SAR',prep:'Prepared by',rev:'Reviewed by',appr:'Manager approval'};
+  const cols=mgr?14:8;
+  const T={base:0,absd:0,ott:0,bonus:0,extra:0,net:0,pres:0,abs:0,leave:0,oth:0};
+  const calc=e=>{
+    const d=data[e.id]||{};
+    const base=e.baseSalary||0;
+    const dailyRate=base?+(base/30).toFixed(2):0, hourlyRate=base?+(base/30/8).toFixed(2):0;
+    const att=getAttCount(month,e.id);
+    const absd=+(att.A*dailyRate).toFixed(2);
+    const oth=getCoverageOT(e.id,month);
+    const ott=+(oth*hourlyRate).toFixed(2);
+    const bonus=d.bonus||0, extra=d.extraDeductions||0;
+    return {e,d,base,pres:att.P+att.T,abs:att.A,leave:att.L,absd,oth,ott,bonus,extra,net:base-absd+ott+bonus-extra};
+  };
+  const add=(A,r)=>{A.base+=r.base;A.absd+=r.absd;A.ott+=r.ott;A.bonus+=r.bonus;A.extra+=r.extra;A.net+=r.net;A.pres+=r.pres;A.abs+=r.abs;A.leave+=r.leave;A.oth+=r.oth;};
+  const rowHtml=(r,i)=>`<tr>
+    <td class="num">${i}</td><td class="nm">${esc(r.e.name)}</td>
+    ${mgr?`<td class="num">${fm(r.base)}</td>`:''}
+    <td class="num">${r.pres||'—'}</td><td class="num">${r.abs?`<span class="neg">${r.abs}</span>`:'—'}</td><td class="num">${r.leave||'—'}</td>
+    ${mgr?`<td class="num">${r.absd?`<span class="neg">${fm(r.absd)}</span>`:'—'}</td>`:''}
+    <td class="num">${r.oth||'—'}</td>
+    ${mgr?`<td class="num">${r.ott?`<span class="pos">${fm(r.ott)}</span>`:'—'}</td><td class="num">${fm(r.bonus)}</td><td class="num">${r.extra?`<span class="neg">${fm(r.extra)}</span>`:'—'}</td><td class="num"><span class="${r.net<0?'neg':'pos'}">${fm(r.net)}</span></td>`:''}
+    <td class="nt">${esc(r.d.notes||'')}</td>
+  </tr>`;
+  const sumHtml=(label,A,cls)=>`<tr class="${cls}"><td colspan="2">${label}</td>
+    ${mgr?`<td class="num">${fm(A.base)}</td>`:''}
+    <td class="num">${A.pres||'—'}</td><td class="num">${A.abs||'—'}</td><td class="num">${A.leave||'—'}</td>
+    ${mgr?`<td class="num">${fm(A.absd)}</td>`:''}
+    <td class="num">${A.oth||'—'}</td>
+    ${mgr?`<td class="num">${fm(A.ott)}</td><td class="num">${fm(A.bonus)}</td><td class="num">${fm(A.extra)}</td><td class="num">${fm(A.net)}</td>`:''}
+    <td></td></tr>`;
+  // التجميع حسب المشروع بترتيب المشاريع المعروفة ثم أي مشروع آخر
+  const order=[...PROJS,...[...new Set(list.map(e=>e.project))].filter(p=>!PROJS.includes(p))];
+  let i=0,body='';
+  order.forEach(pn=>{
+    const rows=list.filter(e=>e.project===pn).map(calc);
+    if(!rows.length)return;
+    const S={base:0,absd:0,ott:0,bonus:0,extra:0,net:0,pres:0,abs:0,leave:0,oth:0};
+    body+=`<tr class="pr-grp"><td colspan="${cols}">${esc(pn)} — ${rows.length} ${isAr?'موظف':'employees'}</td></tr>`;
+    rows.forEach(r=>{i++;add(S,r);add(T,r);body+=rowHtml(r,i);});
+    if(order.length>1)body+=sumHtml(`${H.sub} — ${esc(pn)}`,S,'pr-sub');
+  });
+  if(!i)body=`<tr><td colspan="${cols}" style="text-align:center;padding:20px">—</td></tr>`;
+  body+=sumHtml(H.grand,T,'pr-tot');
+  const th=`<tr><th>#</th><th>${H.name}</th>${mgr?`<th>${H.base}</th>`:''}<th>${H.pres}</th><th>${H.abs}</th><th>${H.leave}</th>${mgr?`<th>${H.absd}</th>`:''}<th>${H.oth}</th>${mgr?`<th>${H.ott}</th><th>${H.bonus}</th><th>${H.extra}</th><th>${H.net}</th>`:''}<th>${H.notes}</th></tr>`;
+  document.getElementById('dailyAttPrint').innerHTML=`
+    <div class="da-card pr-sheet" dir="${isAr?'rtl':'ltr'}" style="direction:${isAr?'rtl':'ltr'}">
+      ${buildReportHeader('كشف الرواتب الشهري','Monthly Payroll Sheet',lang)}
+      <div class="da-meta" dir="${isAr?'rtl':'ltr'}">
+        <div>📅 <b>${H.month}:</b> ${esc(month)}</div>
+        <div>🏗 <b>${H.proj}:</b> ${esc(proj||H.all)}</div>
+        <div>👥 <b>${H.cnt}:</b> ${i}</div>
+      </div>
+      <table><thead>${th}</thead><tbody>${body}</tbody></table>
+      ${mgr?`<div class="pr-strip" dir="${isAr?'rtl':'ltr'}">
+        <span>${H.base}: ${fm(T.base)} ${H.sar}</span><span>${H.absd}: ${fm(T.absd)}</span><span>${H.ott}: ${fm(T.ott)}</span>
+        <span>${H.bonus}: ${fm(T.bonus)}</span><span>${H.extra}: ${fm(T.extra)}</span><span style="border-color:#0f2444">${H.net}: ${fm(T.net)} ${H.sar}</span>
+      </div>`:''}
+      <div class="pr-foot">
+        <div class="da-sign">${H.prep}</div><div class="da-sign">${H.rev}</div><div class="da-sign">${H.appr}</div>
+      </div>
+    </div>`;
+  _setPrintOrientation('landscape');
+  window.addEventListener('afterprint',()=>_setPrintOrientation(''),{once:true});
+  document.body.classList.add('printing-att');
+  window.print();
+  document.body.classList.remove('printing-att');
+  setTimeout(()=>_setPrintOrientation(''),60000);
+}
+
 // ── طباعة حضور الموظفين السعوديين: كشف اليوم وكشف الشهر ──
 async function printSaudiAtt(){
   if(!can('attendance_admin'))return;
@@ -3302,7 +3425,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.10.14.0540";
+const BUILD_VERSION="2026.10.14.0655";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{
@@ -3392,8 +3515,8 @@ function buildReportHeader(titleAr,titleEn,lang){
           <div class="da-title-en">${isAr?titleEn:titleAr}</div>
         </div>
         <div class="da-hdr-rep" dir="${isAr?'rtl':'ltr'}">
-          <b>${repNoLbl}</b><span>${repNo}</span><br/>
-          <b style="margin-top:4px">${repDateLbl}</b><span>${dateStr}</span>
+          <b>${repNoLbl}</b> <span dir="ltr">${repNo}</span><br/>
+          <b style="margin-top:4px">${repDateLbl}</b> <span dir="ltr">${dateStr}</span>
         </div>
       </div>
     </div>`;

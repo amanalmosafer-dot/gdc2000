@@ -1661,6 +1661,11 @@ td{padding:10px 13px;vertical-align:middle}
         </div>
       </div>
 
+      <div class="field"><label id="dLblEmpType">نوع الموظف</label>
+        <select id="fEmpType" onchange="applyEmpType(true)">
+          <option value="resident" id="dEmpTypeRes">مقيم</option>
+          <option value="saudi" id="dEmpTypeSa">سعودي</option>
+        </select></div>
       <div class="field"><label id="dLblEmpNum">رقم الموظف</label><input id="fEmpNum" type="text" placeholder="701"/></div>
       <div class="field"><label id="dLblFullName">الاسم الكامل *</label><input id="fName" type="text" placeholder="اسم الموظف"/></div>
 
@@ -1678,6 +1683,8 @@ td{padding:10px 13px;vertical-align:middle}
           <option value="Afternoon Shift Supervisor">Afternoon Shift Supervisor</option>
           <option value="Evening Shift Supervisor">Evening Shift Supervisor</option>
           <option value="General Supervisor">General Supervisor</option>
+          <option value="Administrative">Administrative</option>
+          <option value="Operations Manager">Operations Manager</option>
         </select>
       </div>
       <div class="field"><label id="dLblGender">الجنس</label>
@@ -1695,8 +1702,8 @@ td{padding:10px 13px;vertical-align:middle}
       <!-- إقامة وكفيل -->
       <div class="field"><label id="dLblPassport">رقم الجواز</label><input id="fPass" type="text"/></div>
       <div class="field"><label id="dLblIqamaNum">رقم الإقامة</label><input id="fIqNum" type="text"/></div>
-      <div class="field"><label id="dLblIqamaExp">انتهاء الإقامة (هجري)</label><input id="fIqExp" type="text" placeholder="1447/03/15"/></div>
-      <div class="field"><label id="dLblSponsor">الكفيل</label>
+      <div class="field" id="fIqExpWrap"><label id="dLblIqamaExp">انتهاء الإقامة (هجري)</label><input id="fIqExp" type="text" placeholder="1447/03/15"/></div>
+      <div class="field" id="fSponsorWrap"><label id="dLblSponsor">الكفيل</label>
         <select id="fSponsor">
           <option value="">— اختر —</option>
           <option>Rizqah Maintenance &amp; Cleaning Est.</option>
@@ -1944,7 +1951,7 @@ const T={
     // drawer labels
     lblPhoto:'صورة الموظف',lblEmpNum:'رقم الموظف',lblFullName:'الاسم الكامل *',
     lblJobTitle:'المسمى الوظيفي',lblGender:'الجنس',lblNationality:'الجنسية',
-    lblPassport:'رقم الجواز',lblIqamaNum:'رقم الإقامة',lblIqamaExp:'انتهاء الإقامة (هجري)',
+    lblPassport:'رقم الجواز',lblIqamaNum:'رقم الإقامة',lblIqamaExp:'انتهاء الإقامة (هجري)',lblEmpType:'نوع الموظف',empTypeRes:'مقيم',empTypeSa:'سعودي',lblNationalId:'رقم الهوية الوطنية',
     lblSponsor:'الكفيل',lblStartDate:'تاريخ بداية العمل',lblPhone:'رقم التواصل',
     lblBaseSalary:'الراتب الأساسي (ريال)',lblOTRate:'معدل الأوفر تايم (ريال/ساعة)',
     lblEmpStatus:'الحالة الوظيفية',lblProject:'المشروع',lblShift:'الشفت',lblBranch:'الفرع / الموقع',
@@ -2108,7 +2115,7 @@ const T={
     // drawer labels
     lblPhoto:'Employee Photo',lblEmpNum:'Employee No.',lblFullName:'Full Name *',
     lblJobTitle:'Job Title',lblGender:'Gender',lblNationality:'Nationality',
-    lblPassport:'Passport No.',lblIqamaNum:'Iqama No.',lblIqamaExp:'Iqama Expiry (Hijri)',
+    lblPassport:'Passport No.',lblIqamaNum:'Iqama No.',lblIqamaExp:'Iqama Expiry (Hijri)',lblEmpType:'Employee Type',empTypeRes:'Resident',empTypeSa:'Saudi',lblNationalId:'National ID No.',
     lblSponsor:'Sponsor',lblStartDate:'Start Date',lblPhone:'Phone No.',
     lblBaseSalary:'Base Salary (SAR)',lblOTRate:'OT Rate (SAR/h)',
     lblEmpStatus:'Employment Status',lblProject:'Project',lblShift:'Shift',lblBranch:'Branch / Location',
@@ -2312,7 +2319,7 @@ function applyLang(){
   setText('dLblPhoto',t('lblPhoto'));setText('dLblEmpNum',t('lblEmpNum'));
   setText('dLblFullName',t('lblFullName'));setText('dLblJobTitle',t('lblJobTitle'));
   setText('dLblGender',t('lblGender'));setText('dLblNationality',t('lblNationality'));
-  setText('dLblPassport',t('lblPassport'));setText('dLblIqamaNum',t('lblIqamaNum'));
+  setText('dLblPassport',t('lblPassport'));setText('dLblIqamaNum',t('lblIqamaNum'));setText('dLblEmpType',t('lblEmpType'));setText('dEmpTypeRes',t('empTypeRes'));setText('dEmpTypeSa',t('empTypeSa'));
   setText('dLblIqamaExp',t('lblIqamaExp'));setText('dLblSponsor',t('lblSponsor'));
   setText('dLblStartDate',t('lblStartDate'));setText('dLblPhone',t('lblPhone'));
   setText('dLblBaseSalary',t('lblBaseSalary'));setText('dLblOTRate',t('lblOTRate'));
@@ -2766,9 +2773,10 @@ function openCompleteness(){
   // احسب النقص لكل موظف + عدّاد لكل حقل
   const fieldMissing={};COMP_FIELDS.forEach(f=>fieldMissing[f.key]=0);
   const rows=list.map(e=>{
-    const missing=COMP_FIELDS.filter(f=>!_isFilled(e[f.key]));
+    const _cf=empIsSaudi(e)?COMP_FIELDS.filter(f=>!['iqamaExpiry','sponsor','passportNum'].includes(f.key)):COMP_FIELDS;
+    const missing=_cf.filter(f=>!_isFilled(e[f.key]));
     missing.forEach(f=>fieldMissing[f.key]++);
-    const pct=Math.round((COMP_FIELDS.length-missing.length)/COMP_FIELDS.length*100);
+    const pct=Math.round((_cf.length-missing.length)/_cf.length*100);
     return {e,missing,pct};
   }).sort((a,b)=>a.pct-b.pct); // الأقل اكتمالاً أولاً
   const avg=Math.round(rows.reduce((s,r)=>s+r.pct,0)/total);
@@ -2866,6 +2874,19 @@ const SL = {'Morning Shift':'Morning Shift','Afternoon Shift':'Afternoon Shift',
 // الأسماء القديمة (الشفت 1/2/3) تُحوَّل تلقائياً عند التحميل إلى الأسماء الموحّدة
 const SHIFT_LEGACY = {'الشفت 1':'Night Shift','الشفت 2':'Morning Shift','الشفت 3':'Afternoon Shift'};
 function normShift(v){return SHIFT_LEGACY[v]||v;}
+// ── نوع الموظف: سعودي / مقيم ──
+function isSaudiNat(n){return /^(saudi|سعودي|سعودية)$/i.test(String(n||'').trim());}
+function empIsSaudi(e){return !!e&&(e.empType==='saudi'||(!e.empType&&isSaudiNat(e.nationality)));}
+// يُظهر/يُخفي حقول الإقامة والكفيل حسب النوع. fromUser=true عند تغيير القائمة يدوياً
+function applyEmpType(fromUser){
+  const sel=document.getElementById('fEmpType');if(!sel)return;
+  const sa=sel.value==='saudi';
+  ['fIqExpWrap','fSponsorWrap'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=sa?'none':'';});
+  setText('dLblIqamaNum',t(sa?'lblNationalId':'lblIqamaNum'));
+  if(fromUser){const nat=document.getElementById('fNat');
+    if(sa&&!nat.value.trim())nat.value='Saudi';
+    else if(!sa&&isSaudiNat(nat.value))nat.value='';}
+}
 const PC = ['p0','p1','p2','p3'];
 const BC = ['bp0','bp1','bp2','bp3'];
 const SPECIAL = {'Vivian Magno':'General Supervisor','Etchel Truzo':'Morning Shift Supervisor','Amor Tubanar':'Afternoon Shift Supervisor','MD Mosharof':'Team Leader','Maram Yanbuawi':'Morning Shift Supervisor','MD Mominul Hoque':'Evening Shift Supervisor','Novi Sarah Safitri':'Morning Shift Supervisor'};
@@ -3065,7 +3086,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.10.14.0135";
+const BUILD_VERSION="2026.10.14.0305";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{
@@ -4116,8 +4137,9 @@ function buildExecPage4(){
   // 1) نسبة اكتمال ملفات الموظفين
   const requiredFields=['empNum','name','nationality','passportNum','iqamaNum','iqamaExpiry','sponsor','phone','startDate','baseSalary','shift','medExamDate','medExamExpiry','vaccMMR','vaccInfluenza'];
   const empCompletion=employees.map(e=>{
-    const filled=requiredFields.filter(f=>e[f]&&String(e[f]).trim()).length;
-    return{e,pct:Math.round(filled/requiredFields.length*100),filled,total:requiredFields.length};
+    const _req=empIsSaudi(e)?requiredFields.filter(f=>!['iqamaExpiry','sponsor','passportNum'].includes(f)):requiredFields;
+    const filled=_req.filter(f=>e[f]&&String(e[f]).trim()).length;
+    return{e,pct:Math.round(filled/_req.length*100),filled,total:_req.length};
   });
   const avgCompletion=empCompletion.length?Math.round(empCompletion.reduce((s,x)=>s+x.pct,0)/empCompletion.length):0;
   const completeEmps=empCompletion.filter(x=>x.pct>=80).length;
@@ -4267,7 +4289,7 @@ function buildExecPage4(){
 function buildExecPage5(){
   const today=new Date();
   // إقامات منتهية أو قريبة
-  const iqAlerts=employees.filter(e=>e.iqamaExpiry).map(e=>{
+  const iqAlerts=employees.filter(e=>e.iqamaExpiry&&!empIsSaudi(e)).map(e=>{
     const ref=(h2g(e.iqamaExpiry)||new Date(e.iqamaExpiry));
     const days=Math.floor((ref-today)/86400000);
     return{e,days};
@@ -4540,7 +4562,7 @@ function renderDashboard(){
 function iqamaAlerts(){
   if(!isMgr())return []; // تنبيهات الإقامات للمدير فقط — لا تظهر للمشرفين إطلاقاً
   return employees.filter(e=>{
-    if(!e.iqamaExpiry)return false;
+    if(!e.iqamaExpiry||empIsSaudi(e))return false;
     const ref=h2g(e.iqamaExpiry)||new Date(e.iqamaExpiry);
     return Math.floor((ref-new Date())/86400000)<90;
   }).sort((a,b)=>{
@@ -4615,7 +4637,7 @@ function getFiltered(){
     if(gender &&e.gender!==gender)return false;
     if(status &&(e.status||'نشط')!==status)return false;
     if(iqama){
-      if(!e.iqamaExpiry)return false;
+      if(!e.iqamaExpiry||empIsSaudi(e))return false;
       const ref=h2g(e.iqamaExpiry)||new Date(e.iqamaExpiry);
       const days=Math.floor((ref-now)/86400000);
       if(iqama==='expired'&&days>=0)return false;
@@ -4753,9 +4775,9 @@ function mkRow(e,n,pi){
     <div class="exp-item"><span class="exp-lbl">${t('expBirth')}</span><span class="exp-val">${esc(e.birthDate||'—')}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expNat')}</span><span class="exp-val">${esc(e.nationality||'—')}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expPass')}</span><span class="exp-val">${esc(e.passportNum||'—')}</span></div>
-    <div class="exp-item"><span class="exp-lbl">${t('expIq')}</span><span class="exp-val">${esc(e.iqamaNum||'—')}</span></div>
-    <div class="exp-item"><span class="exp-lbl">${t('expIqExp')}</span><span class="exp-val">${iqBadge(e.iqamaExpiry)}</span></div>
-    <div class="exp-item"><span class="exp-lbl">${t('expSponsor')}</span><span class="exp-val" style="font-size:.8rem">${esc(e.sponsor||'—')}</span></div>
+    <div class="exp-item"><span class="exp-lbl">${empIsSaudi(e)?t('lblNationalId'):t('expIq')}</span><span class="exp-val">${esc(e.iqamaNum||'—')}</span></div>
+    ${empIsSaudi(e)?'':`<div class="exp-item"><span class="exp-lbl">${t('expIqExp')}</span><span class="exp-val">${iqBadge(e.iqamaExpiry)}</span></div>`}
+    ${empIsSaudi(e)?'':`<div class="exp-item"><span class="exp-lbl">${t('expSponsor')}</span><span class="exp-val" style="font-size:.8rem">${esc(e.sponsor||'—')}</span></div>`}
     <div class="exp-item full"><span class="exp-lbl">${t('expPhone')}</span><span class="exp-val" dir="ltr">${waLink}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expStart')}</span><span class="exp-val">${esc(e.startDate||'—')}</span></div>
     ${can('payroll')?`<div class="exp-item"><span class="exp-lbl">${t('expSal')}</span><span class="exp-val" style="font-weight:700;color:var(--ok)">${sal}</span></div>
@@ -4817,6 +4839,7 @@ function openAdd(){
   document.getElementById('fTitle').value='Cleaner';
   document.getElementById('fGender').value='';
   document.getElementById('fSponsor').value='';
+  document.getElementById('fEmpType').value='resident';applyEmpType();
   ['fIqExp','fStart','fMedDate','fMedExpiry','fVaccMMR','fVaccFlu','fBirth'].forEach(id=>document.getElementById(id).value='');
   ['fSal','fOT','fHousing','fTransport','fDriverCost'].forEach(id=>document.getElementById(id).value='');
   ['fDriverName','fDriverPhone','fSalNotes'].forEach(id=>document.getElementById(id).value='');
@@ -4859,6 +4882,7 @@ function openEdit(idx){
   document.getElementById('fShift').value=e.shift||'-';
   document.getElementById('fStatus').value=e.status||'نشط';
   document.getElementById('fBranch').value=e.branch||'';
+  document.getElementById('fEmpType').value=empIsSaudi(e)?'saudi':'resident';applyEmpType();
   document.getElementById('fProj').value=e.project;
   photoData=e.photo||'';
   document.getElementById('photoPrev').innerHTML=e.photo?`<img src="${safeImg(e.photo)}"/>`:'👤';
@@ -4906,6 +4930,7 @@ function saveEmp(){
     id:editIdx>=0?employees[editIdx].id:uid(),
     empNum:document.getElementById('fEmpNum').value.trim(),
     name,
+    empType:document.getElementById('fEmpType').value,
     title:document.getElementById('fTitle').value.trim(),
     nationality:document.getElementById('fNat').value.trim(),
     passportNum:document.getElementById('fPass').value.trim(),
@@ -4938,6 +4963,7 @@ function saveEmp(){
     vaccHepB2:document.getElementById('fHepB2').checked,
     vaccHepB3:document.getElementById('fHepB3').checked,
   };
+  if(emp.empType==='saudi'){emp.iqamaExpiry='';emp.sponsor='';if(!emp.nationality)emp.nationality='Saudi';}
   const isEdit=editIdx>=0;
   if(isEdit)employees[editIdx]=emp;else employees.push(emp);
   saveOneEmp(emp);closeModal();render();
@@ -4978,9 +5004,9 @@ function printEmp(idx){
     [t('pcGender'),    e.gender==='M'?t('male'):e.gender==='F'?t('female'):'—',               ''],
     [t('pcNationality'),e.nationality||'—',                                                    ''],
     [t('pcPassport'),  e.passportNum||'—',                                                     ''],
-    [t('pcIqamaNum'),  e.iqamaNum||'—',                                                        ''],
-    [t('pcIqamaExp'),  iqTxt,                                                                  iqCol],
-    [t('pcSponsor'),   e.sponsor||'—',                                                         '','full'],
+    [empIsSaudi(e)?t('lblNationalId'):t('pcIqamaNum'),e.iqamaNum||'—',''],
+    ...(empIsSaudi(e)?[]:[[t('pcIqamaExp'),iqTxt,iqCol]]),
+    ...(empIsSaudi(e)?[]:[[t('pcSponsor'),e.sponsor||'—','','full']]),
     [t('pcShift'),     SL[e.shift||'-']||'—',                                                  ''],
     [t('pcBranch'),    e.branch||'—',                                                           ''],
     [t('pcStartDate'), e.startDate||'—',                                                        ''],

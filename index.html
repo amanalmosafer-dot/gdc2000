@@ -1264,6 +1264,7 @@ td{padding:10px 13px;vertical-align:middle}
       <label id="saLblDate">التاريخ:</label>
       <input type="date" id="saDate" onchange="renderSaudiAtt()"/>
       <div class="spacer"></div>
+      <button class="btn btn-info no-print" id="saBtnPrintDay" onclick="printSaudiAtt()">🖨️ طباعة تحضير اليوم</button>
     </div>
     <div class="tbl-wrap">
       <div class="tbl-hdr"><h2 id="saTitle">حضور وانصراف الموظفين السعوديين</h2></div>
@@ -1281,6 +1282,7 @@ td{padding:10px 13px;vertical-align:middle}
       <div class="toolbar" style="margin-bottom:12px">
         <label id="saLblMonth">الشهر:</label>
         <input type="month" id="saMonth" onchange="renderSaudiSum()"/>
+        <button class="btn btn-info no-print" id="saBtnPrintMonth" onclick="printSaudiMonth()">🖨️ طباعة كشف الشهر</button>
       </div>
       <div class="tbl-wrap">
         <div class="tbl-hdr"><h2 id="saSumTitle">ملخص الساعات الشهري</h2></div>
@@ -2016,7 +2018,7 @@ const T={
     // permissions
     permDashboard:'📊 لوحة التحكم',permEmpView:'👁️ رؤية الموظفين',
     permEmpEdit:'✏️ تعديل الموظفين',permEmpAdd:'➕ إضافة موظف',
-    permEmpDel:'🗑️ حذف موظف',permAttendance:'📋 الحضور والغياب',permAttAdmin:'🕐 حضور الموظفين السعوديين (تسجيل وتعديل)',attModeGen:'التحضير العام',attModeSa:'الموظفون السعوديون',saTitle:'حضور وانصراف الموظفين السعوديين',saLblDate:'التاريخ:',saThName:'الاسم',saThTitle:'المسمى',saThProj:'المشروع',saThIn:'وقت الحضور',saThOut:'وقت الانصراف',saThHours:'الساعات',saThNote:'ملاحظة',saEmpty:'لا يوجد موظفون سعوديون مسجّلون',saSumTitle:'ملخص الساعات الشهري',saLblMonth:'الشهر:',saSumDays:'أيام الحضور',saSumTotal:'إجمالي الساعات',saSumAvg:'متوسط الساعات/يوم',
+    permEmpDel:'🗑️ حذف موظف',permAttendance:'📋 الحضور والغياب',permAttAdmin:'🕐 حضور الموظفين السعوديين (تسجيل وتعديل)',attModeGen:'التحضير العام',attModeSa:'الموظفون السعوديون',saTitle:'حضور وانصراف الموظفين السعوديين',saLblDate:'التاريخ:',saThName:'الاسم',saThTitle:'المسمى',saThProj:'المشروع',saThIn:'وقت الحضور',saThOut:'وقت الانصراف',saThHours:'الساعات',saThNote:'ملاحظة',saEmpty:'لا يوجد موظفون سعوديون مسجّلون',saSumTitle:'ملخص الساعات الشهري',saLblMonth:'الشهر:',saPrintDay:'طباعة تحضير اليوم',saPrintMonth:'طباعة كشف الشهر',saSumDays:'أيام الحضور',saSumTotal:'إجمالي الساعات',saSumAvg:'متوسط الساعات/يوم',
     permReports:'📈 التقارير',permEvaluation:'⭐ التقييم',permPayroll:'💰 الرواتب',permBackup:'💾 نسخ/استعادة',permWarehouse:'📦 المستودع',
     // errors & confirms
     errLoginRequired:'يرجى إدخال اسم المستخدم وكلمة المرور',
@@ -2180,7 +2182,7 @@ const T={
     // permissions
     permDashboard:'📊 Dashboard',permEmpView:'👁️ View Employees',
     permEmpEdit:'✏️ Edit Employees',permEmpAdd:'➕ Add Employee',
-    permEmpDel:'🗑️ Delete Employee',permAttendance:'📋 Attendance',permAttAdmin:'🕐 Saudi staff attendance (record & edit)',attModeGen:'General attendance',attModeSa:'Saudi staff',saTitle:'Saudi staff check-in / check-out',saLblDate:'Date:',saThName:'Name',saThTitle:'Job title',saThProj:'Project',saThIn:'Check-in',saThOut:'Check-out',saThHours:'Hours',saThNote:'Note',saEmpty:'No Saudi employees registered',saSumTitle:'Monthly hours summary',saLblMonth:'Month:',saSumDays:'Days worked',saSumTotal:'Total hours',saSumAvg:'Avg hours/day',
+    permEmpDel:'🗑️ Delete Employee',permAttendance:'📋 Attendance',permAttAdmin:'🕐 Saudi staff attendance (record & edit)',attModeGen:'General attendance',attModeSa:'Saudi staff',saTitle:'Saudi staff check-in / check-out',saLblDate:'Date:',saThName:'Name',saThTitle:'Job title',saThProj:'Project',saThIn:'Check-in',saThOut:'Check-out',saThHours:'Hours',saThNote:'Note',saEmpty:'No Saudi employees registered',saSumTitle:'Monthly hours summary',saLblMonth:'Month:',saPrintDay:'Print daily sheet',saPrintMonth:'Print monthly sheet',saSumDays:'Days worked',saSumTotal:'Total hours',saSumAvg:'Avg hours/day',
     permReports:'📈 Reports',permEvaluation:'⭐ Evaluation',permPayroll:'💰 Payroll',permBackup:'💾 Backup/Restore',permWarehouse:'📦 Warehouse',
     // errors & confirms
     errLoginRequired:'Please enter username and password',
@@ -2830,6 +2832,7 @@ function renderSaudiAtt(){
   if(!dateEl||!body)return;
   if(!dateEl.value)dateEl.value=localDateStr(new Date());
   [['saTitle','saTitle'],['saLblDate','saLblDate'],['saThName','saThName'],['saThTitle','saThTitle'],['saThProj','saThProj'],['saThIn','saThIn'],['saThOut','saThOut'],['saThHours','saThHours'],['saThNote','saThNote']].forEach(([id,k])=>setText(id,t(k)));
+  setText('saBtnPrintDay','🖨️ '+t('saPrintDay'));setText('saBtnPrintMonth','🖨️ '+t('saPrintMonth'));
   const date=dateEl.value,day=saudiAtt[date]||{},list=saudiEmps(),edit=can('attendance_admin');
   if(!list.length){body.innerHTML=`<tr class="erow"><td colspan="8" style="text-align:center;padding:40px;color:var(--txt2)">${esc(t('saEmpty'))}</td></tr>`;return;}
   body.innerHTML=list.map((e,i)=>{
@@ -2848,6 +2851,86 @@ function renderSaudiAtt(){
     </tr>`;
   }).join('');
 }
+// ── طباعة حضور الموظفين السعوديين: كشف اليوم وكشف الشهر ──
+async function printSaudiAtt(){
+  if(!can('attendance_admin'))return;
+  const date=document.getElementById('saDate').value;
+  if(!date){toast(t('errSelectDate'),'err');return}
+  const lang=await askPrintLang();if(!lang)return;const isAr=lang==='ar';
+  const day=saudiAtt[date]||{},list=saudiEmps();
+  let present=0,tot=0;
+  const rows=list.map((e,i)=>{
+    const r=day[e.id]||{};
+    if(r.in)present++;
+    if(typeof r.hours==='number')tot+=r.hours;
+    return `<tr>
+      <td>${i+1}</td><td class="nm">${esc(e.name)}</td><td>${esc(e.empNum||'—')}</td><td>${esc(e.title||'—')}</td><td>${esc(e.project||'—')}</td>
+      <td style="text-align:center">${esc(r.in||'—')}</td><td style="text-align:center">${esc(r.out||'—')}</td>
+      <td style="text-align:center;font-weight:700">${typeof r.hours==='number'?esc(fmtHours(r.hours)):'—'}</td><td>${esc(r.note||'')}</td>
+    </tr>`;
+  }).join('');
+  const H=isAr?{ttl:'حضور وانصراف الموظفين السعوديين',date:'التاريخ',cnt:'عدد الموظفين',name:'الاسم',num:'الرقم',job:'المسمى',proj:'المشروع',inn:'الحضور',out:'الانصراف',hrs:'الساعات',note:'ملاحظة',pres:'سجّلوا حضوراً',total:'إجمالي الساعات'}
+              :{ttl:'Saudi Staff Attendance',date:'Date',cnt:'Employees',name:'Name',num:'No.',job:'Job title',proj:'Project',inn:'Check-in',out:'Check-out',hrs:'Hours',note:'Note',pres:'Checked in',total:'Total hours'};
+  document.getElementById('dailyAttPrint').innerHTML=`
+    <div class="da-card" dir="${isAr?'rtl':'ltr'}">
+      ${buildReportHeader('حضور وانصراف الموظفين السعوديين','Saudi Staff Attendance',lang)}
+      <div class="da-meta" dir="${isAr?'rtl':'ltr'}">
+        <div>📅 <b>${H.date}:</b> ${esc(fmtDateLong(date))}</div>
+        <div>👥 <b>${H.cnt}:</b> ${list.length}</div>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>${H.name}</th><th>${H.num}</th><th>${H.job}</th><th>${H.proj}</th><th>${H.inn}</th><th>${H.out}</th><th>${H.hrs}</th><th>${H.note}</th></tr></thead>
+        <tbody>${rows||'<tr><td colspan="9">—</td></tr>'}</tbody>
+      </table>
+      <div class="da-sum" dir="${isAr?'rtl':'ltr'}">
+        <span class="da-P">✓ ${H.pres}: ${present}</span>
+        <span style="color:#0f2444;font-weight:700">⏱ ${H.total}: ${esc(fmtHours(tot))}</span>
+      </div>
+      <div class="da-foot">
+        <div class="da-sign">${L(lang,'supervisorSign')}</div>
+        <div class="da-sign">${L(lang,'managerSign')}</div>
+      </div>
+    </div>`;
+  document.body.classList.add('printing-att');
+  window.print();
+  document.body.classList.remove('printing-att');
+}
+async function printSaudiMonth(){
+  if(!can('attendance_admin'))return;
+  const m=document.getElementById('saMonth').value;
+  if(!m){toast(t('errSelectDate'),'err');return}
+  const lang=await askPrintLang();if(!lang)return;const isAr=lang==='ar';
+  const DN=isAr?['أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت']:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const H=isAr?{date:'التاريخ',day:'اليوم',inn:'الحضور',out:'الانصراف',hrs:'الساعات',note:'ملاحظة',month:'الشهر',days:'أيام الحضور',total:'إجمالي الساعات',none:'لا توجد سجلات هذا الشهر'}
+              :{date:'Date',day:'Day',inn:'Check-in',out:'Check-out',hrs:'Hours',note:'Note',month:'Month',days:'Days worked',total:'Total hours',none:'No records this month'};
+  const dates=Object.keys(saudiAtt).filter(d=>d.startsWith(m)).sort();
+  const blocks=saudiEmps().map(e=>{
+    let days=0,tot=0;
+    const rows=dates.map(d=>{
+      const r=(saudiAtt[d]||{})[e.id];if(!r||(!r.in&&!r.out&&!r.note))return '';
+      if(typeof r.hours==='number'&&r.hours>0){days++;tot+=r.hours;}
+      return `<tr><td>${esc(d)}</td><td>${DN[new Date(d+'T12:00:00').getDay()]||''}</td><td style="text-align:center">${esc(r.in||'—')}</td><td style="text-align:center">${esc(r.out||'—')}</td><td style="text-align:center;font-weight:700">${typeof r.hours==='number'?esc(fmtHours(r.hours)):'—'}</td><td>${esc(r.note||'')}</td></tr>`;
+    }).join('');
+    return `<div style="page-break-inside:avoid;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;gap:10px;font-weight:800;margin-bottom:4px"><span>${esc(e.name)}${e.empNum?' · '+esc(e.empNum):''}${e.title?' · '+esc(e.title):''}</span><span style="color:#0f2444">${H.days}: ${days} · ${H.total}: ${esc(fmtHours(tot))}</span></div>
+      <table><thead><tr><th>${H.date}</th><th>${H.day}</th><th>${H.inn}</th><th>${H.out}</th><th>${H.hrs}</th><th>${H.note}</th></tr></thead>
+      <tbody>${rows||`<tr><td colspan="6" style="color:#94a3b8">${H.none}</td></tr>`}</tbody></table></div>`;
+  }).join('');
+  document.getElementById('dailyAttPrint').innerHTML=`
+    <div class="da-card" dir="${isAr?'rtl':'ltr'}">
+      ${buildReportHeader('كشف حضور الموظفين السعوديين الشهري','Saudi Staff Monthly Timesheet',lang)}
+      <div class="da-meta" dir="${isAr?'rtl':'ltr'}"><div>📅 <b>${H.month}:</b> ${esc(m)}</div></div>
+      ${blocks||''}
+      <div class="da-foot">
+        <div class="da-sign">${L(lang,'supervisorSign')}</div>
+        <div class="da-sign">${L(lang,'managerSign')}</div>
+      </div>
+    </div>`;
+  document.body.classList.add('printing-att');
+  window.print();
+  document.body.classList.remove('printing-att');
+}
+
 function saudiSet(date,empId,field,value,idx){
   if(!can('attendance_admin')||!date)return;
   if(!['in','out','note'].includes(field))return;
@@ -3219,7 +3302,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.10.14.0420";
+const BUILD_VERSION="2026.10.14.0540";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{

@@ -1092,11 +1092,9 @@ td{padding:10px 13px;vertical-align:middle}
     <select id="fltProj" onchange="render()"><option value="">كل المشاريع</option></select>
     <select id="fltShift" onchange="render()">
       <option value="" id="optAllShifts">كل الشفتات</option>
-      <option value="الشفت 1">الشفت 1 — آخر الليل</option>
-      <option value="الشفت 2">الشفت 2 — الصباح</option>
-      <option value="الشفت 3">الشفت 3 — المساء</option>
       <option value="Morning Shift">Morning Shift</option>
       <option value="Afternoon Shift">Afternoon Shift</option>
+      <option value="Night Shift">Night Shift</option>
       <option value="-" id="optNoShift">بدون شفت</option>
     </select>
     <select id="fltGender" onchange="render()">
@@ -1776,11 +1774,9 @@ td{padding:10px 13px;vertical-align:middle}
       <div class="field"><label id="dLblShift">الشفت</label>
         <select id="fShift">
           <option value="-" id="dFShiftNone">بدون شفت</option>
-          <option value="الشفت 1" id="dFShift1">الشفت 1 — آخر الليل</option>
-          <option value="الشفت 2" id="dFShift2">الشفت 2 — الصباح</option>
-          <option value="الشفت 3" id="dFShift3">الشفت 3 — المساء</option>
-          <option value="Morning Shift">Morning Shift</option>
-          <option value="Afternoon Shift">Afternoon Shift</option>
+          <option value="Morning Shift" id="dFShift1">Morning Shift</option>
+          <option value="Afternoon Shift" id="dFShift2">Afternoon Shift</option>
+          <option value="Night Shift" id="dFShift3">Night Shift</option>
         </select>
       </div>
       <div class="field"><label id="dLblBranch">الفرع / الموقع</label><input id="fBranch" type="text" placeholder="Red Sea Mall..."/></div>
@@ -1866,6 +1862,12 @@ td{padding:10px 13px;vertical-align:middle}
 </div>
 
 <script>
+// ── تعقيم النصوص: كل نص قادم من المستخدم أو القاعدة يمرّ من هنا قبل وضعه في HTML ──
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+// للقيم داخل نص JavaScript في سمة onclick مثل onclick="f('${escJs(id)}')"
+// يسمح فقط بصور data:image أو روابط https، وإلا يرجع فارغاً
+function safeImg(s){s=String(s==null?'':s);return /^(data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+\/=]+|https:\/\/[^\s"'<>]+)$/.test(s)?s:'';}
+function escJs(s){return esc(String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/[\r\n]+/g,' '));}
 // ── TRANSLATIONS ─────────────────────────────────────────────
 let currentLang=localStorage.getItem('lang')||'ar';
 
@@ -1949,7 +1951,7 @@ const T={
     // drawer select options
     optChoose:'— اختر —',fGenderM:'♂ ذكر',fGenderF:'♀ أنثى',
     fStatusActive:'✅ نشط',fStatusLeave:'🟡 إجازة',fStatusTerm:'🔴 منتهية خدمته',
-    fShiftNone:'بدون شفت',fShift1:'الشفت 1 — آخر الليل',fShift2:'الشفت 2 — الصباح',fShift3:'الشفت 3 — المساء',
+    fShiftNone:'بدون شفت',fShift1:'Morning Shift',fShift2:'Afternoon Shift',fShift3:'Night Shift',
     // placeholders
     phEmpName:'اسم الموظف',phNationality:'بنغلاديشي، فلبيني...',
     // login
@@ -2113,7 +2115,7 @@ const T={
     // drawer select options
     optChoose:'— Choose —',fGenderM:'♂ Male',fGenderF:'♀ Female',
     fStatusActive:'✅ Active',fStatusLeave:'🟡 On Leave',fStatusTerm:'🔴 Terminated',
-    fShiftNone:'No Shift',fShift1:'Shift 1 — Late Night',fShift2:'Shift 2 — Morning',fShift3:'Shift 3 — Evening',
+    fShiftNone:'No Shift',fShift1:'Morning Shift',fShift2:'Afternoon Shift',fShift3:'Night Shift',
     // placeholders
     phEmpName:'Employee Name',phNationality:'Bangladeshi, Filipino...',
     // login
@@ -2301,7 +2303,7 @@ function applyLang(){
   initSelects();
   // update shift filter display text (values stay Arabic for DB compatibility)
   const _fs=document.getElementById('fltShift');
-  if(_fs){const _sm={'الشفت 1':t('fShift1'),'الشفت 2':t('fShift2'),'الشفت 3':t('fShift3')};Array.from(_fs.options).forEach(o=>{if(_sm[o.value])o.textContent=_sm[o.value];});}
+  if(_fs){const _sm={'Morning Shift':t('fShift1'),'Afternoon Shift':t('fShift2'),'Night Shift':t('fShift3')};Array.from(_fs.options).forEach(o=>{if(_sm[o.value])o.textContent=_sm[o.value];});}
   // reports section headers
   setText('repTitlesH3',t('repTitlesTitle'));
   setText('repProjH3',t('repProjTitle'));
@@ -2593,10 +2595,10 @@ function renderUsersModal(){
     const roleLabel=u.role==='manager'?'🔑 '+t('roleManager'):'👤 '+t('roleSupervisor');
     const permsText=u.role==='manager'?t('allPermsLabel'):(u.permissions||[]).length?getPermsList().filter(p=>(u.permissions||[]).includes(p.key)).map(p=>p.label).join(' | '):t('noPermsLabel');
     const ap=u.assignedProjects||(u.assignedProject?[u.assignedProject]:[]);
-    const projText=u.role!=='manager'&&ap.length?` | 📁 ${ap.join('، ')}`:'';
+    const projText=u.role!=='manager'&&ap.length?` | 📁 ${esc(ap.join('، '))}`:'';
     html+=`<div class="user-row">
       <div class="user-row-info">
-        <div class="user-row-name">👤 ${u.username}${isMe?' <span style="font-size:.7rem;color:var(--accent)">'+t('lblYou')+'</span>':''}</div>
+        <div class="user-row-name">👤 ${esc(u.username)}${isMe?' <span style="font-size:.7rem;color:var(--accent)">'+t('lblYou')+'</span>':''}</div>
         <div class="user-row-role">${roleLabel} — ${permsText}${projText}</div>
       </div>
       ${!isMe?`<button class="btn btn-warn btn-sm" onclick="editUserPerms(${i})">✏️ ${t('btnEdit')}</button>
@@ -2660,7 +2662,7 @@ function editUserPerms(i){
   const div=document.createElement('div');
   div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);direction:rtl';
   div.innerHTML=`<div style="background:var(--surface);border-radius:16px;padding:24px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto">
-    <h3 style="font-size:.97rem;font-weight:700;margin-bottom:16px">${t('editUserTitle')} ${u.username}</h3>
+    <h3 style="font-size:.97rem;font-weight:700;margin-bottom:16px">${t('editUserTitle')} ${esc(u.username)}</h3>
     <div style="margin-bottom:14px;padding:9px 12px;background:var(--surface2);border-radius:8px;font-size:.78rem;color:var(--txt2);line-height:1.6">🔑 كلمة المرور تُدار عبر Firebase. لتغييرها احذف الحساب وأعد إنشاءه بكلمة جديدة.</div>
     ${u.role!=='manager'?`<div style="margin-bottom:6px;font-size:.78rem;font-weight:700;color:var(--txt2);text-transform:uppercase">${t('lblAssignedProject')} <span style="font-weight:400;opacity:.7">(اختر واحد أو أكثر)</span>:</div>
     <div id="editProjFld" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
@@ -2728,10 +2730,10 @@ function openAuditLog(){
       const d=new Date(l.time);
       const ds=fmtDateTime(d);
       return `<div class="audit-row">
-        <span class="audit-icon">${l.icon}</span>
+        <span class="audit-icon">${esc(l.icon)}</span>
         <div class="audit-info">
-          <div class="audit-action">${l.action} <span style="font-size:.74rem;color:var(--txt2);font-weight:400">— ${l.user}</span></div>
-          <div class="audit-detail">${l.detail}</div>
+          <div class="audit-action">${esc(l.action)} <span style="font-size:.74rem;color:var(--txt2);font-weight:400">— ${esc(l.user)}</span></div>
+          <div class="audit-detail">${esc(l.detail)}</div>
         </div>
         <div class="audit-time">${ds}</div>
       </div>`;
@@ -2794,7 +2796,7 @@ function openCompleteness(){
       ? r.missing.map(f=>`<span class="comp-miss-chip">${isAr?f.ar:f.en}</span>`).join('')
       : `<span style="color:#1e8e3e;font-weight:700;font-size:.78rem">✓ ${isAr?'مكتمل':'Complete'}</span>`;
     return `<div class="comp-emp-row">
-      <div style="min-width:130px;font-weight:600">${r.e.name||'—'}<div style="font-size:.7rem;color:var(--txt2);font-weight:400">${r.e.project||''}</div></div>
+      <div style="min-width:130px;font-weight:600">${esc(r.e.name||'—')}<div style="font-size:.7rem;color:var(--txt2);font-weight:400">${esc(r.e.project||'')}</div></div>
       <div class="comp-bar"><div class="comp-bar-fill" style="width:${r.pct}%;background:${barColor(r.pct)}"></div></div>
       <span style="min-width:36px;font-weight:700;color:${barColor(r.pct)}">${r.pct}%</span>
       <div style="flex:2;min-width:160px;text-align:${isAr?'right':'left'}">${chips}</div>
@@ -2821,10 +2823,10 @@ function showPayslip(empId,month){
   const net=(e.baseSalary||0)-absDeduct+otTotal+bonus-extraDeduct;
   document.getElementById('payslipMeta').textContent=e.name+' — '+month;
   document.getElementById('payslipBody').innerHTML=`
-    <div class="payslip-row"><span class="payslip-lbl">${t('psEmpName')}</span><span class="payslip-val">${e.name}</span></div>
+    <div class="payslip-row"><span class="payslip-lbl">${t('psEmpName')}</span><span class="payslip-val">${esc(e.name)}</span></div>
     <div class="payslip-row"><span class="payslip-lbl">${t('psMonth')}</span><span class="payslip-val">${month}</span></div>
-    <div class="payslip-row"><span class="payslip-lbl">${t('psProject')}</span><span class="payslip-val">${e.project||'—'}</span></div>
-    ${e.empNum?`<div class="payslip-row"><span class="payslip-lbl">${t('psEmpNum')}</span><span class="payslip-val">#${e.empNum}</span></div>`:''}
+    <div class="payslip-row"><span class="payslip-lbl">${t('psProject')}</span><span class="payslip-val">${esc(e.project||'—')}</span></div>
+    ${e.empNum?`<div class="payslip-row"><span class="payslip-lbl">${t('psEmpNum')}</span><span class="payslip-val">#${esc(e.empNum)}</span></div>`:''}
     <hr style="border:none;border-top:2px dashed #e2e8f0;margin:8px 0"/>
     <div class="payslip-row"><span class="payslip-lbl">${t('psBaseSal')}</span><span class="payslip-val">${(e.baseSalary||0).toLocaleString()} ${t('sar')}</span></div>
     <div class="payslip-row"><span class="payslip-lbl">${t('psPresentDays')}</span><span class="payslip-val" style="color:#16a34a">${att.P+att.T} ${t('psDay')}</span></div>
@@ -2834,7 +2836,7 @@ function showPayslip(empId,month){
     <div class="payslip-row"><span class="payslip-lbl">${t('psOTTotal')}</span><span class="payslip-val" style="color:#16a34a">${otTotal?'+'+otTotal.toLocaleString()+' '+t('sar'):'—'}</span></div>
     <div class="payslip-row"><span class="payslip-lbl">${t('psBonus')}</span><span class="payslip-val" style="color:#2563eb">${bonus?'+'+bonus.toLocaleString()+' '+t('sar'):'—'}</span></div>
     <div class="payslip-row"><span class="payslip-lbl">${t('psExtraDeduct')}</span><span class="payslip-val" style="color:#dc2626">${extraDeduct?'−'+extraDeduct.toLocaleString()+' '+t('sar'):'—'}</span></div>
-    ${d.notes?`<div class="payslip-row"><span class="payslip-lbl">${t('psNotes')}</span><span class="payslip-val">${d.notes}</span></div>`:''}
+    ${d.notes?`<div class="payslip-row"><span class="payslip-lbl">${t('psNotes')}</span><span class="payslip-val">${esc(d.notes)}</span></div>`:''}
     <div class="payslip-net"><span class="plbl">${t('psNetPay')}</span><span class="pval">${net.toLocaleString()} ${t('sar')}</span></div>
     <div style="text-align:center;font-size:.72rem;color:#94a3b8;margin-top:12px;padding-top:10px;border-top:1px dashed #e2e8f0">${t('sysTitle')} — ${currentLang==='ar'?fmtDate(new Date()):new Date().toLocaleDateString('en-US')}</div>`;
   document.getElementById('payslipModal').classList.add('open');
@@ -2852,15 +2854,18 @@ function printPayslip(){
   .payslip-net{display:flex;justify-content:space-between;background:#dcfce7;border-radius:10px;padding:14px;margin-top:12px}
   .plbl{color:#15803d;font-weight:700}.pval{font-size:1.3rem;font-weight:900;color:#15803d}
   hr{border:none;border-top:2px dashed #e2e8f0;margin:8px 0}</style></head>
-  <body><h2>🏢 ${t('sysTitle')}</h2><p>${t('payslipTitle')} — ${meta}</p>${body}
+  <body><h2>🏢 ${t('sysTitle')}</h2><p>${t('payslipTitle')} — ${esc(meta)}</p>${body}
   <script>window.onload=function(){window.print();}<\/script></body></html>`);
   w.document.close();
 }
 
 // ── CONSTANTS ────────────────────────────────────────────────
 const PROJS  = ['فيرست كلينك','IMC Makkah','هيد كوارتر','رويا كروز'];
-const SHIFTS = ['الشفت 1','الشفت 2','الشفت 3','Morning Shift','Afternoon Shift','-'];
-const SL = {'الشفت 1':'الشفت 1 — آخر الليل','الشفت 2':'الشفت 2 — الصباح','الشفت 3':'الشفت 3 — المساء','Morning Shift':'Morning Shift','Afternoon Shift':'Afternoon Shift','-':'—'};
+const SHIFTS = ['Morning Shift','Afternoon Shift','Night Shift','-'];
+const SL = {'Morning Shift':'Morning Shift','Afternoon Shift':'Afternoon Shift','Night Shift':'Night Shift','-':'—'};
+// الأسماء القديمة (الشفت 1/2/3) تُحوَّل تلقائياً عند التحميل إلى الأسماء الموحّدة
+const SHIFT_LEGACY = {'الشفت 1':'Night Shift','الشفت 2':'Morning Shift','الشفت 3':'Afternoon Shift'};
+function normShift(v){return SHIFT_LEGACY[v]||v;}
 const PC = ['p0','p1','p2','p3'];
 const BC = ['bp0','bp1','bp2','bp3'];
 const SPECIAL = {'Vivian Magno':'General Supervisor','Etchel Truzo':'Morning Shift Supervisor','Amor Tubanar':'Afternoon Shift Supervisor','MD Mosharof':'Team Leader','Maram Yanbuawi':'Morning Shift Supervisor','MD Mominul Hoque':'Evening Shift Supervisor','Novi Sarah Safitri':'Morning Shift Supervisor'};
@@ -3060,7 +3065,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.08.13.2129";
+const BUILD_VERSION="2026.10.14.0135";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{
@@ -3192,7 +3197,7 @@ function toast(msg,type){
   if(!wrap){alert(msg);return;}
   const el=document.createElement('div');
   el.className='toast '+type;
-  el.innerHTML=`<span class="t-ico">${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  el.innerHTML=`<span class="t-ico">${icons[type]||'ℹ️'}</span><span>${esc(msg)}</span>`;
   wrap.appendChild(el);
   const dur=type==='err'?4500:2800;
   setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),300);},dur);
@@ -3307,7 +3312,8 @@ let attendance=JSON.parse(localStorage.getItem('attendance')||'{}');
 let payroll=JSON.parse(localStorage.getItem('payroll')||'{}');
 let evaluations=JSON.parse(localStorage.getItem('evaluations')||'{}');
 // التغطية المؤقتة للشفتات: {id, empId, coverShift, fromDate, toDate, reason}
-let coverages=JSON.parse(localStorage.getItem('coverages')||'[]');
+employees=employees.map(e=>({...e,shift:normShift(e.shift)}));
+let coverages=JSON.parse(localStorage.getItem('coverages')||'[]').map(c=>({...c,coverShift:normShift(c.coverShift)}));
 // أوفر تايم يدوي بساعات محددة: [{id, empId, date, hours, reason, by}]
 let overtimes=JSON.parse(localStorage.getItem('overtimes')||'[]');
 
@@ -3458,7 +3464,7 @@ function attachDataListeners(){
   db.ref('employees').on('value',snap=>{
     const v=snap.val();
     if(v){
-      employees=Object.values(v).map(e=>({...e,...(payrollDataCache[e.id]||{})}));
+      employees=Object.values(v).map(e=>({...e,shift:normShift(e.shift),...(payrollDataCache[e.id]||{})}));
       localStorage.setItem('employees',JSON.stringify(employees));
     }
     renderActive();
@@ -3486,7 +3492,7 @@ function attachDataListeners(){
   },onErr);
   db.ref('coverages').on('value',snap=>{
     const v=snap.val();
-    coverages=v?Object.values(v):[];localStorage.setItem('coverages',JSON.stringify(coverages));
+    coverages=v?Object.values(v).map(c=>({...c,coverShift:normShift(c.coverShift)})):[];localStorage.setItem('coverages',JSON.stringify(coverages));
     renderActive();
   },onErr);
   db.ref('overtimes').on('value',snap=>{
@@ -3695,7 +3701,7 @@ function buildGauge(value,maxVal,label,color){
       <path d="M ${startX} ${startY} A ${r} ${r} 0 ${large} 1 ${endX} ${endY}" fill="none" stroke="${color}" stroke-width="18" stroke-linecap="round" style="transition:all .8s"/>
       <text x="${cx}" y="${cy-15}" font-size="32" font-weight="800" fill="${color}" text-anchor="middle">${Math.round(value)}${maxVal===100?'%':''}</text>
     </svg>
-    ${label?`<div class="gauge-lbl">${label}</div>`:''}
+    ${label?`<div class="gauge-lbl">${esc(label)}</div>`:''}
   </div>`;
 }
 
@@ -3807,7 +3813,7 @@ function execRing(pct,label,color){
 function execMiniBar(name,pct,color,val){
   color=color||'#8d8253';
   return `<div class="exec-mbar">
-    <div class="exec-mbar-name">${name}</div>
+    <div class="exec-mbar-name">${esc(name)}</div>
     <div class="exec-mbar-track"><div class="exec-mbar-fill" style="width:${pct}%;--c:${color};--c2:${color}cc"></div></div>
     <div class="exec-mbar-val">${val||pct+'%'}</div>
   </div>`;
@@ -3929,7 +3935,7 @@ function buildExecPage0(){
         <div class="exec-tile-title"><span class="exec-tile-title-ico">🏗</span> ترتيب المشاريع بالأداء</div>
         ${projPerf.map((p,i)=>{
           const colors=['#22c55e','#06b6d4','#f59e0b','#ef4444'];
-          return execMiniBar(`${i+1}. ${p.name}`,p.pct,colors[i]||'#8d8253',p.pct+'%');
+          return execMiniBar(`${i+1}. ${esc(p.name)}`,p.pct,colors[i]||'#8d8253',p.pct+'%');
         }).join('')}
       </div>
       <div class="exec-tile">
@@ -3969,7 +3975,7 @@ function buildExecPage1(){
         const c=colors[i%4];
         return `<div class="exec-tile" style="--accent:${c}">
           <div style="font-size:.7rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.05em">المشروع</div>
-          <div style="font-size:1.1rem;font-weight:800;color:#fff;margin:6px 0 14px">${p.name}</div>
+          <div style="font-size:1.1rem;font-weight:800;color:#fff;margin:6px 0 14px">${esc(p.name)}</div>
           <div style="margin-bottom:14px">${execRing(p.pct,'معدل الحضور',c)}</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;text-align:center;margin-top:10px">
             <div><div style="font-size:1.1rem;font-weight:800;color:#fff">${p.count}</div><div style="font-size:.65rem;color:#64748b">موظف</div></div>
@@ -3984,7 +3990,7 @@ function buildExecPage1(){
       <table class="exec-table">
         <thead><tr><th>المشروع</th><th>الموظفين</th><th>حضور</th><th>غياب</th><th>إجازة</th><th>أوفر تايم</th><th>معدل %</th></tr></thead>
         <tbody>${projData.map(p=>`<tr>
-          <td class="exec-cell-bold">${p.name}</td>
+          <td class="exec-cell-bold">${esc(p.name)}</td>
           <td>${p.count}</td>
           <td style="color:#4ade80">${p.present}</td>
           <td style="color:#f87171">${p.absent}</td>
@@ -4038,11 +4044,11 @@ function buildExecPage2(){
       </div>
       <div class="exec-tile">
         <div class="exec-tile-title"><span class="exec-tile-title-ico">🏆</span> أعلى 5 موظفين</div>
-        ${top5.map((e,i)=>`<div class="exec-mbar"><div class="exec-mbar-name">${i+1}. ${e.name}</div><div class="exec-mbar-val" style="color:#4ade80">${e.pct}%</div></div>`).join('')||'<div style="color:#475569;padding:20px;text-align:center">لا توجد بيانات</div>'}
+        ${top5.map((e,i)=>`<div class="exec-mbar"><div class="exec-mbar-name">${i+1}. ${esc(e.name)}</div><div class="exec-mbar-val" style="color:#4ade80">${e.pct}%</div></div>`).join('')||'<div style="color:#475569;padding:20px;text-align:center">لا توجد بيانات</div>'}
       </div>
       <div class="exec-tile">
         <div class="exec-tile-title"><span class="exec-tile-title-ico">⚠️</span> الأقل أداءً</div>
-        ${bottom5.map((e,i)=>`<div class="exec-mbar"><div class="exec-mbar-name">${i+1}. ${e.name}</div><div class="exec-mbar-val" style="color:${e.pct>=70?'#fbbf24':'#f87171'}">${e.pct}%</div></div>`).join('')||'<div style="color:#475569;padding:20px;text-align:center">لا توجد بيانات</div>'}
+        ${bottom5.map((e,i)=>`<div class="exec-mbar"><div class="exec-mbar-name">${i+1}. ${esc(e.name)}</div><div class="exec-mbar-val" style="color:${e.pct>=70?'#fbbf24':'#f87171'}">${e.pct}%</div></div>`).join('')||'<div style="color:#475569;padding:20px;text-align:center">لا توجد بيانات</div>'}
       </div>
     </div>`;
 }
@@ -4291,8 +4297,8 @@ function buildExecPage5(){
         <div class="exec-tile-title" style="color:#f87171"><span class="exec-tile-title-ico">🚨</span> تنبيهات الإقامة العاجلة</div>
         ${iqAlerts.length?`<table class="exec-table"><thead><tr><th>الموظف</th><th>المشروع</th><th>تنتهي خلال</th></tr></thead>
           <tbody>${iqAlerts.slice(0,10).map(x=>`<tr>
-            <td class="exec-cell-bold">${x.e.name}</td>
-            <td>${x.e.project}</td>
+            <td class="exec-cell-bold">${esc(x.e.name)}</td>
+            <td>${esc(x.e.project)}</td>
             <td><span style="color:${x.days<0?'#f87171':x.days<30?'#fbbf24':'#fb923c'};font-weight:800">${x.days<0?'منتهية منذ '+Math.abs(x.days)+'ي':x.days+' يوم'}</span></td>
           </tr>`).join('')}</tbody></table>`:'<div style="text-align:center;padding:40px;color:#4ade80">✓ لا توجد تنبيهات</div>'}
       </div>
@@ -4300,8 +4306,8 @@ function buildExecPage5(){
         <div class="exec-tile-title" style="color:#fbbf24"><span class="exec-tile-title-ico">📋</span> أعلى موظفين غياباً</div>
         ${frequentAbsent.length?`<table class="exec-table"><thead><tr><th>الموظف</th><th>المشروع</th><th>أيام الغياب</th></tr></thead>
           <tbody>${frequentAbsent.slice(0,10).map(x=>`<tr>
-            <td class="exec-cell-bold">${x.e.name}</td>
-            <td>${x.e.project}</td>
+            <td class="exec-cell-bold">${esc(x.e.name)}</td>
+            <td>${esc(x.e.project)}</td>
             <td><span style="color:#f87171;font-weight:800">${x.absent} يوم</span></td>
           </tr>`).join('')}</tbody></table>`:'<div style="text-align:center;padding:40px;color:#4ade80">✓ لا يوجد غياب متكرر</div>'}
       </div>
@@ -4356,8 +4362,8 @@ function buildExecPage6(){
       </tr></thead><tbody>
       ${cur.map((r,i)=>`<tr>
         <td style="color:#64748b">${i+1}</td>
-        <td class="exec-cell-bold">${r.item.name}</td>
-        <td style="color:#94a3b8">${r.item.unit}</td>
+        <td class="exec-cell-bold">${esc(r.item.name)}</td>
+        <td style="color:#94a3b8">${esc(r.item.unit)}</td>
         <td style="color:#4ade80;font-weight:700">${r.totalIn||'—'}</td>
         <td style="color:#f87171;font-weight:700">${r.totalOut||'—'}</td>
         <td style="font-weight:800;color:${r.balance<=0?'#f87171':'#e2e8f0'}">${r.balance}</td>
@@ -4498,8 +4504,8 @@ function renderDashboard(){
     const chip=d<0?`<span style="color:#dc2626;font-size:.72rem;font-weight:700">${isAr?`إقامة منتهية منذ ${Math.abs(d)} يوم`:`Iqama expired ${Math.abs(d)} days ago`}</span>`
                :`<span style="color:#d97706;font-size:.72rem;font-weight:700">${isAr?`إقامة تنتهي خلال ${d} يوم`:`Iqama expires in ${d} days`}</span>`;
     return`<div style="padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--surface2)">
-      <div style="font-weight:700;font-size:.84rem">${e.name}</div>
-      <div style="display:flex;justify-content:space-between;margin-top:2px">${chip}<span style="font-size:.72rem;color:var(--txt2)">${e.project}</span></div>
+      <div style="font-weight:700;font-size:.84rem">${esc(e.name)}</div>
+      <div style="display:flex;justify-content:space-between;margin-top:2px">${chip}<span style="font-size:.72rem;color:var(--txt2)">${esc(e.project)}</span></div>
     </div>`;
   }).join('');
   const medRows=medAlerts.slice(0,4).map(e=>{
@@ -4509,8 +4515,8 @@ function renderDashboard(){
     const chip=d<0?`<span style="color:#dc2626;font-size:.72rem;font-weight:700">${isAr?`فحص طبي منتهي منذ ${Math.abs(d)} يوم`:`Medical check expired ${Math.abs(d)} days ago`}</span>`
                :`<span style="color:#d97706;font-size:.72rem;font-weight:700">${isAr?`فحص طبي ينتهي خلال ${d} يوم`:`Medical check expires in ${d} days`}</span>`;
     return`<div style="padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--surface2)">
-      <div style="font-weight:700;font-size:.84rem">${e.name}</div>
-      <div style="display:flex;justify-content:space-between;margin-top:2px">${chip}<span style="font-size:.72rem;color:var(--txt2)">${e.project}</span></div>
+      <div style="font-weight:700;font-size:.84rem">${esc(e.name)}</div>
+      <div style="display:flex;justify-content:space-between;margin-top:2px">${chip}<span style="font-size:.72rem;color:var(--txt2)">${esc(e.project)}</span></div>
     </div>`;
   }).join('');
   bellItems.innerHTML=totalAlerts===0
@@ -4560,7 +4566,7 @@ function restoreData(inp){
   r.onload=ev=>{
     try{
       const data=JSON.parse(ev.target.result);
-      if(data.employees){employees=data.employees;saveEmps();}
+      if(data.employees){employees=data.employees.map(e=>({...e,shift:normShift(e.shift)}));saveEmps();}
       if(data.attendance){attendance=data.attendance;localStorage.setItem('attendance',JSON.stringify(attendance));if(fbReady)db.ref('attendance').set(attendance);}
       if(data.payroll){payroll=data.payroll;savePay()}
       toast(t('msgRestoreOk'),'ok');
@@ -4633,23 +4639,23 @@ function iqBadge(exp){
   if(!exp)return'<span style="color:var(--txt2)">—</span>';
   const greg=h2g(exp);
   const ref=greg||new Date(exp);
-  if(isNaN(ref))return`<span style="color:var(--txt2)">${exp}</span>`;
+  if(isNaN(ref))return`<span style="color:var(--txt2)">${esc(exp)}</span>`;
   const days=Math.floor((ref-new Date())/86400000);
-  if(days<0)return`<span class="iq-bad">${t('iqExpiredSince')}(${exp}) ${Math.abs(days)}${t('iqDay')}</span>`;
-  if(days<30)return`<span class="iq-bad">${exp} (${days}${t('iqDay')})</span>`;
-  if(days<90)return`<span class="iq-warn">${exp} (${days}${t('iqDay')})</span>`;
-  return`<span class="iq-ok">${exp}</span>`;
+  if(days<0)return`<span class="iq-bad">${t('iqExpiredSince')}(${esc(exp)}) ${Math.abs(days)}${t('iqDay')}</span>`;
+  if(days<30)return`<span class="iq-bad">${esc(exp)} (${days}${t('iqDay')})</span>`;
+  if(days<90)return`<span class="iq-warn">${esc(exp)} (${days}${t('iqDay')})</span>`;
+  return`<span class="iq-ok">${esc(exp)}</span>`;
 }
 
 function medBadge(exp){
   if(!exp)return'<span style="color:var(--txt2)">—</span>';
   const ref=new Date(exp);
-  if(isNaN(ref))return`<span style="color:var(--txt2)">${exp}</span>`;
+  if(isNaN(ref))return`<span style="color:var(--txt2)">${esc(exp)}</span>`;
   const days=Math.floor((ref-new Date())/86400000);
-  if(days<0)return`<span class="iq-bad">${t('iqBadgeExpired')} (${exp})</span>`;
-  if(days<30)return`<span class="iq-bad">${exp} (${days}${t('dayUnit')})</span>`;
-  if(days<90)return`<span class="iq-warn">${exp} (${days}${t('dayUnit')})</span>`;
-  return`<span class="iq-ok">${exp}</span>`;
+  if(days<0)return`<span class="iq-bad">${t('iqBadgeExpired')} (${esc(exp)})</span>`;
+  if(days<30)return`<span class="iq-bad">${esc(exp)} (${days}${t('dayUnit')})</span>`;
+  if(days<90)return`<span class="iq-warn">${esc(exp)} (${days}${t('dayUnit')})</span>`;
+  return`<span class="iq-ok">${esc(exp)}</span>`;
 }
 
 function medicalAlerts(){
@@ -4682,14 +4688,14 @@ function render(){
       const total=SHIFTS.reduce((a,s)=>a+(groups[pn][s]||[]).length,0);
       if(!total)return;
       const gh=document.createElement('tr');gh.className='grow';
-      gh.innerHTML=`<td colspan="6">📁 ${pn} &nbsp;(${total} ${t('empWord')})</td>`;
+      gh.innerHTML=`<td colspan="6">📁 ${esc(pn)} &nbsp;(${total} ${t('empWord')})</td>`;
       tbody.appendChild(gh);
       SHIFTS.forEach(s=>{
         const list=groups[pn][s]||[];
         if(!list.length)return;
         if(s!=='-'){
           const sh=document.createElement('tr');sh.className='srow';
-          sh.innerHTML=`<td colspan="6">◈ ${SL[s]||s} &nbsp;(${list.length})</td>`;
+          sh.innerHTML=`<td colspan="6">◈ ${esc(SL[s]||s)} &nbsp;(${list.length})</td>`;
           tbody.appendChild(sh);
         }
         list.forEach(e=>tbody.appendChild(mkRow(e,n++,pi)));
@@ -4703,8 +4709,8 @@ function render(){
 
 function mkRow(e,n,pi){
   const idx=employees.indexOf(e);
-  const av=e.photo?`<div class="av"><img src="${e.photo}"/></div>`:`<div class="av">${e.name[0]||'?'}</div>`;
-  const projBadge=pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project;
+  const av=e.photo?`<div class="av"><img src="${safeImg(e.photo)}"/></div>`:`<div class="av">${esc(e.name[0]||'?')}</div>`;
+  const projBadge=pi>=0?`<span class="badge ${BC[pi]}">${esc(e.project)}</span>`:e.project;
   const rowId='exp-'+e.id;
 
   const tr=document.createElement('tr');
@@ -4712,61 +4718,61 @@ function mkRow(e,n,pi){
     <td style="color:var(--txt2);font-size:.76rem">${n}</td>
     <td class="no-print">${av}</td>
     <td>
-      <button class="name-btn" onclick="toggleExp('${rowId}',this)">
+      <button class="name-btn" onclick="toggleExp('${escJs(rowId)}',this)">
         <span class="arr">▼</span>
-        <span>${e.name}</span>
-        ${e.empNum?`<span style="font-size:.72rem;color:var(--txt2);font-weight:400">#${e.empNum}</span>`:''}
+        <span>${esc(e.name)}</span>
+        ${e.empNum?`<span style="font-size:.72rem;color:var(--txt2);font-weight:400">#${esc(e.empNum)}</span>`:''}
       </button>
     </td>
     <td>${projBadge}</td>
-    <td>${e.title||'—'}</td>
+    <td>${esc(e.title||'—')}</td>
     <td class="no-print"><div class="actions" style="gap:4px;flex-wrap:wrap">
       ${can('employees_edit')?`<button class="btn btn-warn btn-sm" onclick="openEdit(${idx})" title="تعديل">✏️</button>`:''}
       ${can('employees_delete')?`<button class="btn btn-danger btn-sm" onclick="delEmp(${idx})" title="حذف">🗑️</button>`:''}
       ${can('employees_view')?`<button class="btn btn-info btn-sm" onclick="printEmp(${idx})" title="${t('printEmpCardTitle')}">🖨️</button>`:''}
-      ${can('attendance')?`<button class="btn btn-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff" onclick="printEmpMonthlyAtt('${e.id}')" title="تقرير حضور شهري">📋</button>`:''}
-      ${can('employees_view')?`<button class="btn btn-sm" style="background:linear-gradient(135deg,#0f2444,#1e3a5f);color:#fff" onclick="printEmpFullProfile('${e.id}')" title="تقرير شامل عن الموظف">📊</button>`:''}
-      ${can('evaluation')?`<button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border)" onclick="quickEval('${e.id}')" title="تقييم">⭐</button>`:''}
+      ${can('attendance')?`<button class="btn btn-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff" onclick="printEmpMonthlyAtt('${escJs(e.id)}')" title="تقرير حضور شهري">📋</button>`:''}
+      ${can('employees_view')?`<button class="btn btn-sm" style="background:linear-gradient(135deg,#0f2444,#1e3a5f);color:#fff" onclick="printEmpFullProfile('${escJs(e.id)}')" title="تقرير شامل عن الموظف">📊</button>`:''}
+      ${can('evaluation')?`<button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border)" onclick="quickEval('${escJs(e.id)}')" title="تقييم">⭐</button>`:''}
     </div></td>`;
 
   const sal=e.baseSalary?Number(e.baseSalary).toLocaleString()+' '+t('sar'):'—';
-  const sl=e.shift&&e.shift!=='-'?`<span class="sbadge">${SL[e.shift]||e.shift}</span>`:'—';
+  const sl=e.shift&&e.shift!=='-'?`<span class="sbadge">${esc(SL[e.shift]||e.shift)}</span>`:'—';
   const st=e.status||'نشط';
   const stKey=st==='نشط'?'active':st==='إجازة'?'leave':'terminated';
   const stBadge=st==='نشط'?`<span class="st-active">● ${t('active')}</span>`:st==='إجازة'?`<span class="st-leave">● ${t('leave')}</span>`:`<span class="st-terminated">● ${t('terminated')}</span>`;
   const genderTxt=e.gender==='M'?t('male'):e.gender==='F'?t('female'):'—';
   const waPhone=e.phone?e.phone.replace(/\D/g,''):'';
-  const waLink=waPhone?`<a href="https://wa.me/966${waPhone.replace(/^0/,'')}" target="_blank" style="color:#16a34a;text-decoration:none;font-weight:600">📱 ${e.phone} <span style="font-size:.7rem;opacity:.7">(WhatsApp)</span></a>`:e.phone||'—';
+  const waLink=waPhone?`<a href="https://wa.me/966${waPhone.replace(/^0/,'')}" target="_blank" style="color:#16a34a;text-decoration:none;font-weight:600">📱 ${esc(e.phone)} <span style="font-size:.7rem;opacity:.7">(WhatsApp)</span></a>`:esc(e.phone||'—');
   const exp=document.createElement('tr');
   exp.className='exp-row';exp.id=rowId;exp.style.display='none';
   exp.innerHTML=`<td colspan="6"><div class="exp-inner">
     <div class="exp-item"><span class="exp-lbl">${t('expStatus')}</span><span class="exp-val">${stBadge}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expShift')}</span><span class="exp-val">${sl}</span></div>
-    <div class="exp-item"><span class="exp-lbl">${t('expBranch')}</span><span class="exp-val">${e.branch?`<span class="bbadge">${e.branch}</span>`:'—'}</span></div>
+    <div class="exp-item"><span class="exp-lbl">${t('expBranch')}</span><span class="exp-val">${e.branch?`<span class="bbadge">${esc(e.branch)}</span>`:'—'}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expGender')}</span><span class="exp-val">${genderTxt}</span></div>
-    <div class="exp-item"><span class="exp-lbl">${t('expBirth')}</span><span class="exp-val">${e.birthDate||'—'}</span></div>
-    <div class="exp-item"><span class="exp-lbl">${t('expNat')}</span><span class="exp-val">${e.nationality||'—'}</span></div>
-    <div class="exp-item"><span class="exp-lbl">${t('expPass')}</span><span class="exp-val">${e.passportNum||'—'}</span></div>
-    <div class="exp-item"><span class="exp-lbl">${t('expIq')}</span><span class="exp-val">${e.iqamaNum||'—'}</span></div>
+    <div class="exp-item"><span class="exp-lbl">${t('expBirth')}</span><span class="exp-val">${esc(e.birthDate||'—')}</span></div>
+    <div class="exp-item"><span class="exp-lbl">${t('expNat')}</span><span class="exp-val">${esc(e.nationality||'—')}</span></div>
+    <div class="exp-item"><span class="exp-lbl">${t('expPass')}</span><span class="exp-val">${esc(e.passportNum||'—')}</span></div>
+    <div class="exp-item"><span class="exp-lbl">${t('expIq')}</span><span class="exp-val">${esc(e.iqamaNum||'—')}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expIqExp')}</span><span class="exp-val">${iqBadge(e.iqamaExpiry)}</span></div>
-    <div class="exp-item"><span class="exp-lbl">${t('expSponsor')}</span><span class="exp-val" style="font-size:.8rem">${e.sponsor||'—'}</span></div>
+    <div class="exp-item"><span class="exp-lbl">${t('expSponsor')}</span><span class="exp-val" style="font-size:.8rem">${esc(e.sponsor||'—')}</span></div>
     <div class="exp-item full"><span class="exp-lbl">${t('expPhone')}</span><span class="exp-val" dir="ltr">${waLink}</span></div>
-    <div class="exp-item"><span class="exp-lbl">${t('expStart')}</span><span class="exp-val">${e.startDate||'—'}</span></div>
+    <div class="exp-item"><span class="exp-lbl">${t('expStart')}</span><span class="exp-val">${esc(e.startDate||'—')}</span></div>
     ${can('payroll')?`<div class="exp-item"><span class="exp-lbl">${t('expSal')}</span><span class="exp-val" style="font-weight:700;color:var(--ok)">${sal}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expOT')}</span><span class="exp-val">${e.overtimeRate?e.overtimeRate+' '+t('sarH'):'—'}</span></div>`:''}
-    ${(()=>{const today=localDateStr(new Date());const cov=getActiveCoverage(e.id,today);return cov?`<div class="exp-item full"><span class="exp-lbl">🔄 تغطية مؤقتة نشطة</span><span class="exp-val"><span class="chip-warn">📅 ${cov.fromDate} → ${cov.toDate} | الشفت: ${SL[cov.coverShift]||cov.coverShift}</span>${can('employees_edit')?`<button class="btn btn-danger btn-sm" style="margin-right:8px" onclick="endCoverage('${cov.id}')">إنهاء</button>`:''}</span></div>`:'';})()}
+    ${(()=>{const today=localDateStr(new Date());const cov=getActiveCoverage(e.id,today);return cov?`<div class="exp-item full"><span class="exp-lbl">🔄 تغطية مؤقتة نشطة</span><span class="exp-val"><span class="chip-warn">📅 ${cov.fromDate} → ${cov.toDate} | الشفت: ${esc(SL[cov.coverShift]||cov.coverShift)}</span>${can('employees_edit')?`<button class="btn btn-danger btn-sm" style="margin-right:8px" onclick="endCoverage('${escJs(cov.id)}')">إنهاء</button>`:''}</span></div>`:'';})()}
   </div>
   ${can('employees_edit')?`<div style="padding:8px 14px 4px;text-align:right;display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">
-    <button class="btn btn-sm no-print" style="background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;font-size:.78rem" onclick="openCoverageModal('${e.id}')">🔄 تغطية مؤقتة</button>
-    <button class="btn btn-sm no-print" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:.78rem" onclick="openOvertimeModal('${e.id}')">⏱️ إضافة ساعات أوفر</button>
+    <button class="btn btn-sm no-print" style="background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;font-size:.78rem" onclick="openCoverageModal('${escJs(e.id)}')">🔄 تغطية مؤقتة</button>
+    <button class="btn btn-sm no-print" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:.78rem" onclick="openOvertimeModal('${escJs(e.id)}')">⏱️ إضافة ساعات أوفر</button>
   </div>`:''}
   <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:10px">
     <div style="font-size:.75rem;font-weight:700;color:var(--txt2);margin-bottom:8px;padding:0 14px">🏥 الفحص الطبي والتطعيمات</div>
     <div class="exp-inner" style="padding-top:0">
-      <div class="exp-item"><span class="exp-lbl">📋 الفحص الطبي</span><span class="exp-val">${e.medExamDate||'<span style="color:var(--txt2)">—</span>'}</span></div>
+      <div class="exp-item"><span class="exp-lbl">📋 الفحص الطبي</span><span class="exp-val">${e.medExamDate?esc(e.medExamDate):'<span style="color:var(--txt2)">—</span>'}</span></div>
       <div class="exp-item"><span class="exp-lbl">⏳ انتهاء الفحص</span><span class="exp-val">${e.medExamExpiry?medBadge(e.medExamExpiry):'<span style="color:var(--txt2)">—</span>'}</span></div>
-      <div class="exp-item"><span class="exp-lbl">💉 MMR</span><span class="exp-val">${e.vaccMMR?`<span class="chip-ok">✓ ${e.vaccMMR}</span>`:'<span class="chip-bad">✗ لم يُطعَّم</span>'}</span></div>
-      <div class="exp-item"><span class="exp-lbl">💉 Influenza</span><span class="exp-val">${e.vaccInfluenza?`<span class="chip-ok">✓ ${e.vaccInfluenza}</span>`:'<span class="chip-bad">✗ لم يُطعَّم</span>'}</span></div>
+      <div class="exp-item"><span class="exp-lbl">💉 MMR</span><span class="exp-val">${e.vaccMMR?`<span class="chip-ok">✓ ${esc(e.vaccMMR)}</span>`:'<span class="chip-bad">✗ لم يُطعَّم</span>'}</span></div>
+      <div class="exp-item"><span class="exp-lbl">💉 Influenza</span><span class="exp-val">${e.vaccInfluenza?`<span class="chip-ok">✓ ${esc(e.vaccInfluenza)}</span>`:'<span class="chip-bad">✗ لم يُطعَّم</span>'}</span></div>
       <div class="exp-item full"><span class="exp-lbl">💉 Hep B</span><span class="exp-val" style="display:flex;gap:10px">
         <span class="${e.vaccHepB1?'chip-ok':'chip-bad'}">${e.vaccHepB1?'✓':'✗'} الأولى</span>
         <span class="${e.vaccHepB2?'chip-ok':'chip-bad'}">${e.vaccHepB2?'✓':'✗'} الثانية</span>
@@ -4855,7 +4861,7 @@ function openEdit(idx){
   document.getElementById('fBranch').value=e.branch||'';
   document.getElementById('fProj').value=e.project;
   photoData=e.photo||'';
-  document.getElementById('photoPrev').innerHTML=e.photo?`<img src="${e.photo}"/>`:'👤';
+  document.getElementById('photoPrev').innerHTML=e.photo?`<img src="${safeImg(e.photo)}"/>`:'👤';
   document.getElementById('fPhoto').value='';
   document.getElementById('fBirth').value=e.birthDate||'';
   document.getElementById('fMedDate').value=e.medExamDate||'';
@@ -4886,7 +4892,7 @@ function prevPhoto(inp){
       const cv=document.createElement('canvas');cv.width=w;cv.height=h;
       cv.getContext('2d').drawImage(img,0,0,w,h);
       photoData=cv.toDataURL('image/jpeg',0.7);
-      document.getElementById('photoPrev').innerHTML=`<img src="${photoData}"/>`;
+      document.getElementById('photoPrev').innerHTML=`<img src="${safeImg(photoData)}"/>`;
     };
     img.src=e.target.result;
   };
@@ -4955,7 +4961,7 @@ function printEmp(idx){
 
   const greg=e.iqamaExpiry?(h2g(e.iqamaExpiry)||new Date(e.iqamaExpiry)):null;
   const days=greg?Math.floor((greg-new Date())/86400000):null;
-  const iqTxt=days===null?'—':days<0?`${t('pcIqExpired')} — ${e.iqamaExpiry} (${t('iqExpiredSince')}${Math.abs(days)}${t('iqDay')})`:`${e.iqamaExpiry} (${days}${t('iqDaysLeft')})`;
+  const iqTxt=days===null?'—':days<0?`${t('pcIqExpired')} — ${esc(e.iqamaExpiry)} (${t('iqExpiredSince')}${Math.abs(days)}${t('iqDay')})`:`${esc(e.iqamaExpiry)} (${days}${t('iqDaysLeft')})`;
   const iqCol=days===null?'#64748b':days<0?'#dc2626':days<90?'#d97706':'#16a34a';
 
   const st=e.status||'نشط';
@@ -4963,7 +4969,7 @@ function printEmp(idx){
   const stBg =st==='نشط'?'#dcfce7':st==='إجازة'?'#fef9c3':'#fee2e2';
 
   const avContent=e.photo
-    ?`<img src="${e.photo}"/>`
+    ?`<img src="${safeImg(e.photo)}"/>`
     :(e.name?e.name[0].toUpperCase():'?');
 
   const rows=[
@@ -4985,8 +4991,8 @@ function printEmp(idx){
 
   const fieldsHtml=rows.map(([lbl,val,col,full])=>
     `<div class="pc-f${full?' full':''}">
-       <div class="pc-fl">${lbl}</div>
-       <div class="pc-fv"${col?` style="color:${col}"`:''}>${val}</div>
+       <div class="pc-fl">${esc(lbl)}</div>
+       <div class="pc-fv"${col?` style="color:${esc(col)}"`:''}>${esc(val)}</div>
      </div>`).join('');
 
   document.getElementById('empPrintCard').innerHTML=`
@@ -4994,11 +5000,11 @@ function printEmp(idx){
       <div class="pc-hdr" style="background:linear-gradient(135deg,${g1},${g2})">
         <div class="pc-av">${avContent}</div>
         <div style="flex:1">
-          <div class="pc-name">${e.name}</div>
-          <div class="pc-sub">${e.project}${e.empNum?t('pcNumHash')+e.empNum:''}</div>
+          <div class="pc-name">${esc(e.name)}</div>
+          <div class="pc-sub">${esc(e.project)}${esc(e.empNum?t('pcNumHash')+e.empNum:'')}</div>
           <div class="pc-tags">
-            <span class="pc-tag">${e.title||'Cleaner'}</span>
-            <span class="pc-st" style="background:${stBg};color:${stCol}">● ${st}</span>
+            <span class="pc-tag">${esc(e.title||'Cleaner')}</span>
+            <span class="pc-st" style="background:${stBg};color:${stCol}">● ${esc(st)}</span>
           </div>
         </div>
       </div>
@@ -5032,8 +5038,8 @@ async function printDailyAtt(){
     if(st==='P')P++;else if(st==='A')A++;else if(st==='L')L_++;else if(st==='T')T++;else if(st==='O')O++;else N++;
     const cell=st&&STMAP[st]?`<span class="${STMAP[st][0]}">${STMAP[st][1]}</span>`:'<span style="color:#94a3b8">—</span>';
     return `<tr>
-      <td>${i+1}</td><td class="nm">${e.name}</td><td>${e.empNum||'—'}</td>
-      <td>${e.project}</td><td>${SL[e.shift||'-']||'—'}</td><td>${cell}</td>
+      <td>${i+1}</td><td class="nm">${esc(e.name)}</td><td>${esc(e.empNum||'—')}</td>
+      <td>${esc(e.project)}</td><td>${esc(SL[e.shift||'-']||'—')}</td><td>${cell}</td>
     </tr>`;
   }).join('');
   document.getElementById('dailyAttPrint').innerHTML=`
@@ -5114,12 +5120,12 @@ async function printEmpMonthlyAtt(empId){
     <div class="da-card" style="font-size:.82rem;max-width:760px" dir="${isAr?'rtl':'ltr'}">
       ${buildReportHeader(L('ar','individualMonth'),L('en','individualMonth'),lang)}
       <div style="background:#f4f1e8;border-radius:8px;padding:10px 14px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 14px;font-size:.76rem;-webkit-print-color-adjust:exact;print-color-adjust:exact" dir="${isAr?'rtl':'ltr'}">
-        <div>👤 <b>${L(lang,'name')}:</b> ${e.name}</div>
-        <div>🆔 ${e.empNum||'—'}</div>
+        <div>👤 <b>${L(lang,'name')}:</b> ${esc(e.name)}</div>
+        <div>🆔 ${esc(e.empNum||'—')}</div>
         <div>📅 <b>${L(lang,'month')}:</b> ${month}</div>
-        <div>🏗 ${e.project}</div>
-        <div>⏰ ${SL[e.shift||'-']||'—'}</div>
-        <div>🏷 ${e.title||'—'}</div>
+        <div>🏗 ${esc(e.project)}</div>
+        <div>⏰ ${esc(SL[e.shift||'-']||'—')}</div>
+        <div>🏷 ${esc(e.title||'—')}</div>
       </div>
       <table style="width:100%;border-collapse:collapse;border:1px solid #d6cfb8">
         <thead><tr style="background:#f4f1e8;-webkit-print-color-adjust:exact;print-color-adjust:exact">
@@ -5217,7 +5223,7 @@ async function printEmpFullProfile(empId){
   }
 
   // عرض المعلومات الشخصية
-  const avContent=e.photo?`<img src="${e.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`:(e.name?e.name[0].toUpperCase():'?');
+  const avContent=e.photo?`<img src="${safeImg(e.photo)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`:(e.name?e.name[0].toUpperCase():'?');
   const pi=PROJS.indexOf(e.project);
   const projColors=[['#0f2444','#1d4ed8'],['#4c1d95','#7c3aed'],['#0c4a6e','#0891b2'],['#78350f','#d97706']];
   const [g1,g2]=projColors[pi>=0?pi:0];
@@ -5256,7 +5262,7 @@ async function printEmpFullProfile(empId){
     return `<tr>
       <td style="padding:3px 5px;font-size:.7rem">${d.date.substr(8)}/${d.date.substr(5,2)}</td>
       <td style="padding:3px 5px;font-size:.7rem">${d.dayName}</td>
-      <td style="padding:3px 5px;font-size:.7rem;color:${isManual?'#7c3aed':'#0891b2'}">${isManual?'⏱️':'🔄'} ${d.shift}</td>
+      <td style="padding:3px 5px;font-size:.7rem;color:${isManual?'#7c3aed':'#0891b2'}">${isManual?'⏱️':'🔄'} ${esc(d.shift)}</td>
       <td style="padding:3px 5px;font-size:.7rem;text-align:center;font-weight:700">${d.hours}h</td>
     </tr>`;
   }).join(''):`<tr><td colspan="4" style="text-align:center;padding:8px;color:#94a3b8;font-size:.75rem">${isAr?'لا يوجد':'None'}</td></tr>`;
@@ -5264,8 +5270,8 @@ async function printEmpFullProfile(empId){
   // التغطيات
   const covRows=covsThisMonth.length?covsThisMonth.map(c=>`<tr>
     <td style="padding:3px 5px;font-size:.7rem">${c.fromDate} → ${c.toDate}</td>
-    <td style="padding:3px 5px;font-size:.7rem">${SL[c.coverShift]||c.coverShift}</td>
-    <td style="padding:3px 5px;font-size:.7rem;color:#64748b">${c.reason||'—'}</td>
+    <td style="padding:3px 5px;font-size:.7rem">${esc(SL[c.coverShift]||c.coverShift)}</td>
+    <td style="padding:3px 5px;font-size:.7rem;color:#64748b">${esc(c.reason||'—')}</td>
   </tr>`).join(''):`<tr><td colspan="3" style="text-align:center;padding:8px;color:#94a3b8;font-size:.75rem">${isAr?'لا يوجد':'None'}</td></tr>`;
 
   document.getElementById('empFullPrint').innerHTML=`
@@ -5291,11 +5297,11 @@ async function printEmpFullProfile(empId){
       <div style="background:linear-gradient(135deg,${g1},${g2});color:#fff;padding:14px 18px;border-radius:12px;margin-bottom:10px;display:flex;align-items:center;gap:14px;-webkit-print-color-adjust:exact;print-color-adjust:exact" dir="${isAr?'rtl':'ltr'}">
         <div style="width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;flex-shrink:0;overflow:hidden">${avContent}</div>
         <div style="flex:1">
-          <div style="font-size:1.25rem;font-weight:800;margin-bottom:3px">${e.name}</div>
-          <div style="font-size:.82rem;opacity:.9;margin-bottom:5px">${e.title||(isAr?'موظف':'Employee')} · ${e.project} ${e.empNum?`· #${e.empNum}`:''}</div>
+          <div style="font-size:1.25rem;font-weight:800;margin-bottom:3px">${esc(e.name)}</div>
+          <div style="font-size:.82rem;opacity:.9;margin-bottom:5px">${esc(e.title||(isAr?'موظف':'Employee'))} · ${esc(e.project)} ${e.empNum?`· #${esc(e.empNum)}`:''}</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <span style="padding:2px 8px;border-radius:20px;font-size:.7rem;background:${stColor};-webkit-print-color-adjust:exact;print-color-adjust:exact">● ${stLabel}</span>
-            ${e.shift&&e.shift!=='-'?`<span style="padding:2px 8px;border-radius:20px;font-size:.7rem;background:rgba(255,255,255,.2)">${SL[e.shift]}</span>`:''}
+            ${e.shift&&e.shift!=='-'?`<span style="padding:2px 8px;border-radius:20px;font-size:.7rem;background:rgba(255,255,255,.2)">${esc(SL[e.shift])}</span>`:''}
             ${activeCov?`<span style="padding:2px 8px;border-radius:20px;font-size:.7rem;background:#0891b2;-webkit-print-color-adjust:exact;print-color-adjust:exact">🔄 ${isAr?'تغطية نشطة':'Active Coverage'}</span>`:''}
           </div>
         </div>
@@ -5309,18 +5315,18 @@ async function printEmpFullProfile(empId){
       <div class="section">
         <div class="sec-title">📋 ${isAr?'المعلومات الشخصية':'Personal Information'}</div>
         <div class="info-grid">
-          <div class="it"><b>${isAr?'رقم الموظف':'Employee #'}</b>${e.empNum||'—'}</div>
+          <div class="it"><b>${isAr?'رقم الموظف':'Employee #'}</b>${esc(e.empNum||'—')}</div>
           <div class="it"><b>${isAr?'الجنس':'Gender'}</b>${e.gender==='M'?(isAr?'ذكر':'Male'):e.gender==='F'?(isAr?'أنثى':'Female'):'—'}</div>
-          <div class="it"><b>${isAr?'الجنسية':'Nationality'}</b>${e.nationality||'—'}</div>
-          <div class="it"><b>${isAr?'رقم الجواز':'Passport'}</b>${e.passportNum||'—'}</div>
-          <div class="it"><b>${isAr?'رقم الإقامة':'Iqama #'}</b>${e.iqamaNum||'—'}</div>
-          <div class="it"><b>${isAr?'انتهاء الإقامة':'Iqama Expiry'}</b><span style="color:${iqColor};font-weight:700">${e.iqamaExpiry||'—'} ${iqStatus?`(${iqStatus})`:''}</span></div>
-          <div class="it"><b>${isAr?'الكفيل':'Sponsor'}</b><span style="font-size:.7rem">${e.sponsor||'—'}</span></div>
-          <div class="it"><b>${isAr?'الجوال':'Phone'}</b><span dir="ltr">${e.phone||'—'}</span></div>
-          <div class="it"><b>${isAr?'بداية العمل':'Start Date'}</b>${e.startDate||'—'}</div>
-          <div class="it"><b>${isAr?'الفرع':'Branch'}</b>${e.branch||'—'}</div>
-          <div class="it"><b>${isAr?'المسمى':'Title'}</b>${e.title||'—'}</div>
-          <div class="it"><b>${isAr?'المشروع':'Project'}</b>${e.project}</div>
+          <div class="it"><b>${isAr?'الجنسية':'Nationality'}</b>${esc(e.nationality||'—')}</div>
+          <div class="it"><b>${isAr?'رقم الجواز':'Passport'}</b>${esc(e.passportNum||'—')}</div>
+          <div class="it"><b>${isAr?'رقم الإقامة':'Iqama #'}</b>${esc(e.iqamaNum||'—')}</div>
+          <div class="it"><b>${isAr?'انتهاء الإقامة':'Iqama Expiry'}</b><span style="color:${iqColor};font-weight:700">${esc(e.iqamaExpiry||'—')} ${iqStatus?`(${iqStatus})`:''}</span></div>
+          <div class="it"><b>${isAr?'الكفيل':'Sponsor'}</b><span style="font-size:.7rem">${esc(e.sponsor||'—')}</span></div>
+          <div class="it"><b>${isAr?'الجوال':'Phone'}</b><span dir="ltr">${esc(e.phone||'—')}</span></div>
+          <div class="it"><b>${isAr?'بداية العمل':'Start Date'}</b>${esc(e.startDate||'—')}</div>
+          <div class="it"><b>${isAr?'الفرع':'Branch'}</b>${esc(e.branch||'—')}</div>
+          <div class="it"><b>${isAr?'المسمى':'Title'}</b>${esc(e.title||'—')}</div>
+          <div class="it"><b>${isAr?'المشروع':'Project'}</b>${esc(e.project)}</div>
         </div>
       </div>
 
@@ -5328,10 +5334,10 @@ async function printEmpFullProfile(empId){
       <div class="section">
         <div class="sec-title">🏥 ${isAr?'الفحص الطبي والتطعيمات':'Medical & Vaccinations'}</div>
         <div class="info-grid">
-          <div class="it"><b>${isAr?'تاريخ الفحص':'Exam Date'}</b>${e.medExamDate||'—'}</div>
-          <div class="it"><b>${isAr?'انتهاء الفحص':'Exam Expiry'}</b><span style="color:${medColor};font-weight:700">${e.medExamExpiry||'—'} ${medStatus?`(${medStatus})`:''}</span></div>
-          <div class="it"><b>💉 MMR</b>${e.vaccMMR?`<span style="color:#15803d">✓ ${e.vaccMMR}</span>`:'<span style="color:#dc2626">✗</span>'}</div>
-          <div class="it"><b>💉 Influenza</b>${e.vaccInfluenza?`<span style="color:#15803d">✓ ${e.vaccInfluenza}</span>`:'<span style="color:#dc2626">✗</span>'}</div>
+          <div class="it"><b>${isAr?'تاريخ الفحص':'Exam Date'}</b>${esc(e.medExamDate||'—')}</div>
+          <div class="it"><b>${isAr?'انتهاء الفحص':'Exam Expiry'}</b><span style="color:${medColor};font-weight:700">${esc(e.medExamExpiry||'—')} ${medStatus?`(${medStatus})`:''}</span></div>
+          <div class="it"><b>💉 MMR</b>${e.vaccMMR?`<span style="color:#15803d">✓ ${esc(e.vaccMMR)}</span>`:'<span style="color:#dc2626">✗</span>'}</div>
+          <div class="it"><b>💉 Influenza</b>${e.vaccInfluenza?`<span style="color:#15803d">✓ ${esc(e.vaccInfluenza)}</span>`:'<span style="color:#dc2626">✗</span>'}</div>
           <div class="it" style="grid-column:span 2"><b>💉 Hep B</b>
             <span style="color:${e.vaccHepB1?'#15803d':'#dc2626'}">${e.vaccHepB1?'✓':'✗'} ${isAr?'الأولى':'1st'}</span> ·
             <span style="color:${e.vaccHepB2?'#15803d':'#dc2626'}">${e.vaccHepB2?'✓':'✗'} ${isAr?'الثانية':'2nd'}</span> ·
@@ -5421,7 +5427,7 @@ async function printOvertimeReport(){
   const isMgr=currentUser&&currentUser.role==='manager';
   const rows=data.map((rec,idx)=>{
     const pi=PROJS.indexOf(rec.emp.project);
-    const projBadge=pi>=0?`<span class="badge ${BC[pi]||''}" style="-webkit-print-color-adjust:exact;print-color-adjust:exact">${rec.emp.project}</span>`:rec.emp.project;
+    const projBadge=pi>=0?`<span class="badge ${BC[pi]||''}" style="-webkit-print-color-adjust:exact;print-color-adjust:exact">${esc(rec.emp.project)}</span>`:rec.emp.project;
     const dayCells=rec.details.map(d=>{
       const isManual=d.source==='يدوي';
       const srcColor=isManual?'#7c3aed':'#0891b2';
@@ -5430,14 +5436,14 @@ async function printOvertimeReport(){
       return `<div style="padding:3px 6px;border-bottom:1px dashed #e2e8f0;font-size:.72rem;display:flex;justify-content:space-between;gap:8px">
         <span style="font-weight:700">${d.date.substr(8)}/${d.date.substr(5,2)}</span>
         <span style="color:#64748b">${d.dayName}</span>
-        <span style="color:${srcColor};font-weight:600">${srcIcon} ${isManual?srcLbl:d.shift}</span>
+        <span style="color:${srcColor};font-weight:600">${srcIcon} ${esc(isManual?srcLbl:d.shift)}</span>
         <span style="color:#15803d;font-weight:700">${d.hours}h</span>
       </div>`;}).join('');
     return `<tr>
       <td style="text-align:center;font-weight:600">${idx+1}</td>
-      <td style="font-weight:700;font-size:.85rem">${rec.emp.name}<br><span style="font-size:.7rem;color:#64748b">${rec.emp.empNum||'—'}</span></td>
+      <td style="font-weight:700;font-size:.85rem">${esc(rec.emp.name)}<br><span style="font-size:.7rem;color:#64748b">${esc(rec.emp.empNum||'—')}</span></td>
       <td style="text-align:center">${projBadge}</td>
-      <td style="text-align:center;color:#64748b;font-size:.75rem">${SL[rec.emp.shift||'-']||'—'}</td>
+      <td style="text-align:center;color:#64748b;font-size:.75rem">${esc(SL[rec.emp.shift||'-']||'—')}</td>
       <td style="padding:0">${dayCells}</td>
       <td style="text-align:center;font-weight:800;color:#0891b2;font-size:1.1rem">${rec.totalHours}<br><span style="font-size:.65rem;color:#64748b;font-weight:600">${L(lang,'hours')}</span></td>
       ${isMgr?`<td style="text-align:center;color:#64748b;font-size:.78rem">${rec.hourlyRate}</td>
@@ -5451,7 +5457,7 @@ async function printOvertimeReport(){
   const chartBars=top.map(t=>{
     const w=Math.round(t.totalHours/maxH*100);
     return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:.74rem">
-      <span style="width:130px;text-align:${isAr?'right':'left'};font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.emp.name}</span>
+      <span style="width:130px;text-align:${isAr?'right':'left'};font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.emp.name)}</span>
       <div style="flex:1;background:#f1f5f9;border-radius:4px;height:18px;position:relative;-webkit-print-color-adjust:exact;print-color-adjust:exact">
         <div style="width:${w}%;height:100%;background:linear-gradient(90deg,#0891b2,#06b6d4);border-radius:4px;-webkit-print-color-adjust:exact;print-color-adjust:exact"></div>
       </div>
@@ -5610,10 +5616,10 @@ function renderEvaluations(){
       lastCell=rec.at?fmtDate(rec.at):'—';
     }
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="color:var(--txt2)">${i+1}</td><td><strong>${e.name}</strong></td>
-      <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
+    tr.innerHTML=`<td style="color:var(--txt2)">${i+1}</td><td><strong>${esc(e.name)}</strong></td>
+      <td>${pi>=0?`<span class="badge ${BC[pi]}">${esc(e.project)}</span>`:e.project}</td>
       <td>${scoreCell}</td><td>${ratingCell}</td><td style="color:var(--txt2);font-size:.82rem">${lastCell}</td>
-      <td style="text-align:left">${canEval?`<button class="btn btn-primary btn-sm" onclick="openEvalModal('${e.id}')">${rec?t('evalBtnEdit'):t('evalBtnStart')}</button>`:'—'}</td>`;
+      <td style="text-align:left">${canEval?`<button class="btn btn-primary btn-sm" onclick="openEvalModal('${escJs(e.id)}')">${rec?t('evalBtnEdit'):t('evalBtnStart')}</button>`:'—'}</td>`;
     tbody.appendChild(tr);
   });
   const sumEl=document.getElementById('evalSum');if(sumEl)sumEl.textContent=`${done} ${t('evalSumOf')} ${list.length}`;
@@ -5666,8 +5672,8 @@ function openCoverageModal(empId){
   div.id='covOverlay';
   div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);direction:rtl;padding:16px';
   div.innerHTML=`<div style="background:var(--surface);border-radius:16px;padding:24px;width:480px;max-width:96vw">
-    <h3 style="font-size:1rem;font-weight:800;margin-bottom:4px">🔄 تغطية مؤقتة: ${e.name}</h3>
-    <div style="color:var(--txt2);font-size:.82rem;margin-bottom:18px">الشفت الأصلي: ${SL[e.shift||'-']||'—'} | المشروع: ${e.project}</div>
+    <h3 style="font-size:1rem;font-weight:800;margin-bottom:4px">🔄 تغطية مؤقتة: ${esc(e.name)}</h3>
+    <div style="color:var(--txt2);font-size:.82rem;margin-bottom:18px">الشفت الأصلي: ${esc(SL[e.shift||'-']||'—')} | المشروع: ${esc(e.project)}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
       <div><label style="display:block;font-size:.78rem;font-weight:700;color:var(--txt2);margin-bottom:5px">من تاريخ</label>
         <input type="date" id="covFrom" value="${today}" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface2);color:var(--txt)"/></div>
@@ -5680,7 +5686,7 @@ function openCoverageModal(empId){
       <input type="text" id="covReason" placeholder="مثال: تغطية غياب موظف المساء" style="width:100%;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface2);color:var(--txt);box-sizing:border-box"/></div>
     <div style="display:flex;gap:10px">
       <button class="btn btn-secondary" onclick="document.getElementById('covOverlay').remove()">إلغاء</button>
-      <button class="btn btn-primary" onclick="saveCoverage('${empId}')">✅ تفعيل التغطية</button>
+      <button class="btn btn-primary" onclick="saveCoverage('${escJs(empId)}')">✅ تفعيل التغطية</button>
     </div>
   </div>`;
   document.body.appendChild(div);
@@ -5721,17 +5727,17 @@ function openOvertimeModal(empId){
   const listHTML=empOTs.length?empOTs.map(o=>
     `<div style="display:flex;gap:8px;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:7px;margin-bottom:5px;font-size:.83rem">
        <span style="font-weight:700;color:#7c3aed">⏱️ ${o.hours}h</span>
-       <span style="color:var(--txt2)">📅 ${o.date}</span>
-       <span style="flex:1;color:var(--txt2);font-size:.78rem">${o.reason||'—'}</span>
-       <button class="btn btn-danger btn-sm" onclick="delOvertime('${o.id}','${empId}')" title="حذف">🗑️</button>
+       <span style="color:var(--txt2)">📅 ${esc(o.date)}</span>
+       <span style="flex:1;color:var(--txt2);font-size:.78rem">${esc(o.reason||'—')}</span>
+       <button class="btn btn-danger btn-sm" onclick="delOvertime('${escJs(o.id)}','${escJs(empId)}')" title="حذف">🗑️</button>
      </div>`).join(''):'<div style="text-align:center;padding:14px;color:var(--txt2);font-size:.85rem">لا يوجد أوفر تايم يدوي مسجّل</div>';
 
   const div=document.createElement('div');
   div.id='otOverlay';
   div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);direction:rtl;padding:16px';
   div.innerHTML=`<div style="background:var(--surface);border-radius:16px;padding:24px;width:520px;max-width:96vw;max-height:92vh;overflow-y:auto">
-    <h3 style="font-size:1rem;font-weight:800;margin-bottom:4px">⏱️ ساعات أوفر تايم: ${e.name}</h3>
-    <div style="color:var(--txt2);font-size:.82rem;margin-bottom:16px">${e.project} · ${SL[e.shift||'-']||'—'}</div>
+    <h3 style="font-size:1rem;font-weight:800;margin-bottom:4px">⏱️ ساعات أوفر تايم: ${esc(e.name)}</h3>
+    <div style="color:var(--txt2);font-size:.82rem;margin-bottom:16px">${esc(e.project)} · ${esc(SL[e.shift||'-']||'—')}</div>
 
     <div style="background:#f3e8ff;border:1px solid #d8b4fe;border-radius:10px;padding:14px;margin-bottom:14px">
       <div style="font-weight:700;font-size:.85rem;color:#6d28d9;margin-bottom:10px">➕ تسجيل أوفر تايم جديد</div>
@@ -5742,7 +5748,7 @@ function openOvertimeModal(empId){
           <input type="number" id="otHours" min="0.5" step="0.5" placeholder="مثال: 4" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;background:#fff;box-sizing:border-box"/></div>
       </div>
       <input type="text" id="otReason" placeholder="السبب (اختياري — مثال: تعويض غياب يومي)" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;background:#fff;box-sizing:border-box;margin-bottom:10px"/>
-      <button class="btn btn-primary" style="width:100%;background:#7c3aed" onclick="saveOvertime('${empId}')">✅ إضافة</button>
+      <button class="btn btn-primary" style="width:100%;background:#7c3aed" onclick="saveOvertime('${escJs(empId)}')">✅ إضافة</button>
     </div>
 
     <div style="font-weight:700;font-size:.82rem;color:var(--txt2);margin-bottom:8px">📋 السجل السابق</div>
@@ -5800,7 +5806,7 @@ function openEvalModal(empId){
   const att=getAttCount(month,empId);const denom=att.P+att.A+att.T;const attP=denom?Math.round((att.P+att.T)/denom*100):100;
   const critHtml=EVAL_CRIT.map(c=>`
     <div class="ev-crit">
-      <div class="ev-crit-lbl">${c.label}<small>${c.desc} · الوزن ${c.w}%</small></div>
+      <div class="ev-crit-lbl">${c.label}<small>${esc(c.desc)} · الوزن ${c.w}%</small></div>
       <div class="ev-stars" data-crit="${c.k}">
         ${[1,2,3,4,5].map(n=>`<span class="ev-star${n<=window._evalTmp[c.k]?' on':''}" onclick="setEvalStar('${c.k}',${n})">★</span>`).join('')}
       </div>
@@ -5809,18 +5815,18 @@ function openEvalModal(empId){
   div.id='evalOverlay';
   div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);direction:rtl;padding:16px';
   div.innerHTML=`<div style="background:var(--surface);border-radius:16px;padding:24px;width:560px;max-width:96vw;max-height:92vh;overflow-y:auto">
-    <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:4px">⭐ تقييم: ${e.name}</h3>
-    <div style="color:var(--txt2);font-size:.83rem;margin-bottom:16px">${e.project} · ${month}</div>
+    <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:4px">⭐ تقييم: ${esc(e.name)}</h3>
+    <div style="color:var(--txt2);font-size:.83rem;margin-bottom:16px">${esc(e.project)} · ${month}</div>
     ${critHtml}
     <div class="ev-crit" style="border-bottom:none">
       <div class="ev-crit-lbl">المواظبة <small>تلقائي من سجل الحضور · الوزن 15%</small></div>
       <div style="font-weight:800;font-size:1.1rem;color:${attP>=90?'#16a34a':attP>=70?'#d97706':'#dc2626'}">${attP}%</div>
     </div>
     <label style="display:block;font-size:.8rem;font-weight:700;color:var(--txt2);margin:14px 0 6px">ملاحظات (اختياري)</label>
-    <textarea id="evalNotes" rows="3" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface2);color:var(--txt);direction:rtl;resize:vertical;box-sizing:border-box">${rec.notes||''}</textarea>
+    <textarea id="evalNotes" rows="3" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface2);color:var(--txt);direction:rtl;resize:vertical;box-sizing:border-box">${esc(rec.notes||'')}</textarea>
     <div style="display:flex;gap:10px;margin-top:18px">
       <button class="btn btn-secondary" onclick="document.getElementById('evalOverlay').remove()">إلغاء</button>
-      <button class="btn btn-primary" onclick="saveEvalForm('${empId}')">💾 حفظ التقييم</button>
+      <button class="btn btn-primary" onclick="saveEvalForm('${escJs(empId)}')">💾 حفظ التقييم</button>
     </div>
   </div>`;
   document.body.appendChild(div);
@@ -5856,7 +5862,7 @@ async function printEvaluations(){
   const rows=list.map((e,i)=>{
     const rec=monthData[e.id];
     if(!rec){
-      return `<tr><td>${i+1}</td><td class="nm">${e.name}</td><td>${e.project}</td>
+      return `<tr><td>${i+1}</td><td class="nm">${esc(e.name)}</td><td>${esc(e.project)}</td>
         <td colspan="6" style="color:#94a3b8">—</td>
         <td style="color:#94a3b8">${L(lang,'notRated')}</td></tr>`;
     }
@@ -5865,7 +5871,7 @@ async function printEvaluations(){
     if(sc.total>=90)nEx++;else if(sc.total>=75)nVg++;else if(sc.total>=60)nG++;else nN++;
     const rLbl=sc.total>=90?L(lang,'excellent'):sc.total>=75?L(lang,'veryGood'):sc.total>=60?L(lang,'good'):L(lang,'needsFollowup');
     return `<tr>
-      <td>${i+1}</td><td class="nm">${e.name}</td><td>${e.project}</td>
+      <td>${i+1}</td><td class="nm">${esc(e.name)}</td><td>${esc(e.project)}</td>
       <td>${rec.quality||0}</td><td>${rec.productivity||0}</td><td>${rec.compliance||0}</td>
       <td>${rec.teamwork||0}</td><td>${rec.safety||0}</td><td>${sc.attPct}%</td>
       <td style="font-weight:800">${sc.total}</td>
@@ -5973,25 +5979,25 @@ function renderPayroll(){
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td style="color:var(--txt2);font-size:.76rem">${i+1}</td>
-      ${isMgr?`<td class="no-print">${month?`<button class="btn btn-info btn-sm" onclick="showPayslip('${e.id}','${month}')" title="بطاقة الراتب">🧾</button>`:''}</td>`:''}
-      <td><strong>${e.name}</strong></td>
-      <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
+      ${isMgr?`<td class="no-print">${month?`<button class="btn btn-info btn-sm" onclick="showPayslip('${escJs(e.id)}','${escJs(month)}')" title="بطاقة الراتب">🧾</button>`:''}</td>`:''}
+      <td><strong>${esc(e.name)}</strong></td>
+      <td>${pi>=0?`<span class="badge ${BC[pi]}">${esc(e.project)}</span>`:e.project}</td>
       ${isMgr?`<td style="font-weight:700">${(e.baseSalary||0).toLocaleString()}</td>`:''}
       <td style="color:#16a34a;font-weight:600;text-align:center">${att.P+att.T}</td>
       <td style="color:#dc2626;font-weight:600;text-align:center">${att.A}</td>
       <td style="color:#d97706;font-weight:600;text-align:center">${att.L}</td>
-      ${isMgr?`<td style="color:#dc2626;font-weight:600" id="abd-${e.id}">${absDeduct?absDeduct.toLocaleString():'—'}</td>`:''}
+      ${isMgr?`<td style="color:#dc2626;font-weight:600" id="abd-${esc(e.id)}">${absDeduct?absDeduct.toLocaleString():'—'}</td>`:''}
       <td style="text-align:center">${otCell}</td>
       ${isMgr?`
       <td style="color:var(--txt2);font-size:.8rem">${hourlyRate}</td>
-      <td style="color:#16a34a;font-weight:600" id="ot-${e.id}">${otTotal?otTotal.toLocaleString():'—'}</td>
+      <td style="color:#16a34a;font-weight:600" id="ot-${esc(e.id)}">${otTotal?otTotal.toLocaleString():'—'}</td>
       <td><input class="pay-input" type="number" min="0" value="${bonus||''}" placeholder="0"
-          oninput="onPay('${month}','${e.id}','bonus',this.value)"/></td>
+          oninput="onPay('${escJs(month)}','${escJs(e.id)}','bonus',this.value)"/></td>
       <td><input class="pay-input" type="number" min="0" value="${extraDeduct||''}" placeholder="0"
-          oninput="onPay('${month}','${e.id}','extraDeductions',this.value)"/></td>
-      <td id="tot-${e.id}" style="font-weight:800;color:${net<0?'#dc2626':'#16a34a'};font-size:.9rem">${net.toLocaleString()}</td>`:''}
-      <td><input class="pay-input" type="text" style="width:85px" value="${d.notes||''}" placeholder="..."
-          oninput="onPay('${month}','${e.id}','notes',this.value)"/></td>`;
+          oninput="onPay('${escJs(month)}','${escJs(e.id)}','extraDeductions',this.value)"/></td>
+      <td id="tot-${esc(e.id)}" style="font-weight:800;color:${net<0?'#dc2626':'#16a34a'};font-size:.9rem">${net.toLocaleString()}</td>`:''}
+      <td><input class="pay-input" type="text" style="width:85px" value="${esc(d.notes||'')}" placeholder="..."
+          oninput="onPay('${escJs(month)}','${escJs(e.id)}','notes',this.value)"/></td>`;
     tbody.appendChild(tr);
   });
 
@@ -6101,7 +6107,7 @@ function calcPayrollFromAtt(){
   const proj2=document.getElementById('payProj').value;
   const summary=list.map(e=>{
     const att=getAttCount(month,e.id);
-    return att.A>0?`• ${e.name}: ${att.A} يوم غياب`:'';
+    return att.A>0?`• ${esc(e.name)}: ${att.A} يوم غياب`:'';
   }).filter(Boolean);
   if(summary.length){
     toast(t('msgPayrollCalcDone')+` — ${summary.length} موظف لديهم غياب`,'ok');
@@ -6312,21 +6318,21 @@ function renderAtt(){
     const pi=PROJS.indexOf(e.project);
     const cov=date?getActiveCoverage(e.id,date):null;
     const shiftDisplay=cov
-      ?`<span class="sbadge">${SL[e.shift||'-']||'—'}</span> <span class="sbadge" style="background:#0891b2;color:#fff" title="تغطية مؤقتة حتى ${cov.toDate}">🔄 ${SL[cov.coverShift]||cov.coverShift}</span>`
-      :(e.shift&&e.shift!=='-'?`<span class="sbadge">${SL[e.shift]||e.shift}</span>`:'—');
+      ?`<span class="sbadge">${esc(SL[e.shift||'-']||'—')}</span> <span class="sbadge" style="background:#0891b2;color:#fff" title="تغطية مؤقتة حتى ${cov.toDate}">🔄 ${esc(SL[cov.coverShift]||cov.coverShift)}</span>`
+      :(e.shift&&e.shift!=='-'?`<span class="sbadge">${esc(SL[e.shift]||e.shift)}</span>`:'—');
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td style="color:var(--txt2)">${i+1}</td>
-      <td><strong>${e.name}</strong>${cov?`<span style="font-size:.65rem;color:#0891b2;margin-right:4px"> 🔄</span>`:''}</td>
-      <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
+      <td><strong>${esc(e.name)}</strong>${cov?`<span style="font-size:.65rem;color:#0891b2;margin-right:4px"> 🔄</span>`:''}</td>
+      <td>${pi>=0?`<span class="badge ${BC[pi]}">${esc(e.project)}</span>`:e.project}</td>
       <td>${shiftDisplay}</td>
       <td><div style="display:flex;gap:6px;flex-wrap:wrap">
-        ${['P','A','L','T','O'].map(s=>`<button class="att-btn ${st===s?s:''}" data-eid="${e.id}" data-s="${s}" onclick="setAtt('${date}','${e.id}','${s}',this)">${t('att'+s)}</button>`).join('')}
+        ${['P','A','L','T','O'].map(s=>`<button class="att-btn ${st===s?s:''}" data-eid="${esc(e.id)}" data-s="${s}" onclick="setAtt('${escJs(date)}','${escJs(e.id)}','${escJs(s)}',this)">${t('att'+s)}</button>`).join('')}
       </div></td>`;
     tbody.appendChild(tr);
   });
   // أزرار الفلترة الجميلة
-  const mkBtn=(k,n,color,emoji,label)=>`<button class="att-filter-btn ${attFilter===k?'active':''}" data-status="${k}" style="--c:${color}" onclick="toggleAttFilter('${k}')" title="اضغط للفلترة">
+  const mkBtn=(k,n,color,emoji,label)=>`<button class="att-filter-btn ${attFilter===k?'active':''}" data-status="${k}" style="--c:${color}" onclick="toggleAttFilter('${escJs(k)}')" title="اضغط للفلترة">
     <span style="font-size:1.1rem">${emoji}</span>
     <span style="font-weight:800;font-size:1.05rem">${n}</span>
     <span style="font-size:.7rem;opacity:.85">${label}</span>
@@ -6456,8 +6462,8 @@ function renderAttSum(){
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td style="color:var(--txt2)">${i+1}</td>
-      <td><strong>${e.name}</strong></td>
-      <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
+      <td><strong>${esc(e.name)}</strong></td>
+      <td>${pi>=0?`<span class="badge ${BC[pi]}">${esc(e.project)}</span>`:e.project}</td>
       <td style="color:#16a34a;font-weight:600">${P}</td>
       <td style="color:#dc2626;font-weight:600">${A}</td>
       <td style="color:#d97706;font-weight:600">${L}</td>
@@ -6787,7 +6793,7 @@ function renderCalendarView(){
     const futureCls=isFuture?'cal-future':'';
     const todayCls=isToday?'cal-today':'';
 
-    return `<div class="cal-cell ${cls} ${todayCls} ${futureCls}" onclick="showCalDayDetail('${d}')" title="${dt.toLocaleDateString('ar-SA-u-nu-latn-ca-gregory',{year:'numeric',month:'long',day:'numeric',weekday:'long'})}">
+    return `<div class="cal-cell ${cls} ${todayCls} ${futureCls}" onclick="showCalDayDetail('${escJs(d)}')" title="${dt.toLocaleDateString('ar-SA-u-nu-latn-ca-gregory',{year:'numeric',month:'long',day:'numeric',weekday:'long'})}">
       <div class="cal-day-num">${dt.getDate()}<span class="cal-name">${dn}${isToday?' • اليوم':''}</span></div>
       ${isRecorded?`
         <div class="cal-pct" style="color:${pct>=90?'#15803d':pct>=70?'#a16207':'#b91c1c'}">${pct}%</div>
@@ -6865,14 +6871,14 @@ function renderHeatmap(){
       const cls=s?`hm-color-${s}`:'hm-color-empty';
       const lbl=s==='P'?'✓':s==='A'?'✗':s==='L'?'إ':s==='T'?'⏱':s==='O'?'🛌':'';
       const tip=s==='P'?'حاضر':s==='A'?'غائب':s==='L'?'إجازة':s==='T'?'متأخر':s==='O'?'راحة':'لم يُسجّل';
-      return `<td class="hm-day ${cls}" title="${e.name} — ${d} — ${tip}">${lbl}</td>`;
+      return `<td class="hm-day ${cls}" title="${esc(e.name)} — ${d} — ${tip}">${lbl}</td>`;
     }).join('');
     // ملخص الموظف
     const summary=getAttCount(month,e.id);
     const workSum=summary.P+summary.A+summary.T;
     const pct=workSum?Math.round((summary.P+summary.T)/workSum*100):0;
     return `<tr>
-      <td class="hm-name">${e.name}<div style="font-size:.65rem;color:var(--txt2);margin-top:2px">${e.project}</div></td>
+      <td class="hm-name">${esc(e.name)}<div style="font-size:.65rem;color:var(--txt2);margin-top:2px">${esc(e.project)}</div></td>
       ${cells}
       <td class="hm-name" style="background:${pct>=90?'#dcfce7':pct>=70?'#fef9c3':'#fee2e2'};color:${pct>=90?'#15803d':pct>=70?'#a16207':'#b91c1c'};-webkit-print-color-adjust:exact;print-color-adjust:exact;font-weight:800;font-size:.85rem">${pct}%</td>
     </tr>`;
@@ -7002,7 +7008,7 @@ function renderLiveDashboard(){
     const pp2=pct(pp+pt,pList.length*(recDates.length||1));
     const colors=['#3b82f6','#8b5cf6','#06b6d4','#f59e0b'];
     return`<div class="bar-row">
-      <span class="bar-lbl"><span class="badge ${BC[pi]}">${proj}</span></span>
+      <span class="bar-lbl"><span class="badge ${BC[pi]}">${esc(proj)}</span></span>
       <div class="bar-track"><div class="bar-fill" style="width:${pp2}%;background:${colors[pi]||'#3b82f6'}"></div></div>
       <span class="bar-val">${pp2}%</span>
       <span style="color:var(--txt2);font-size:.78rem">${pList.length} موظف</span>
@@ -7121,7 +7127,7 @@ function renderLiveDashboard(){
     ${isMgr&&notMarked.length?`<div class="rep-section">
       <div class="rep-section-title">⚠️ ${t('repNotMarkedToday')} (${notMarked.length})</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px">
-        ${notMarked.map(e=>`<span style="background:var(--surface2);padding:5px 12px;border-radius:20px;font-size:.84rem">${e.name}</span>`).join('')}
+        ${notMarked.map(e=>`<span style="background:var(--surface2);padding:5px 12px;border-radius:20px;font-size:.84rem">${esc(e.name)}</span>`).join('')}
       </div>
     </div>`:''}
   `;
@@ -7173,8 +7179,8 @@ function renderWeeklyReport(){
       return`<td style="text-align:center;background:${bg};border-radius:4px;font-size:.82rem;padding:4px 2px">${lbl}</td>`;
     }).join('');
     return`<tr>
-      <td>${i+1}</td><td style="font-weight:600">${e.name}</td>
-      <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
+      <td>${i+1}</td><td style="font-weight:600">${esc(e.name)}</td>
+      <td>${pi>=0?`<span class="badge ${BC[pi]}">${esc(e.project)}</span>`:e.project}</td>
       ${cells}
       <td style="text-align:center;font-weight:700;color:#16a34a">${s.P}</td>
       <td style="text-align:center;color:#dc2626">${s.A}</td>
@@ -7265,8 +7271,8 @@ function renderMonthlyReport(){
       <td style="text-align:center;color:#16a34a">${otAmt.toLocaleString()}</td>
       <td style="text-align:center;font-weight:700">${Math.round(net).toLocaleString()}</td>`:'';
     return`<tr>
-      <td>${i+1}</td><td style="font-weight:600">${e.name}</td>
-      <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
+      <td>${i+1}</td><td style="font-weight:600">${esc(e.name)}</td>
+      <td>${pi>=0?`<span class="badge ${BC[pi]}">${esc(e.project)}</span>`:e.project}</td>
       <td style="text-align:center;color:#16a34a">${s.P}</td>
       <td style="text-align:center;color:#dc2626">${s.A}</td>
       <td style="text-align:center;color:#d97706">${s.L}</td>
@@ -7347,8 +7353,8 @@ function renderCompareReport(){
     const ot2=getCoverageOT(e.id,m2);
     const pi=PROJS.indexOf(e.project);
     return`<tr>
-      <td>${i+1}</td><td style="font-weight:600">${e.name}</td>
-      <td>${pi>=0?`<span class="badge ${BC[pi]}">${e.project}</span>`:e.project}</td>
+      <td>${i+1}</td><td style="font-weight:600">${esc(e.name)}</td>
+      <td>${pi>=0?`<span class="badge ${BC[pi]}">${esc(e.project)}</span>`:e.project}</td>
       <td style="text-align:center">${a1.P}→${a2.P} ${dlt(a2.P,a1.P)}</td>
       <td style="text-align:center">${a1.A}→${a2.A} ${dlt(a2.A,a1.A,true)}</td>
       <td style="text-align:center">${ot1}→${ot2} ${dlt(ot2,ot1)}</td>
@@ -7483,7 +7489,7 @@ function renderWhStock(){
   const lowItems=warehouseItems.filter(item=>whStock(item.id)<=(item.minStock||0)&&(item.minStock||0)>0);
   const alertEl=document.getElementById('wh-low-alert');
   if(alertEl)alertEl.innerHTML=lowItems.length
-    ?`<div class="wh-alert">⚠️ <strong>${lowItems.length} صنف</strong> وصل للحد الأدنى — يحتاج تعبئة: ${lowItems.map(x=>x.name).join('، ')}</div>`
+    ?`<div class="wh-alert">⚠️ <strong>${lowItems.length} صنف</strong> وصل للحد الأدنى — يحتاج تعبئة: ${esc(lowItems.map(x=>x.name).join('، '))}</div>`
     :'';
   const grid=document.getElementById('wh-stock-grid');if(!grid)return;
   if(!warehouseItems.length){
@@ -7499,7 +7505,7 @@ function renderWhStock(){
   let html='';
   let rowNum=1;
   Object.entries(cats).forEach(([cat,items])=>{
-    html+=`<div class="wh-stock-cat-hdr">📂 ${cat}</div>`;
+    html+=`<div class="wh-stock-cat-hdr">📂 ${esc(cat)}</div>`;
     html+=`<table class="wh-stock-list"><tbody>`;
     items.forEach(item=>{
       const qty=whStock(item.id);
@@ -7507,9 +7513,9 @@ function renderWhStock(){
       const isLow=min>0&&qty<=min;
       html+=`<tr>
         <td class="col-num">${rowNum++}</td>
-        <td class="col-name${isLow?' low':''}">${item.name}${isLow?' <span style="color:#dc2626;font-size:.75rem">⚠️</span>':''}</td>
+        <td class="col-name${isLow?' low':''}">${esc(item.name)}${isLow?' <span style="color:#dc2626;font-size:.75rem">⚠️</span>':''}</td>
         <td class="col-qty"><span class="qty-badge ${isLow?'low':'ok'}">${qty.toLocaleString()}</span></td>
-        <td class="col-unit">${item.unit}</td>
+        <td class="col-unit">${esc(item.unit)}</td>
         <td class="col-min">${min>0?`حد: ${min}`:'—'}</td>
       </tr>`;
     });
@@ -7530,7 +7536,7 @@ function populateWhItemSelects(){
     const sel=document.getElementById(id);if(!sel)return;
     const cur=sel.value;
     sel.innerHTML='<option value="">— اختر صنف —</option>'+
-      sorted.map(x=>`<option value="${x.id}" data-unit="${x.unit}">${x.name}</option>`).join('');
+      sorted.map(x=>`<option value="${esc(x.id)}" data-unit="${esc(x.unit)}">${esc(x.name)}</option>`).join('');
     if(cur)sel.value=cur;
   });
 }
@@ -7551,10 +7557,10 @@ function renderWhIn(){
   if(!sorted.length){body.innerHTML=`<tr><td colspan="7" class="wh-empty">لا توجد سجلات وارد بعد</td></tr>`;return;}
   body.innerHTML=sorted.map((r,i)=>{
     const item=warehouseItems.find(x=>x.id===r.itemId);
-    return `<tr><td>${i+1}</td><td>${r.date}</td><td><strong>${item?item.name:'—'}</strong></td>
-      <td style="color:#16a34a;font-weight:700">+${r.qty} ${r.unit||item?.unit||''}</td>
-      <td>${r.supplier||'—'}</td><td>${r.by||'—'}</td>
-      <td><button class="btn btn-ghost" style="padding:2px 8px;font-size:.7rem" onclick="delStockIn('${r.id}')">🗑️</button></td></tr>`;
+    return `<tr><td>${i+1}</td><td>${esc(r.date)}</td><td><strong>${esc(item?item.name:'—')}</strong></td>
+      <td style="color:#16a34a;font-weight:700">+${r.qty} ${esc(r.unit||item?.unit||'')}</td>
+      <td>${esc(r.supplier||'—')}</td><td>${esc(r.by||'—')}</td>
+      <td><button class="btn btn-ghost" style="padding:2px 8px;font-size:.7rem" onclick="delStockIn('${escJs(r.id)}')">🗑️</button></td></tr>`;
   }).join('');
 }
 
@@ -7565,10 +7571,10 @@ function renderWhOut(){
   if(!sorted.length){body.innerHTML=`<tr><td colspan="7" class="wh-empty">لا توجد سجلات صرف بعد</td></tr>`;return;}
   body.innerHTML=sorted.map((r,i)=>{
     const item=warehouseItems.find(x=>x.id===r.itemId);
-    return `<tr><td>${i+1}</td><td>${r.date}</td><td><strong>${item?item.name:'—'}</strong></td>
-      <td style="color:#dc2626;font-weight:700">-${r.qty} ${r.unit||item?.unit||''}</td>
-      <td>${r.notes||'—'}</td><td>${r.by||'—'}</td>
-      <td><button class="btn btn-ghost" style="padding:2px 8px;font-size:.7rem" onclick="delStockOut('${r.id}')">🗑️</button></td></tr>`;
+    return `<tr><td>${i+1}</td><td>${esc(r.date)}</td><td><strong>${esc(item?item.name:'—')}</strong></td>
+      <td style="color:#dc2626;font-weight:700">-${r.qty} ${esc(r.unit||item?.unit||'')}</td>
+      <td>${esc(r.notes||'—')}</td><td>${esc(r.by||'—')}</td>
+      <td><button class="btn btn-ghost" style="padding:2px 8px;font-size:.7rem" onclick="delStockOut('${escJs(r.id)}')">🗑️</button></td></tr>`;
   }).join('');
 }
 
@@ -7578,10 +7584,10 @@ function renderWhItems(){
   body.innerHTML=warehouseItems.map((item,i)=>{
     const qty=whStock(item.id);
     const isLow=(item.minStock||0)>0&&qty<=(item.minStock||0);
-    return `<tr><td>${i+1}</td><td><strong>${item.name}</strong></td><td>${item.category||'—'}</td>
-      <td>${item.unit}</td><td>${item.minStock||0}</td>
-      <td style="color:${isLow?'#dc2626':'#16a34a'};font-weight:700">${qty} ${item.unit}</td>
-      <td><button class="btn btn-ghost" style="padding:2px 8px;font-size:.7rem" onclick="delWhItem('${item.id}')">🗑️</button></td></tr>`;
+    return `<tr><td>${i+1}</td><td><strong>${esc(item.name)}</strong></td><td>${esc(item.category||'—')}</td>
+      <td>${esc(item.unit)}</td><td>${item.minStock||0}</td>
+      <td style="color:${isLow?'#dc2626':'#16a34a'};font-weight:700">${qty} ${esc(item.unit)}</td>
+      <td><button class="btn btn-ghost" style="padding:2px 8px;font-size:.7rem" onclick="delWhItem('${escJs(item.id)}')">🗑️</button></td></tr>`;
   }).join('');
 }
 
@@ -7622,10 +7628,10 @@ function renderWhReport(){
     const meta=WH_CAT_META[cat]||WH_CAT_META['أخرى'];
     const chg=d.totalOutPrev>0?Math.round((d.totalOut-d.totalOutPrev)/d.totalOutPrev*100):0;
     const active=_whRepCat===cat;
-    html+=`<div onclick="whRepFilter('${cat}')" style="cursor:pointer;background:${meta.grad};border-radius:16px;padding:18px 14px;color:#fff;text-align:center;
+    html+=`<div onclick="whRepFilter('${escJs(cat)}')" style="cursor:pointer;background:${meta.grad};border-radius:16px;padding:18px 14px;color:#fff;text-align:center;
       box-shadow:${active?'0 0 0 3px #fff,0 0 0 5px #3b82f6':'0 6px 20px rgba(0,0,0,.25)'};transition:all .2s">
-      <div style="font-size:2rem">${meta.icon}</div>
-      <div style="font-size:.8rem;opacity:.8;margin:4px 0">${cat}</div>
+      <div style="font-size:2rem">${esc(meta.icon)}</div>
+      <div style="font-size:.8rem;opacity:.8;margin:4px 0">${esc(cat)}</div>
       <div style="font-size:1.7rem;font-weight:900">${d.totalOut}</div>
       <div style="font-size:.72rem;margin-top:4px;opacity:.85">
         ${d.totalOutPrev>0?(chg>0?`↑${chg}% من الشهر الماضي`:`↓${Math.abs(chg)}% من الشهر الماضي`):'أول بيانات'}
@@ -7670,8 +7676,8 @@ function renderWhReport(){
       const ind=chg>15?'🔴 ↑':chg<-15?'🟢 ↓':'🟡 ≈';
       html+=`<tr>
         <td style="color:#64748b">${i+1}</td>
-        <td><strong>${item.name}</strong></td>
-        <td style="color:#94a3b8">${item.unit}</td>
+        <td><strong>${esc(item.name)}</strong></td>
+        <td style="color:#94a3b8">${esc(item.unit)}</td>
         <td style="color:#f87171;font-weight:800;font-size:1rem">${cur||'—'}</td>
         <td style="color:#64748b">${prev||'—'}</td>
         <td style="font-size:.85rem">${ind} ${Math.abs(chg)>0?Math.abs(chg)+'%':''}</td>
@@ -7744,7 +7750,7 @@ function addStockOut(){
   const currentQty=whStock(itemId);
   if(qty>currentQty){
     const item=warehouseItems.find(x=>x.id===itemId);
-    toast(`⚠️ الرصيد غير كافٍ — المتاح: ${currentQty} ${item?item.unit:''}`, 'warn');return;
+    toast(`⚠️ الرصيد غير كافٍ — المتاح: ${currentQty} ${esc(item?item.unit:'')}`, 'warn');return;
   }
   const outUnit=document.getElementById('whOutUnit')?.value||
     (warehouseItems.find(x=>x.id===itemId)?.unit||'قطعة');
@@ -7786,9 +7792,9 @@ function renderIqTable(showAll){
     else { chip=isAr?`تنتهي خلال ${d} يوم`:`Expires in ${d} days`; chipClass='s90'; }
     return `<tr>
       <td style="color:var(--txt2)">${i+1}</td>
-      <td style="font-weight:700">${e.name}</td>
-      <td><span class="sbadge">${e.project}</span></td>
-      <td style="font-size:.78rem;color:var(--txt2)">${e.iqamaExpiry||'—'}</td>
+      <td style="font-weight:700">${esc(e.name)}</td>
+      <td><span class="sbadge">${esc(e.project)}</span></td>
+      <td style="font-size:.78rem;color:var(--txt2)">${esc(e.iqamaExpiry||'—')}</td>
       <td><span class="iq-chip ${chipClass}">${d<0?'🔴':d<=30?'🟠':'🟡'} ${chip}</span></td>
     </tr>`;
   }).join('');
@@ -7879,9 +7885,9 @@ function renderIqamaModalTable(showAll){
       else { chip=isArM?`تنتهي خلال ${d} يوم`:`Expires in ${d} days`; chipClass='s90'; }
       return `<tr>
         <td style="color:var(--txt2)">${i+1}</td>
-        <td style="font-weight:700">${e.name}</td>
-        <td><span class="sbadge">${e.project}</span></td>
-        <td style="font-size:.78rem;color:var(--txt2)">${e.iqamaExpiry||'—'}</td>
+        <td style="font-weight:700">${esc(e.name)}</td>
+        <td><span class="sbadge">${esc(e.project)}</span></td>
+        <td style="font-size:.78rem;color:var(--txt2)">${esc(e.iqamaExpiry||'—')}</td>
         <td><span class="iq-chip ${chipClass}">${d<0?'🔴':d<=30?'🟠':'🟡'} ${chip}</span></td>
       </tr>`;
     }).join('');

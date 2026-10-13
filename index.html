@@ -68,6 +68,19 @@ body{font-family:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;background:var(--b
   body.printing-att #dailyAttPrint .pr-sheet .da-title-en{display:none!important}
   body.printing-att #dailyAttPrint .pr-sheet .pr-foot>.da-sign{display:block!important;flex:1 1 0}
 }
+
+/* إصلاح طباعة التحضير: نص داكن لرؤوس الأعمدة، وإبقاء التخطيط الأفقي للسطور */
+.da-card thead th{color:#0f2444!important}
+@media print{
+  body.printing-att #dailyAttPrint .da-meta,
+  body.printing-att #dailyAttPrint .da-sum,
+  body.printing-att #dailyAttPrint .da-foot,
+  body.printing-att #dailyAttPrint .sa-blk-h{display:flex!important}
+  body.printing-att #dailyAttPrint .da-meta>div,
+  body.printing-att #dailyAttPrint .da-sum>span,
+  body.printing-att #dailyAttPrint .sa-blk-h>span,
+  body.printing-att #dailyAttPrint .da-foot>.da-sign{display:block!important}
+}
 /* ── Calendar View ── */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
 .cal-head{background:var(--hdr);color:#fff;padding:8px;text-align:center;font-weight:800;font-size:.82rem;border-radius:8px}
@@ -1324,7 +1337,7 @@ td{padding:10px 13px;vertical-align:middle}
         <div style="overflow-x:auto">
         <table>
           <thead><tr>
-            <th>#</th><th>الاسم</th><th id="saSumDaysTh">أيام الحضور</th><th id="saSumTotalTh">إجمالي الساعات</th><th id="saSumAvgTh">متوسط الساعات/يوم</th>
+            <th>#</th><th>الاسم</th><th id="saSumDaysTh">أيام الحضور</th><th id="saSumTotalTh">إجمالي الساعات</th><th id="saSumAvgTh">متوسط الساعات/يوم</th><th class="no-print"></th>
           </tr></thead>
           <tbody id="saSumBody"></tbody>
         </table>
@@ -2053,7 +2066,7 @@ const T={
     // permissions
     permDashboard:'📊 لوحة التحكم',permEmpView:'👁️ رؤية الموظفين',
     permEmpEdit:'✏️ تعديل الموظفين',permEmpAdd:'➕ إضافة موظف',
-    permEmpDel:'🗑️ حذف موظف',permAttendance:'📋 الحضور والغياب',permAttAdmin:'🕐 حضور الموظفين السعوديين (تسجيل وتعديل)',attModeGen:'التحضير العام',attModeSa:'الموظفون السعوديون',saTitle:'حضور وانصراف الموظفين السعوديين',saLblDate:'التاريخ:',saThName:'الاسم',saThTitle:'المسمى',saThProj:'المشروع',saThIn:'وقت الحضور',saThOut:'وقت الانصراف',saThHours:'الساعات',saThNote:'ملاحظة',saEmpty:'لا يوجد موظفون سعوديون مسجّلون',saSumTitle:'ملخص الساعات الشهري',saLblMonth:'الشهر:',saPrintDay:'طباعة تحضير اليوم',saPrintMonth:'طباعة كشف الشهر',saSumDays:'أيام الحضور',saSumTotal:'إجمالي الساعات',saSumAvg:'متوسط الساعات/يوم',
+    permEmpDel:'🗑️ حذف موظف',permAttendance:'📋 الحضور والغياب',permAttAdmin:'🕐 حضور الموظفين السعوديين (تسجيل وتعديل)',attModeGen:'التحضير العام',attModeSa:'الموظفون السعوديون',saTitle:'حضور وانصراف الموظفين السعوديين',saLblDate:'التاريخ:',saThName:'الاسم',saThTitle:'المسمى',saThProj:'المشروع',saThIn:'وقت الحضور',saThOut:'وقت الانصراف',saThHours:'الساعات',saThNote:'ملاحظة',saEmpty:'لا يوجد موظفون سعوديون مسجّلون',saSumTitle:'ملخص الساعات الشهري',saLblMonth:'الشهر:',saPrintDay:'طباعة تحضير اليوم',saPrintMonth:'طباعة كشف الشهر',saPrintOne:'طباعة',saSumDays:'أيام الحضور',saSumTotal:'إجمالي الساعات',saSumAvg:'متوسط الساعات/يوم',
     permReports:'📈 التقارير',permEvaluation:'⭐ التقييم',permPayroll:'💰 الرواتب',permBackup:'💾 نسخ/استعادة',permWarehouse:'📦 المستودع',
     // errors & confirms
     errLoginRequired:'يرجى إدخال اسم المستخدم وكلمة المرور',
@@ -2217,7 +2230,7 @@ const T={
     // permissions
     permDashboard:'📊 Dashboard',permEmpView:'👁️ View Employees',
     permEmpEdit:'✏️ Edit Employees',permEmpAdd:'➕ Add Employee',
-    permEmpDel:'🗑️ Delete Employee',permAttendance:'📋 Attendance',permAttAdmin:'🕐 Saudi staff attendance (record & edit)',attModeGen:'General attendance',attModeSa:'Saudi staff',saTitle:'Saudi staff check-in / check-out',saLblDate:'Date:',saThName:'Name',saThTitle:'Job title',saThProj:'Project',saThIn:'Check-in',saThOut:'Check-out',saThHours:'Hours',saThNote:'Note',saEmpty:'No Saudi employees registered',saSumTitle:'Monthly hours summary',saLblMonth:'Month:',saPrintDay:'Print daily sheet',saPrintMonth:'Print monthly sheet',saSumDays:'Days worked',saSumTotal:'Total hours',saSumAvg:'Avg hours/day',
+    permEmpDel:'🗑️ Delete Employee',permAttendance:'📋 Attendance',permAttAdmin:'🕐 Saudi staff attendance (record & edit)',attModeGen:'General attendance',attModeSa:'Saudi staff',saTitle:'Saudi staff check-in / check-out',saLblDate:'Date:',saThName:'Name',saThTitle:'Job title',saThProj:'Project',saThIn:'Check-in',saThOut:'Check-out',saThHours:'Hours',saThNote:'Note',saEmpty:'No Saudi employees registered',saSumTitle:'Monthly hours summary',saLblMonth:'Month:',saPrintDay:'Print daily sheet',saPrintMonth:'Print monthly sheet',saPrintOne:'Print',saSumDays:'Days worked',saSumTotal:'Total hours',saSumAvg:'Avg hours/day',
     permReports:'📈 Reports',permEvaluation:'⭐ Evaluation',permPayroll:'💰 Payroll',permBackup:'💾 Backup/Restore',permWarehouse:'📦 Warehouse',
     // errors & confirms
     errLoginRequired:'Please enter username and password',
@@ -3018,7 +3031,7 @@ async function printSaudiAtt(){
   window.print();
   document.body.classList.remove('printing-att');
 }
-async function printSaudiMonth(){
+async function printSaudiMonth(onlyId){
   if(!can('attendance_admin'))return;
   const m=document.getElementById('saMonth').value;
   if(!m){toast(t('errSelectDate'),'err');return}
@@ -3027,7 +3040,7 @@ async function printSaudiMonth(){
   const H=isAr?{date:'التاريخ',day:'اليوم',inn:'الحضور',out:'الانصراف',hrs:'الساعات',note:'ملاحظة',month:'الشهر',days:'أيام الحضور',total:'إجمالي الساعات',none:'لا توجد سجلات هذا الشهر'}
               :{date:'Date',day:'Day',inn:'Check-in',out:'Check-out',hrs:'Hours',note:'Note',month:'Month',days:'Days worked',total:'Total hours',none:'No records this month'};
   const dates=Object.keys(saudiAtt).filter(d=>d.startsWith(m)).sort();
-  const blocks=saudiEmps().map(e=>{
+  const blocks=saudiEmps().filter(e=>!onlyId||e.id===onlyId).map(e=>{
     let days=0,tot=0;
     const rows=dates.map(d=>{
       const r=(saudiAtt[d]||{})[e.id];if(!r||(!r.in&&!r.out&&!r.note))return '';
@@ -3035,7 +3048,7 @@ async function printSaudiMonth(){
       return `<tr><td>${esc(d)}</td><td>${DN[new Date(d+'T12:00:00').getDay()]||''}</td><td style="text-align:center">${esc(r.in||'—')}</td><td style="text-align:center">${esc(r.out||'—')}</td><td style="text-align:center;font-weight:700">${typeof r.hours==='number'?esc(fmtHours(r.hours)):'—'}</td><td>${esc(r.note||'')}</td></tr>`;
     }).join('');
     return `<div style="page-break-inside:avoid;margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;gap:10px;font-weight:800;margin-bottom:4px"><span>${esc(e.name)}${e.empNum?' · '+esc(e.empNum):''}${e.title?' · '+esc(e.title):''}</span><span style="color:#0f2444">${H.days}: ${days} · ${H.total}: ${esc(fmtHours(tot))}</span></div>
+      <div class="sa-blk-h" style="display:flex;justify-content:space-between;gap:10px;font-weight:800;margin-bottom:4px"><span>${esc(e.name)}${e.empNum?' · '+esc(e.empNum):''}${e.title?' · '+esc(e.title):''}</span><span style="color:#0f2444">${H.days}: ${days} · ${H.total}: ${esc(fmtHours(tot))}</span></div>
       <table><thead><tr><th>${H.date}</th><th>${H.day}</th><th>${H.inn}</th><th>${H.out}</th><th>${H.hrs}</th><th>${H.note}</th></tr></thead>
       <tbody>${rows||`<tr><td colspan="6" style="color:#94a3b8">${H.none}</td></tr>`}</tbody></table></div>`;
   }).join('');
@@ -3084,8 +3097,8 @@ function renderSaudiSum(){
   body.innerHTML=list.map((e,i)=>{
     let days=0,tot=0;
     Object.keys(saudiAtt).forEach(d=>{if(d.startsWith(m)){const r=(saudiAtt[d]||{})[e.id];if(r&&typeof r.hours==='number'&&r.hours>0){days++;tot+=r.hours;}}});
-    return `<tr><td style="color:var(--txt2)">${i+1}</td><td><strong>${esc(e.name)}</strong></td><td>${days}</td><td style="font-weight:700">${esc(fmtHours(tot))}</td><td>${days?esc(fmtHours(tot/days)):'—'}</td></tr>`;
-  }).join('')||`<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--txt2)">${esc(t('saEmpty'))}</td></tr>`;
+    return `<tr><td style="color:var(--txt2)">${i+1}</td><td><strong>${esc(e.name)}</strong></td><td>${days}</td><td style="font-weight:700">${esc(fmtHours(tot))}</td><td>${days?esc(fmtHours(tot/days)):'—'}</td><td class="no-print"><button class="btn btn-info btn-sm" onclick="printSaudiMonth('${escJs(e.id)}')">🖨️ ${esc(t('saPrintOne'))}</button></td></tr>`;
+  }).join('')||`<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--txt2)">${esc(t('saEmpty'))}</td></tr>`;
 }
 
 // ── DATA COMPLETENESS ────────────────────────────────────────
@@ -3425,7 +3438,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.10.14.0655";
+const BUILD_VERSION="2026.10.14.0750";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{
@@ -3501,7 +3514,7 @@ function buildReportHeader(titleAr,titleEn,lang){
   const compAr='شركة الإنماء الذهبية للمقاولات العامة';
   const compEn='Golden Development for General Contracting';
   const now=new Date();
-  const dateStr=fmtDate(now);
+  const dateStr=now.getFullYear()+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+String(now.getDate()).padStart(2,'0');
   const repNoLbl=isAr?'رقم التقرير':'Report No.';
   const repDateLbl=isAr?'تاريخ الإصدار':'Issue Date';
   const repNo='GDC-'+now.getFullYear()+(String(now.getMonth()+1).padStart(2,'0'))+'-'+String(Math.floor(Math.random()*10000)).padStart(4,'0');

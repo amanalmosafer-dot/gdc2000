@@ -1764,6 +1764,15 @@ td{padding:10px 13px;vertical-align:middle}
       <hr class="drawer-sep"/>
 
       <!-- المسمى والجنس والجنسية -->
+      <div class="field full"><label id="dLblDept">القسم</label>
+        <select id="fDept">
+          <option value="">— اختر —</option>
+          <option value="ادارة الموارد البشرية">ادارة الموارد البشرية</option>
+          <option value="ادارة الصيانة و التشغيل و النظافة">ادارة الصيانة و التشغيل و النظافة</option>
+          <option value="ادارة المبيعات">ادارة المبيعات</option>
+          <option value="ادارة الشركة">ادارة الشركة</option>
+        </select>
+      </div>
       <div class="field full"><label id="dLblJobTitle">المسمى الوظيفي</label>
         <select id="fTitle">
           <option value="Cleaner">Cleaner</option>
@@ -1777,6 +1786,12 @@ td{padding:10px 13px;vertical-align:middle}
           <option value="General Supervisor">General Supervisor</option>
           <option value="Administrative">Administrative</option>
           <option value="Operations Manager">Operations Manager</option>
+          <option value="مساعد إداري">مساعد إداري</option>
+          <option value="أخصائي عمليات موارد بشرية">أخصائي عمليات موارد بشرية</option>
+          <option value="مشرف صيانة">مشرف صيانة</option>
+          <option value="مندوب مبيعات">مندوب مبيعات</option>
+          <option value="مدخل بيانات">مدخل بيانات</option>
+          <option value="رئيس تنفيذي">رئيس تنفيذي</option>
         </select>
       </div>
       <div class="field"><label id="dLblGender">الجنس</label>
@@ -2043,7 +2058,7 @@ const T={
     // drawer labels
     lblPhoto:'صورة الموظف',lblEmpNum:'رقم الموظف',lblFullName:'الاسم الكامل *',
     lblJobTitle:'المسمى الوظيفي',lblGender:'الجنس',lblNationality:'الجنسية',
-    lblPassport:'رقم الجواز',lblIqamaNum:'رقم الإقامة',lblIqamaExp:'انتهاء الإقامة (هجري)',lblEmpType:'نوع الموظف',empTypeRes:'مقيم',empTypeSa:'سعودي',lblNationalId:'رقم الهوية الوطنية',
+    lblPassport:'رقم الجواز',lblIqamaNum:'رقم الإقامة',lblIqamaExp:'انتهاء الإقامة (هجري)',lblEmpType:'نوع الموظف',empTypeRes:'مقيم',empTypeSa:'سعودي',lblNationalId:'رقم الهوية الوطنية',lblDept:'القسم',expDept:'القسم',pcDept:'القسم',
     lblSponsor:'الكفيل',lblStartDate:'تاريخ بداية العمل',lblPhone:'رقم التواصل',
     lblBaseSalary:'الراتب الأساسي (ريال)',lblOTRate:'معدل الأوفر تايم (ريال/ساعة)',
     lblEmpStatus:'الحالة الوظيفية',lblProject:'المشروع',lblShift:'الشفت',lblBranch:'الفرع / الموقع',
@@ -2207,7 +2222,7 @@ const T={
     // drawer labels
     lblPhoto:'Employee Photo',lblEmpNum:'Employee No.',lblFullName:'Full Name *',
     lblJobTitle:'Job Title',lblGender:'Gender',lblNationality:'Nationality',
-    lblPassport:'Passport No.',lblIqamaNum:'Iqama No.',lblIqamaExp:'Iqama Expiry (Hijri)',lblEmpType:'Employee Type',empTypeRes:'Resident',empTypeSa:'Saudi',lblNationalId:'National ID No.',
+    lblPassport:'Passport No.',lblIqamaNum:'Iqama No.',lblIqamaExp:'Iqama Expiry (Hijri)',lblEmpType:'Employee Type',empTypeRes:'Resident',empTypeSa:'Saudi',lblNationalId:'National ID No.',lblDept:'Department',expDept:'Department',pcDept:'Department',
     lblSponsor:'Sponsor',lblStartDate:'Start Date',lblPhone:'Phone No.',
     lblBaseSalary:'Base Salary (SAR)',lblOTRate:'OT Rate (SAR/h)',
     lblEmpStatus:'Employment Status',lblProject:'Project',lblShift:'Shift',lblBranch:'Branch / Location',
@@ -2411,7 +2426,7 @@ function applyLang(){
   setText('dLblPhoto',t('lblPhoto'));setText('dLblEmpNum',t('lblEmpNum'));
   setText('dLblFullName',t('lblFullName'));setText('dLblJobTitle',t('lblJobTitle'));
   setText('dLblGender',t('lblGender'));setText('dLblNationality',t('lblNationality'));
-  setText('dLblPassport',t('lblPassport'));setText('dLblIqamaNum',t('lblIqamaNum'));setText('dLblEmpType',t('lblEmpType'));setText('dEmpTypeRes',t('empTypeRes'));setText('dEmpTypeSa',t('empTypeSa'));
+  setText('dLblPassport',t('lblPassport'));setText('dLblIqamaNum',t('lblIqamaNum'));setText('dLblEmpType',t('lblEmpType'));setText('dLblDept',t('lblDept'));setText('dEmpTypeRes',t('empTypeRes'));setText('dEmpTypeSa',t('empTypeSa'));
   setText('dLblIqamaExp',t('lblIqamaExp'));setText('dLblSponsor',t('lblSponsor'));
   setText('dLblStartDate',t('lblStartDate'));setText('dLblPhone',t('lblPhone'));
   setText('dLblBaseSalary',t('lblBaseSalary'));setText('dLblOTRate',t('lblOTRate'));
@@ -3438,7 +3453,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.10.14.0750";
+const BUILD_VERSION="2026.10.14.0830";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{
@@ -5126,6 +5141,7 @@ function mkRow(e,n,pi){
   exp.innerHTML=`<td colspan="6"><div class="exp-inner">
     <div class="exp-item"><span class="exp-lbl">${t('expStatus')}</span><span class="exp-val">${stBadge}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expShift')}</span><span class="exp-val">${sl}</span></div>
+    <div class="exp-item"><span class="exp-lbl">${t('expDept')}</span><span class="exp-val">${esc(e.department||'—')}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expBranch')}</span><span class="exp-val">${e.branch?`<span class="bbadge">${esc(e.branch)}</span>`:'—'}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expGender')}</span><span class="exp-val">${genderTxt}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expBirth')}</span><span class="exp-val">${esc(e.birthDate||'—')}</span></div>
@@ -5196,6 +5212,7 @@ function openAdd(){
   document.getElementById('fGender').value='';
   document.getElementById('fSponsor').value='';
   document.getElementById('fEmpType').value='resident';applyEmpType();
+  document.getElementById('fDept').value='';
   ['fIqExp','fStart','fMedDate','fMedExpiry','fVaccMMR','fVaccFlu','fBirth'].forEach(id=>document.getElementById(id).value='');
   ['fSal','fOT','fHousing','fTransport','fDriverCost'].forEach(id=>document.getElementById(id).value='');
   ['fDriverName','fDriverPhone','fSalNotes'].forEach(id=>document.getElementById(id).value='');
@@ -5239,6 +5256,7 @@ function openEdit(idx){
   document.getElementById('fStatus').value=e.status||'نشط';
   document.getElementById('fBranch').value=e.branch||'';
   document.getElementById('fEmpType').value=empIsSaudi(e)?'saudi':'resident';applyEmpType();
+  document.getElementById('fDept').value=e.department||'';
   document.getElementById('fProj').value=e.project;
   photoData=e.photo||'';
   document.getElementById('photoPrev').innerHTML=e.photo?`<img src="${safeImg(e.photo)}"/>`:'👤';
@@ -5287,6 +5305,7 @@ function saveEmp(){
     empNum:document.getElementById('fEmpNum').value.trim(),
     name,
     empType:document.getElementById('fEmpType').value,
+    department:document.getElementById('fDept').value,
     title:document.getElementById('fTitle').value.trim(),
     nationality:document.getElementById('fNat').value.trim(),
     passportNum:document.getElementById('fPass').value.trim(),
@@ -5357,6 +5376,7 @@ function printEmp(idx){
   const rows=[
     [t('pcEmpNum'),    e.empNum||'—',                                                         ''],
     [t('pcJobTitle'),  e.title||'—',                                                           ''],
+    [t('pcDept'),      e.department||'—',                                                    ''],
     [t('pcGender'),    e.gender==='M'?t('male'):e.gender==='F'?t('female'):'—',               ''],
     [t('pcNationality'),e.nationality||'—',                                                    ''],
     [t('pcPassport'),  e.passportNum||'—',                                                     ''],

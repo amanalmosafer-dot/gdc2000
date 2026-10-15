@@ -3600,7 +3600,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.10.15.0200";
+const BUILD_VERSION="2026.10.15.0300";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{
@@ -5221,14 +5221,15 @@ function render(){
   if(!filtered.length){tbody.innerHTML=`<tr class="erow"><td colspan="6">${t('noEmployees')}</td></tr>`;return}
   if(!sortCol){
     const groups={};
-    PROJS.forEach(p=>{groups[p]={};SHIFTS.forEach(s=>groups[p][s]=[])});
-    filtered.forEach(e=>{const s=e.shift||'-';groups[e.project][s].push(e)});
+    const _gp=[...PROJS,''];
+    _gp.forEach(p=>{groups[p]={};SHIFTS.forEach(s=>groups[p][s]=[])});
+    filtered.forEach(e=>{const s=e.shift||'-';const g=groups[e.project]||groups[''];(g[s]||g['-']).push(e)});
     let n=1;
-    PROJS.forEach((pn,pi)=>{
+    _gp.forEach((pn,pi0)=>{const pi=pi0<PROJS.length?pi0:-1;
       const total=SHIFTS.reduce((a,s)=>a+(groups[pn][s]||[]).length,0);
       if(!total)return;
       const gh=document.createElement('tr');gh.className='grow';
-      gh.innerHTML=`<td colspan="6">${esc(pn)} &nbsp;(${total} ${t('empWord')})</td>`;
+      gh.innerHTML=`<td colspan="6">${esc(pn||'—')} &nbsp;(${total} ${t('empWord')})</td>`;
       tbody.appendChild(gh);
       SHIFTS.forEach(s=>{
         const list=groups[pn][s]||[];
@@ -7984,7 +7985,7 @@ function initSelects(){
       el.innerHTML=opts;el.value=saved[id]||'';el.disabled=false;
     }
   });
-  document.getElementById('fProj').innerHTML=PROJS.map(p=>`<option value="${p}">${p}</option>`).join('');
+  document.getElementById('fProj').innerHTML='<option value=""></option>'+PROJS.map(p=>`<option value="${p}">${p}</option>`).join('');
   // show/hide supervisor project banner in employees tab
   const banner=document.getElementById('projLockBanner');
   if(banner)banner.classList.toggle('show',!!myProj);

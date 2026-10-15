@@ -1766,32 +1766,32 @@ td{padding:10px 13px;vertical-align:middle}
       <!-- المسمى والجنس والجنسية -->
       <div class="field full"><label id="dLblDept">القسم</label>
         <select id="fDept">
-          <option value="">— اختر —</option>
-          <option value="ادارة الموارد البشرية">ادارة الموارد البشرية</option>
-          <option value="ادارة الصيانة و التشغيل و النظافة">ادارة الصيانة و التشغيل و النظافة</option>
-          <option value="ادارة المبيعات">ادارة المبيعات</option>
-          <option value="ادارة الشركة">ادارة الشركة</option>
+          <option value="">— بدون قسم — No department —</option>
+          <option value="ادارة الموارد البشرية">ادارة الموارد البشرية — Human Resources Department</option>
+          <option value="ادارة الصيانة و التشغيل و النظافة">ادارة الصيانة و التشغيل و النظافة — Maintenance, Operations &amp; Cleaning Department</option>
+          <option value="ادارة المبيعات">ادارة المبيعات — Sales Department</option>
+          <option value="ادارة الشركة">ادارة الشركة — Company Management</option>
         </select>
       </div>
       <div class="field full"><label id="dLblJobTitle">المسمى الوظيفي</label>
         <select id="fTitle">
-          <option value="Cleaner">Cleaner</option>
-          <option value="Laundry">Laundry</option>
-          <option value="Porter">Porter</option>
-          <option value="Tea Boy">Tea Boy</option>
-          <option value="Team Leader">Team Leader</option>
-          <option value="Morning Shift Supervisor">Morning Shift Supervisor</option>
-          <option value="Afternoon Shift Supervisor">Afternoon Shift Supervisor</option>
-          <option value="Evening Shift Supervisor">Evening Shift Supervisor</option>
-          <option value="General Supervisor">General Supervisor</option>
-          <option value="Administrative">Administrative</option>
-          <option value="Operations Manager">Operations Manager</option>
-          <option value="مساعد إداري">مساعد إداري</option>
-          <option value="أخصائي عمليات موارد بشرية">أخصائي عمليات موارد بشرية</option>
-          <option value="مشرف صيانة">مشرف صيانة</option>
-          <option value="مندوب مبيعات">مندوب مبيعات</option>
-          <option value="مدخل بيانات">مدخل بيانات</option>
-          <option value="رئيس تنفيذي">رئيس تنفيذي</option>
+          <option value="Cleaner">عامل نظافة — Cleaner</option>
+          <option value="Laundry">عامل مغسلة — Laundry</option>
+          <option value="Porter">حمّال — Porter</option>
+          <option value="Tea Boy">عامل ضيافة — Tea Boy</option>
+          <option value="Team Leader">قائد فريق — Team Leader</option>
+          <option value="Morning Shift Supervisor">مشرف الشفت الصباحي — Morning Shift Supervisor</option>
+          <option value="Afternoon Shift Supervisor">مشرف شفت العصر — Afternoon Shift Supervisor</option>
+          <option value="Evening Shift Supervisor">مشرف الشفت المسائي — Evening Shift Supervisor</option>
+          <option value="General Supervisor">مشرف عام — General Supervisor</option>
+          <option value="Administrative">إداري — Administrative</option>
+          <option value="Operations Manager">مدير تشغيل — Operations Manager</option>
+          <option value="مساعد إداري">مساعد إداري — Administrative Assistant</option>
+          <option value="أخصائي عمليات موارد بشرية">أخصائي عمليات موارد بشرية — HR Operations Specialist</option>
+          <option value="مشرف صيانة">مشرف صيانة — Maintenance Supervisor</option>
+          <option value="مندوب مبيعات">مندوب مبيعات — Sales Representative</option>
+          <option value="مدخل بيانات">مدخل بيانات — Data Entry Clerk</option>
+          <option value="رئيس تنفيذي">رئيس تنفيذي — Chief Executive Officer (CEO)</option>
         </select>
       </div>
       <div class="field"><label id="dLblGender">الجنس</label>
@@ -2905,7 +2905,7 @@ function renderSaudiAtt(){
     return `<tr>
       <td style="color:var(--txt2)">${i+1}</td>
       <td><strong>${esc(e.name)}</strong></td>
-      <td>${esc(e.title||'—')}</td>
+      <td>${esc(titleLbl(e.title)||'—')}</td>
       <td>${esc(e.project||'—')}</td>
       <td>${f('in','time',' style="width:120px"')}</td>
       <td>${f('out','time',' style="width:120px"')}</td>
@@ -3015,7 +3015,7 @@ async function printSaudiAtt(){
     if(r.in)present++;
     if(typeof r.hours==='number')tot+=r.hours;
     return `<tr>
-      <td>${i+1}</td><td class="nm">${esc(e.name)}</td><td>${esc(e.empNum||'—')}</td><td>${esc(e.title||'—')}</td><td>${esc(e.project||'—')}</td>
+      <td>${i+1}</td><td class="nm">${esc(e.name)}</td><td>${esc(e.empNum||'—')}</td><td>${esc(titleLbl(e.title,isAr?'ar':'en')||'—')}</td><td>${esc(e.project||'—')}</td>
       <td style="text-align:center">${esc(r.in||'—')}</td><td style="text-align:center">${esc(r.out||'—')}</td>
       <td style="text-align:center;font-weight:700">${typeof r.hours==='number'?esc(fmtHours(r.hours)):'—'}</td><td>${esc(r.note||'')}</td>
     </tr>`;
@@ -3063,7 +3063,7 @@ async function printSaudiMonth(onlyId){
       return `<tr><td>${esc(d)}</td><td>${DN[new Date(d+'T12:00:00').getDay()]||''}</td><td style="text-align:center">${esc(r.in||'—')}</td><td style="text-align:center">${esc(r.out||'—')}</td><td style="text-align:center;font-weight:700">${typeof r.hours==='number'?esc(fmtHours(r.hours)):'—'}</td><td>${esc(r.note||'')}</td></tr>`;
     }).join('');
     return `<div style="page-break-inside:avoid;margin-bottom:16px">
-      <div class="sa-blk-h" style="display:flex;justify-content:space-between;gap:10px;font-weight:800;margin-bottom:4px"><span>${esc(e.name)}${e.empNum?' · '+esc(e.empNum):''}${e.title?' · '+esc(e.title):''}</span><span style="color:#0f2444">${H.days}: ${days} · ${H.total}: ${esc(fmtHours(tot))}</span></div>
+      <div class="sa-blk-h" style="display:flex;justify-content:space-between;gap:10px;font-weight:800;margin-bottom:4px"><span>${esc(e.name)}${e.empNum?' · '+esc(e.empNum):''}${e.title?' · '+esc(titleLbl(e.title,isAr?'ar':'en')):''}</span><span style="color:#0f2444">${H.days}: ${days} · ${H.total}: ${esc(fmtHours(tot))}</span></div>
       <table><thead><tr><th>${H.date}</th><th>${H.day}</th><th>${H.inn}</th><th>${H.out}</th><th>${H.hrs}</th><th>${H.note}</th></tr></thead>
       <tbody>${rows||`<tr><td colspan="6" style="color:#94a3b8">${H.none}</td></tr>`}</tbody></table></div>`;
   }).join('');
@@ -3241,6 +3241,12 @@ const SL = {'Morning Shift':'Morning Shift','Afternoon Shift':'Afternoon Shift',
 // الأسماء القديمة (الشفت 1/2/3) تُحوَّل تلقائياً عند التحميل إلى الأسماء الموحّدة
 const SHIFT_LEGACY = {'الشفت 1':'Night Shift','الشفت 2':'Morning Shift','الشفت 3':'Afternoon Shift'};
 function normShift(v){return SHIFT_LEGACY[v]||v;}
+// ── المسميات الوظيفية والأقسام بالعربي والإنجليزي (القيمة المحفوظة لا تتغيّر، والعرض فقط) ──
+const TITLE_I18N={'Cleaner':['عامل نظافة','Cleaner'],'Laundry':['عامل مغسلة','Laundry'],'Porter':['حمّال','Porter'],'Tea Boy':['عامل ضيافة','Tea Boy'],'Team Leader':['قائد فريق','Team Leader'],'Morning Shift Supervisor':['مشرف الشفت الصباحي','Morning Shift Supervisor'],'Afternoon Shift Supervisor':['مشرف شفت العصر','Afternoon Shift Supervisor'],'Evening Shift Supervisor':['مشرف الشفت المسائي','Evening Shift Supervisor'],'General Supervisor':['مشرف عام','General Supervisor'],'Administrative':['إداري','Administrative'],'Operations Manager':['مدير تشغيل','Operations Manager'],'مساعد إداري':['مساعد إداري','Administrative Assistant'],'أخصائي عمليات موارد بشرية':['أخصائي عمليات موارد بشرية','HR Operations Specialist'],'مشرف صيانة':['مشرف صيانة','Maintenance Supervisor'],'مندوب مبيعات':['مندوب مبيعات','Sales Representative'],'مدخل بيانات':['مدخل بيانات','Data Entry Clerk'],'رئيس تنفيذي':['رئيس تنفيذي','Chief Executive Officer (CEO)']};
+const DEPT_I18N={'ادارة الموارد البشرية':['ادارة الموارد البشرية','Human Resources Department'],'ادارة الصيانة و التشغيل و النظافة':['ادارة الصيانة و التشغيل و النظافة','Maintenance, Operations & Cleaning Department'],'ادارة المبيعات':['ادارة المبيعات','Sales Department'],'ادارة الشركة':['ادارة الشركة','Company Management']};
+function _bi(map,v,lang){if(!v)return '';const x=map[v];if(!x)return v;return lang==='both'?x[0]+' — '+x[1]:(lang==='en'?x[1]:x[0]);}
+function titleLbl(v,lang){return _bi(TITLE_I18N,v,lang||currentLang);}
+function deptLbl(v,lang){return _bi(DEPT_I18N,v,lang||currentLang);}
 // ── نوع الموظف: سعودي / مقيم ──
 function isSaudiNat(n){return /^(saudi|سعودي|سعودية)$/i.test(String(n||'').trim());}
 function empIsSaudi(e){return !!e&&(e.empType==='saudi'||(!e.empType&&isSaudiNat(e.nationality)));}
@@ -3453,7 +3459,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.10.14.0830";
+const BUILD_VERSION="2026.10.14.0915";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{
@@ -5014,7 +5020,7 @@ function getFiltered(){
       if(iqama==='expired'&&days>=0)return false;
       if(iqama==='expiring'&&(days<0||days>=90))return false;
     }
-    if(q&&![e.name,e.title||'',e.empNum||'',e.branch||'',e.nationality||'',e.sponsor||''].some(v=>v.toLowerCase().includes(q)))return false;
+    if(q&&![e.name,titleLbl(e.title,'both')||'',e.empNum||'',e.branch||'',e.nationality||'',e.sponsor||''].some(v=>v.toLowerCase().includes(q)))return false;
     return true;
   });
   if(sortCol){
@@ -5118,7 +5124,7 @@ function mkRow(e,n,pi){
       </button>
     </td>
     <td>${projBadge}</td>
-    <td>${esc(e.title||'—')}</td>
+    <td>${esc(titleLbl(e.title)||'—')}</td>
     <td class="no-print"><div class="actions" style="gap:4px;flex-wrap:wrap">
       ${can('employees_edit')?`<button class="btn btn-warn btn-sm" onclick="openEdit(${idx})" title="تعديل">✏️</button>`:''}
       ${can('employees_delete')?`<button class="btn btn-danger btn-sm" onclick="delEmp(${idx})" title="حذف">🗑️</button>`:''}
@@ -5141,7 +5147,7 @@ function mkRow(e,n,pi){
   exp.innerHTML=`<td colspan="6"><div class="exp-inner">
     <div class="exp-item"><span class="exp-lbl">${t('expStatus')}</span><span class="exp-val">${stBadge}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expShift')}</span><span class="exp-val">${sl}</span></div>
-    <div class="exp-item"><span class="exp-lbl">${t('expDept')}</span><span class="exp-val">${esc(e.department||'—')}</span></div>
+    <div class="exp-item"><span class="exp-lbl">${t('expDept')}</span><span class="exp-val">${esc(deptLbl(e.department)||'—')}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expBranch')}</span><span class="exp-val">${e.branch?`<span class="bbadge">${esc(e.branch)}</span>`:'—'}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expGender')}</span><span class="exp-val">${genderTxt}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expBirth')}</span><span class="exp-val">${esc(e.birthDate||'—')}</span></div>
@@ -5375,8 +5381,8 @@ function printEmp(idx){
 
   const rows=[
     [t('pcEmpNum'),    e.empNum||'—',                                                         ''],
-    [t('pcJobTitle'),  e.title||'—',                                                           ''],
-    [t('pcDept'),      e.department||'—',                                                    ''],
+    [t('pcJobTitle'),  titleLbl(e.title)||'—',                                                           ''],
+    [t('pcDept'),      deptLbl(e.department)||'—',                                                    ''],
     [t('pcGender'),    e.gender==='M'?t('male'):e.gender==='F'?t('female'):'—',               ''],
     [t('pcNationality'),e.nationality||'—',                                                    ''],
     [t('pcPassport'),  e.passportNum||'—',                                                     ''],
@@ -5405,7 +5411,7 @@ function printEmp(idx){
           <div class="pc-name">${esc(e.name)}</div>
           <div class="pc-sub">${esc(e.project)}${esc(e.empNum?t('pcNumHash')+e.empNum:'')}</div>
           <div class="pc-tags">
-            <span class="pc-tag">${esc(e.title||'Cleaner')}</span>
+            <span class="pc-tag">${esc(titleLbl(e.title||'Cleaner'))}</span>
             <span class="pc-st" style="background:${stBg};color:${stCol}">● ${esc(st)}</span>
           </div>
         </div>
@@ -5527,7 +5533,7 @@ async function printEmpMonthlyAtt(empId){
         <div>📅 <b>${L(lang,'month')}:</b> ${month}</div>
         <div>🏗 ${esc(e.project)}</div>
         <div>⏰ ${esc(SL[e.shift||'-']||'—')}</div>
-        <div>🏷 ${esc(e.title||'—')}</div>
+        <div>🏷 ${esc(titleLbl(e.title)||'—')}</div>
       </div>
       <table style="width:100%;border-collapse:collapse;border:1px solid #d6cfb8">
         <thead><tr style="background:#f4f1e8;-webkit-print-color-adjust:exact;print-color-adjust:exact">
@@ -5700,7 +5706,7 @@ async function printEmpFullProfile(empId){
         <div style="width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;flex-shrink:0;overflow:hidden">${avContent}</div>
         <div style="flex:1">
           <div style="font-size:1.25rem;font-weight:800;margin-bottom:3px">${esc(e.name)}</div>
-          <div style="font-size:.82rem;opacity:.9;margin-bottom:5px">${esc(e.title||(isAr?'موظف':'Employee'))} · ${esc(e.project)} ${e.empNum?`· #${esc(e.empNum)}`:''}</div>
+          <div style="font-size:.82rem;opacity:.9;margin-bottom:5px">${esc(titleLbl(e.title,isAr?'ar':'en')||(isAr?'موظف':'Employee'))} · ${esc(e.project)} ${e.empNum?`· #${esc(e.empNum)}`:''}</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <span style="padding:2px 8px;border-radius:20px;font-size:.7rem;background:${stColor};-webkit-print-color-adjust:exact;print-color-adjust:exact">● ${stLabel}</span>
             ${e.shift&&e.shift!=='-'?`<span style="padding:2px 8px;border-radius:20px;font-size:.7rem;background:rgba(255,255,255,.2)">${esc(SL[e.shift])}</span>`:''}
@@ -5727,7 +5733,7 @@ async function printEmpFullProfile(empId){
           <div class="it"><b>${isAr?'الجوال':'Phone'}</b><span dir="ltr">${esc(e.phone||'—')}</span></div>
           <div class="it"><b>${isAr?'بداية العمل':'Start Date'}</b>${esc(e.startDate||'—')}</div>
           <div class="it"><b>${isAr?'الفرع':'Branch'}</b>${esc(e.branch||'—')}</div>
-          <div class="it"><b>${isAr?'المسمى':'Title'}</b>${esc(e.title||'—')}</div>
+          <div class="it"><b>${isAr?'المسمى':'Title'}</b>${esc(titleLbl(e.title,isAr?'ar':'en')||'—')}</div>
           <div class="it"><b>${isAr?'المشروع':'Project'}</b>${esc(e.project)}</div>
         </div>
       </div>

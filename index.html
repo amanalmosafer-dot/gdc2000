@@ -1828,6 +1828,7 @@ td{padding:10px 13px;vertical-align:middle}
 
       <!-- عمل وراتب -->
       <div class="field"><label id="dLblStartDate">تاريخ بداية العمل</label><input id="fStart" type="date"/></div>
+      <div class="field"><label id="dLblEndDate">تاريخ نهاية الخدمة</label><input id="fEnd" type="date"/></div>
       <div class="field"><label id="dLblPhone">رقم التواصل</label><input id="fPhone" type="text" placeholder="05xxxxxxxx"/></div>
       <div class="field" id="fSalWrap"><label id="dLblBaseSalary">الراتب الأساسي (ريال)</label><input id="fSal" type="number" min="0" placeholder="0"/></div>
       <div class="field" id="fOTWrap"><label id="dLblOTRate">معدل الأوفر تايم (ريال/ساعة)</label><input id="fOT" type="number" min="0" step="0.5" placeholder="0"/></div>
@@ -2058,7 +2059,7 @@ const T={
     // drawer labels
     lblPhoto:'صورة الموظف',lblEmpNum:'رقم الموظف',lblFullName:'الاسم الكامل *',
     lblJobTitle:'المسمى الوظيفي',lblGender:'الجنس',lblNationality:'الجنسية',
-    lblPassport:'رقم الجواز',lblIqamaNum:'رقم الإقامة',lblIqamaExp:'انتهاء الإقامة (هجري)',lblEmpType:'نوع الموظف',empTypeRes:'مقيم',empTypeSa:'سعودي',lblNationalId:'رقم الهوية الوطنية',lblDept:'القسم',expDept:'القسم',pcDept:'القسم',
+    lblPassport:'رقم الجواز',lblIqamaNum:'رقم الإقامة',lblIqamaExp:'انتهاء الإقامة (هجري)',lblEmpType:'نوع الموظف',empTypeRes:'مقيم',empTypeSa:'سعودي',lblNationalId:'رقم الهوية الوطنية',lblDept:'القسم',expDept:'القسم',pcDept:'القسم',lblEndDate:'تاريخ نهاية الخدمة',expEnd:'نهاية الخدمة',pcEnd:'نهاية الخدمة',
     lblSponsor:'الكفيل',lblStartDate:'تاريخ بداية العمل',lblPhone:'رقم التواصل',
     lblBaseSalary:'الراتب الأساسي (ريال)',lblOTRate:'معدل الأوفر تايم (ريال/ساعة)',
     lblEmpStatus:'الحالة الوظيفية',lblProject:'المشروع',lblShift:'الشفت',lblBranch:'الفرع / الموقع',
@@ -2222,7 +2223,7 @@ const T={
     // drawer labels
     lblPhoto:'Employee Photo',lblEmpNum:'Employee No.',lblFullName:'Full Name *',
     lblJobTitle:'Job Title',lblGender:'Gender',lblNationality:'Nationality',
-    lblPassport:'Passport No.',lblIqamaNum:'Iqama No.',lblIqamaExp:'Iqama Expiry (Hijri)',lblEmpType:'Employee Type',empTypeRes:'Resident',empTypeSa:'Saudi',lblNationalId:'National ID No.',lblDept:'Department',expDept:'Department',pcDept:'Department',
+    lblPassport:'Passport No.',lblIqamaNum:'Iqama No.',lblIqamaExp:'Iqama Expiry (Hijri)',lblEmpType:'Employee Type',empTypeRes:'Resident',empTypeSa:'Saudi',lblNationalId:'National ID No.',lblDept:'Department',expDept:'Department',pcDept:'Department',lblEndDate:'End of Service Date',expEnd:'End of Service',pcEnd:'End of Service',
     lblSponsor:'Sponsor',lblStartDate:'Start Date',lblPhone:'Phone No.',
     lblBaseSalary:'Base Salary (SAR)',lblOTRate:'OT Rate (SAR/h)',
     lblEmpStatus:'Employment Status',lblProject:'Project',lblShift:'Shift',lblBranch:'Branch / Location',
@@ -2426,7 +2427,7 @@ function applyLang(){
   setText('dLblPhoto',t('lblPhoto'));setText('dLblEmpNum',t('lblEmpNum'));
   setText('dLblFullName',t('lblFullName'));setText('dLblJobTitle',t('lblJobTitle'));
   setText('dLblGender',t('lblGender'));setText('dLblNationality',t('lblNationality'));
-  setText('dLblPassport',t('lblPassport'));setText('dLblIqamaNum',t('lblIqamaNum'));setText('dLblEmpType',t('lblEmpType'));setText('dLblDept',t('lblDept'));setText('dEmpTypeRes',t('empTypeRes'));setText('dEmpTypeSa',t('empTypeSa'));
+  setText('dLblPassport',t('lblPassport'));setText('dLblIqamaNum',t('lblIqamaNum'));setText('dLblEmpType',t('lblEmpType'));setText('dLblDept',t('lblDept'));setText('dLblEndDate',t('lblEndDate'));setText('dEmpTypeRes',t('empTypeRes'));setText('dEmpTypeSa',t('empTypeSa'));
   setText('dLblIqamaExp',t('lblIqamaExp'));setText('dLblSponsor',t('lblSponsor'));
   setText('dLblStartDate',t('lblStartDate'));setText('dLblPhone',t('lblPhone'));
   setText('dLblBaseSalary',t('lblBaseSalary'));setText('dLblOTRate',t('lblOTRate'));
@@ -3459,7 +3460,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.10.15.0010";
+const BUILD_VERSION="2026.10.15.0100";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{
@@ -5148,6 +5149,7 @@ function mkRow(e,n,pi){
     <div class="exp-item"><span class="exp-lbl">${t('expStatus')}</span><span class="exp-val">${stBadge}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expShift')}</span><span class="exp-val">${sl}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expDept')}</span><span class="exp-val">${esc(deptLbl(e.department)||'—')}</span></div>
+    ${e.endDate?`<div class="exp-item"><span class="exp-lbl">${t('expEnd')}</span><span class="exp-val" style="color:#b91c1c;font-weight:700">${esc(e.endDate)}</span></div>`:''}
     <div class="exp-item"><span class="exp-lbl">${t('expBranch')}</span><span class="exp-val">${e.branch?`<span class="bbadge">${esc(e.branch)}</span>`:'—'}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expGender')}</span><span class="exp-val">${genderTxt}</span></div>
     <div class="exp-item"><span class="exp-lbl">${t('expBirth')}</span><span class="exp-val">${esc(e.birthDate||'—')}</span></div>
@@ -5218,7 +5220,7 @@ function openAdd(){
   document.getElementById('fGender').value='';
   document.getElementById('fSponsor').value='';
   document.getElementById('fEmpType').value='resident';applyEmpType();
-  document.getElementById('fDept').value='';
+  document.getElementById('fDept').value='';document.getElementById('fEnd').value='';
   ['fIqExp','fStart','fMedDate','fMedExpiry','fVaccMMR','fVaccFlu','fBirth'].forEach(id=>document.getElementById(id).value='');
   ['fSal','fOT','fHousing','fTransport','fDriverCost'].forEach(id=>document.getElementById(id).value='');
   ['fDriverName','fDriverPhone','fSalNotes'].forEach(id=>document.getElementById(id).value='');
@@ -5262,7 +5264,7 @@ function openEdit(idx){
   document.getElementById('fStatus').value=e.status||'نشط';
   document.getElementById('fBranch').value=e.branch||'';
   document.getElementById('fEmpType').value=empIsSaudi(e)?'saudi':'resident';applyEmpType();
-  document.getElementById('fDept').value=e.department||'';
+  document.getElementById('fDept').value=e.department||'';document.getElementById('fEnd').value=e.endDate||'';
   document.getElementById('fProj').value=e.project;
   photoData=e.photo||'';
   document.getElementById('photoPrev').innerHTML=e.photo?`<img src="${safeImg(e.photo)}"/>`:'👤';
@@ -5312,6 +5314,7 @@ function saveEmp(){
     name,
     empType:document.getElementById('fEmpType').value,
     department:document.getElementById('fDept').value,
+    endDate:document.getElementById('fEnd').value,
     title:document.getElementById('fTitle').value.trim(),
     nationality:document.getElementById('fNat').value.trim(),
     passportNum:document.getElementById('fPass').value.trim(),
@@ -5392,6 +5395,7 @@ function printEmp(idx){
     [t('pcShift'),     SL[e.shift||'-']||'—',                                                  ''],
     [t('pcBranch'),    e.branch||'—',                                                           ''],
     [t('pcStartDate'), e.startDate||'—',                                                        ''],
+    ...(e.endDate?[[t('pcEnd'),e.endDate,'#b91c1c']]:[]),
     [t('pcPhone'),     e.phone||'—',                                                             ''],
     [t('pcBaseSal'),   e.baseSalary?(+e.baseSalary).toLocaleString()+' '+t('sar'):'—',         '#15803d'],
     [t('pcOTRate'),    e.overtimeRate?e.overtimeRate+' '+t('sarH'):'—',                        ''],

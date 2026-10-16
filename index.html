@@ -3600,7 +3600,7 @@ var fbReady=false;
 
 // ── التحديث التلقائي: يضمن أن كل الأجهزة تعمل على نفس أحدث نسخة ──
 // (جذر مشاكل المزامنة كان أن جهازاً يعمل على نسخة قديمة مخزّنة بالكاش)
-const BUILD_VERSION="2026.10.15.0300";
+const BUILD_VERSION="2026.10.17.0100";
 let _updateBannerShown=false;
 async function checkForUpdate(){
   try{
@@ -3916,9 +3916,21 @@ function saveOvertimes(){localStorage.setItem('overtimes',JSON.stringify(overtim
 let warehouseItems=JSON.parse(localStorage.getItem('warehouseItems')||'[]');
 let stockIn=JSON.parse(localStorage.getItem('stockIn')||'[]');
 let stockOut=JSON.parse(localStorage.getItem('stockOut')||'[]');
-function saveWhItems(){localStorage.setItem('warehouseItems',JSON.stringify(warehouseItems));if(fbReady){const o={};warehouseItems.forEach(x=>{o[x.id]=x;});db.ref('warehouseItems').set(o);}}
-function saveStockIn(){localStorage.setItem('stockIn',JSON.stringify(stockIn));if(fbReady){const o={};stockIn.forEach(x=>{o[x.id]=x;});db.ref('stockIn').set(o);}}
-function saveStockOut(){localStorage.setItem('stockOut',JSON.stringify(stockOut));if(fbReady){const o={};stockOut.forEach(x=>{o[x.id]=x;});db.ref('stockOut').set(o);}}
+// حفظ المستودع: يكتب السجلات المتغيرة فقط (لا يستبدل القائمة كاملة) حتى لا يمحو إدخالات أجهزة أخرى، ويُظهر أي فشل في الحفظ
+const _whKnown={};
+function whSync(node,arr){
+  try{localStorage.setItem(node,JSON.stringify(arr));}catch(e){}
+  if(!fbReady)return;
+  const known=_whKnown[node];
+  const upd={};
+  arr.forEach(x=>{if(!known||JSON.stringify(known[x.id])!==JSON.stringify(x))upd[x.id]=x;});
+  if(known)Object.keys(known).forEach(id=>{if(!arr.some(x=>x.id===id))upd[id]=null;});
+  if(!Object.keys(upd).length)return;
+  db.ref(node).update(upd).catch(e=>{console.warn('wh save:',e&&e.code);toast('لم يُحفظ في الخادم ('+((e&&e.code)||'خطأ')+') — الإدخال على هذا الجهاز فقط','err');});
+}
+function saveWhItems(){whSync('warehouseItems',warehouseItems);}
+function saveStockIn(){whSync('stockIn',stockIn);}
+function saveStockOut(){whSync('stockOut',stockOut);}
 function whStock(itemId){
   const totalIn =stockIn.filter(r=>r.itemId===itemId).reduce((s,r)=>s+r.qty,0);
   const totalOut=stockOut.filter(r=>r.itemId===itemId).reduce((s,r)=>s+r.qty,0);
@@ -3996,6 +4008,8 @@ let _listenersOn=false;
 function attachDataListeners(){
   if(_listenersOn)return;_listenersOn=true;fbReady=true;
   const onErr=e=>console.warn('sync:',e&&e.code);
+  let _whErrShown=false;
+  const whErr=e=>{console.warn('sync:',e&&e.code);if(!_whErrShown){_whErrShown=true;toast('تعذّر قراءة بيانات المستودع من الخادم ('+((e&&e.code)||'خطأ')+') — ما تراه قد لا يكون محدّثاً','err');}};
   db.ref('employees').on('value',snap=>{
     const v=snap.val();
     if(v){
@@ -4044,20 +4058,20 @@ function attachDataListeners(){
     if(v){cachedUsers=Object.values(v);localStorage.setItem('sysUsers',JSON.stringify(cachedUsers));}
   },onErr);
   db.ref('warehouseItems').on('value',snap=>{
-    const v=snap.val();
+    const v=snap.val();_whKnown['warehouseItems']=v||{};
     warehouseItems=v?Object.values(v):[];localStorage.setItem('warehouseItems',JSON.stringify(warehouseItems));
     renderActive();
-  },onErr);
+  },whErr);
   db.ref('stockIn').on('value',snap=>{
-    const v=snap.val();
+    const v=snap.val();_whKnown['stockIn']=v||{};
     stockIn=v?Object.values(v):[];localStorage.setItem('stockIn',JSON.stringify(stockIn));
     renderActive();
-  },onErr);
+  },whErr);
   db.ref('stockOut').on('value',snap=>{
-    const v=snap.val();
+    const v=snap.val();_whKnown['stockOut']=v||{};
     stockOut=v?Object.values(v):[];localStorage.setItem('stockOut',JSON.stringify(stockOut));
     renderActive();
-  },onErr);
+  },whErr);
 }
 
 // ── STATE ────────────────────────────────────────────────────
